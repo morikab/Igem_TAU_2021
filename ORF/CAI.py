@@ -2,15 +2,20 @@ from Bio.SeqUtils import CodonUsage as cu
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+import pandas as pd
+import pickle
+import os
 
 # ------------------------------------------------
 
-def load_genome(genome_path, output_path, genes_HE):
+def load_genome(genome_path, output_path, mrna_levels_path, mrna_level_threshold, genes_HE_path):
     """
 
     :param genome_path: original genbank file path
     :param output_path: output path (fasta format)
-    :param genes_HE: 20% Highly Expressed Genes, optional
+    :param mrna_levels_path: .xlsx file: first column - gene name, second column - mrna level. If None, take all genes
+    :param mrna_level_threshold:
+    :param genes_HE_path:
     :return:
     The function extracts all the coding sequences from the supplied genome
     and writes them to a file (output path) in the "fasta" format
@@ -18,11 +23,12 @@ def load_genome(genome_path, output_path, genes_HE):
     """
 
     cds_records = []
+    genes_HE = extract_highly_expressed_genes(mrna_levels_path, mrna_level_threshold, genes_HE_path)
     with open(genome_path) as input_handle:
         for record in SeqIO.parse(input_handle, "genbank"):
             for feature in record.features:
                 if feature.type == "CDS":
-                    if genes_HE is not None:
+                    if mrna_levels_path is not None:
                         if feature.qualifiers['gene'][0] not in genes_HE:
                             continue
                     if 'protein_id' in feature.qualifiers.keys() and 'gene' in feature.qualifiers.keys() and 'product' in feature.qualifiers.keys():
@@ -37,6 +43,31 @@ def load_genome(genome_path, output_path, genes_HE):
 
     with open(output_path, "w") as output_handle:
         SeqIO.write(cds_records, output_handle, "fasta")
+
+
+# ------------------------------------------------
+
+def extract_highly_expressed_genes(mrna_levels_path, mrna_level_threshold, genes_HE_path):
+    """
+
+    :param mrna_levels_path: .xlsx file: first column - gene name, second column - mrna level.
+    :param mrna_level_threshold:
+    :param genes_HE_path:
+    :return:
+    """
+
+    mrna = pd.read_excel(mrna_levels_path)
+    mrna = mrna[pd.to_numeric(mrna['mRNA_level'], errors='coerce').notnull()]
+    mrna = mrna.sort_values('mRNA_level', ascending=True)
+    genes_HE = list(mrna['gene'][0:int(len(mrna['mRNA_level']) * mrna_level_threshold)])
+
+    if genes_HE_path is not None:
+
+        with open(genes_HE_path, 'wb') as handle:
+            pickle.dump(genes_HE, handle)
+
+    return genes_HE
+
 
 # ------------------------------------------------
 
