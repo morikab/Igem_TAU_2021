@@ -1,8 +1,16 @@
 import re
 from collections import defaultdict
 from dnachisel import DnaOptimizationProblem, AvoidPattern,EnforceTranslation
+import time
 
-f = open(r'C:\Users\ASUS\Desktop\ThirdYear\iGEM\Restricition_enzyms_DB\link_orgref_updated_30072021.txt')
+def write_fasta(fid, list_seq, list_name):
+    ofile = open(fid + '.fasta', "w+")
+    for i in range(len(list_seq)):
+        ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
+    ofile.close()
+
+
+f = open(r'REbase_16.8.txt')
 content = f.readlines()
 REbase = [x.strip() for x in content]
 
@@ -48,33 +56,23 @@ def translate(seq,table=table): #DONE
         for i in range(0, len(seq), 3):
             codon = seq[i:i + 3]
             protein += table[codon]
-    return protein
+        return protein
+    else:
+        return ValueError('len(seq)%3 !=0')
+
+
 
 def REbase_org(org): #DONE
-    n_new = 0
-    n_repeat = 0
-    n_unknown = 0
-    # function return REbase of microrganism (org):
-    #### Key - Recogn. Site as string
-    #### Value - {'Enzyme Name':----,'MicroOrganism':-----}
-
     RE_org_ind = [i for i, k in enumerate(REbase)
                   if org in k] ## index of the 3rd section of the "block"
-
     rest_dict_org = {}  ## REbase dict.
     for k in RE_org_ind:
-        enzym=REbase[k + 2][3:]
-        if  enzym =='?' or ',' in enzym:
-            n_unknown +=1
-        elif enzym in rest_dict_org.keys():
-            n_repeat +=1
-        #if enzym!='?':
-        else:
-            n_new +=1
-            rest_dict_org[enzym] = {
-                'Enzyme Name': REbase[k - 2][3:],
-                'MicroOrganism': REbase[k][3:]}
-    #print(n_new, n_repeat, n_unknown)
+        site=REbase[k + 2][3:]
+        if  '?' in site or ',' in site:
+            continue
+        rest_dict_org[site] = {
+            'Enzyme Name': REbase[k - 2][3:],
+            'MicroOrganism': REbase[k][3:]}
     return rest_dict_org
 
 def relevant_seq(re_raw_seq):
@@ -136,67 +134,66 @@ def unpack_opt(list_lists1):
             list_frame=[opt+elemnt[0] for opt in list_frame]
     return list_frame          
                 
-            
-def seq2aaS(recoSeq):
+
+
+
+def seq2aaS(recoSeq, plasmid_aa_cds):
     ''''recoSeq is the recognition sequence 
     the function return the aa possibile sequences for the recoSeq'''
     n=len(recoSeq)
-    recoSeq1=recoSeq[:n-n%3]
-    recoSeq1rest=recoSeq[n-n%3:]
-    #endAA1=[v for k, v in table.items() if k.startswith(recoSeq1rest)and (recoSeq1rest!='')]
-    #aa_options1=unpack_opt(translate(recoSeq1).split()+[unique(endAA1)])
-    endNT1=[k for k, v in table.items() if k.startswith(recoSeq1rest)and (recoSeq1rest!='')]
-    NT_options1=unpack_opt(recoSeq1.split()+[unique(endNT1)])
-    
-    recoSeq2 = recoSeq[1:n - (n-1) % 3]
-    recoSeq2rest = recoSeq[n - (n-1) % 3:]
-    #startAA2=[v for k, v in table.items() if k.endswith(recoSeq[0])]
-    startNT2=[k for k, v in table.items() if k.endswith(recoSeq[0])]
+    nuc_list = ['A', 'G', 'C', 'T' ]
+    if n%3 ==0:
+        NT_options = [recoSeq]
+    elif n%3 ==1:
+        double_nuc_list = []
+        for i in nuc_list:
+            for k in nuc_list:
+                double_nuc_list.append(k + i)
+        NT_options = [recoSeq+k for k in double_nuc_list ]+ [k+recoSeq for k in double_nuc_list]
+    else:
+        NT_options = [recoSeq+k for k in nuc_list ]+ [k+recoSeq for k in nuc_list]
 
-    #endAA2=[v for k, v in table.items() if k.startswith(recoSeq2rest)and (recoSeq2rest!='')]
-    #aa_options2 = unpack_opt([unique(startAA2)]+translate(recoSeq2).split() + [unique(endAA2)])
-    endNT2=[k for k, v in table.items() if k.startswith(recoSeq2rest)and (recoSeq2rest!='')]
-    NT_options2 = unpack_opt([unique(startNT2)]+recoSeq2.split() + [unique(endNT2)])
 
-    recoSeq3 = recoSeq[2:n - (n - 2) % 3]
-    recoSeq3rest = recoSeq[n - (n - 2) % 3:]
-    #startAA3 = [v for k, v in table.items() if k.endswith(recoSeq[0:2])]
-    startNT3 = [k for k, v in table.items() if k.endswith(recoSeq[0:2])]
-    
-    #endAA3 = [v for k, v in table.items() if k.startswith(recoSeq3rest) and (recoSeq3rest!='')]
-    #aa_options3 = unpack_opt([unique(startAA3)] + translate(recoSeq3).split() + [unique(endAA3)])
-    endNT3 = [k for k, v in table.items() if k.startswith(recoSeq3rest) and (recoSeq3rest!='')]
-    NT_options3 = unpack_opt([unique(startNT3)] + recoSeq3.split() + [unique(endNT3)])
-    
-    #aa_options=[aa_options1,aa_options2,aa_options3]
-    NT_options=NT_options1+NT_options2+NT_options3
+    print(1, NT_options)
+    NT_options_final = []
     ntaa_dict={}
     for nt_seq in NT_options:
         aa_seq=translate(nt_seq)
-        if aa_seq not in ntaa_dict: 
-            ntaa_dict[aa_seq]=[nt_seq]
-        else:
-            ntaa_dict[aa_seq].append(nt_seq)
-    return ntaa_dict,NT_options
+        print(2, aa_seq)
+        if aa_seq in plasmid_aa_cds:
+            print(1)
+            if aa_seq not in ntaa_dict:
+                ntaa_dict[aa_seq]=[nt_seq]
+            else:
+                ntaa_dict[aa_seq].append(nt_seq)
+            NT_options_final.append(nt_seq)
+    return ntaa_dict,NT_options_final
 
 
-def REseq_org(org):
-    org_dict=REbase_org(org)
-    org_seq_list=[*org_dict.keys()]
+def REseq_org(org, plasmid_nt_cds):
+    plasmid_aa_cds = translate(plasmid_nt_cds)
+    org_dict=REbase_org(org) #{'site': ['name', microorganism']}
+    org_seq_list=[*org_dict.keys()] #list of sites
     org_seq_opts={}
     org_NT_options=[]
+    seq_opts_list = []
+
     for seq in org_seq_list:
-        seq_opts_list=seq_opps(seq)
-        print(org_seq_opts)
-        for seq_opt in seq_opts_list:
-            ntaa_dict,NT_options=seq2aaS(seq_opt)
-            org_NT_options=org_NT_options+NT_options
-            for k,v in ntaa_dict.items():
-                if k not in org_seq_opts: 
-                    org_seq_opts[k]=v
-                else:
-                    org_seq_opts[k]=org_seq_opts[k]+v
-        
+        seq_opts_list =seq_opts_list + seq_opps(seq) #all options according to SA
+    seq_opts_list = unique(seq_opts_list)
+
+    for seq_opt in seq_opts_list:
+        ntaa_dict,NT_options=seq2aaS(seq_opt, plasmid_aa_cds)
+        if len (ntaa_dict) == 0 :
+            continue
+        org_NT_options=org_NT_options+NT_options
+        print(org_NT_options)
+        for aa_site,nt_site in ntaa_dict.items():
+            if aa_site not in org_seq_opts:
+                org_seq_opts[aa_site]=nt_site
+            else:
+                org_seq_opts[aa_site]=org_seq_opts[aa_site]+nt_site
+
     return org_seq_opts,org_NT_options
 
         
@@ -205,10 +202,8 @@ def insert_site_CDS(cds,ntaa_dict):
 and insert over what have been done before"""
     AA_cds_seq=translate(cds)
     start_end_idex_dict = {}
-    
     for aasite,ntsites in ntaa_dict.items():
         if aasite in AA_cds_seq:
-            
             stratindx=AA_cds_seq.find(aasite)
             endindx=stratindx+len(aasite)
             cds=list(cds)
@@ -218,67 +213,13 @@ and insert over what have been done before"""
                                       'end':stratindx + len(aasite),
                                       'aa': aasite}
             break
-                
-                
-            
     return cds, start_end_idex_dict
 
 def remove_site_from_plasmid(plasmid_nt_cds, re_nt_list):
     #plasmid must be in the correct reading frame
-    site_constraints = [AvoidPattern(nt) for nt in re_nt_list]+[EnforceTranslation()]
+    plasmid_nt_cds = str(plasmid_nt_cds)
+    tested_re_nt_list = [nt for nt in re_nt_list if nt in plasmid_nt_cds]
+    site_constraints = [AvoidPattern(nt) for nt in tested_re_nt_list]+[EnforceTranslation()]
     problem = DnaOptimizationProblem(sequence = plasmid_nt_cds, constraints = site_constraints)
     problem.resolve_constraints()
     return problem.sequence
-
-
-"""def remove_site_Plasmid(plasmid,ntaa_dict,NT_options):
-    AA_plasmid_seq=translate(plasmid)
-    plasmid_opt=[]
-    rest_plasmid_opt=[]
-    start_end_idex_dict_delete = {}
-    NT_options=flatten(NT_options)
-    for ntsite in NT_options:
-        if ntsite in plasmid:
-            stratindx=plasmid.find(ntsite)
-            endindx=stratindx+len(ntsite)
-            plasmid1=list(plasmid)
-            plasmid1[stratindx:endindx]='-'*(endindx-stratindx)
-            plasmid1=''.join(plasmid1)
-            plasmid_opt.append(plasmid1)
-
-            rest_plasmid=['-']*len(plasmid)
-            rest_plasmid[stratindx:endindx]=ntsite
-            rest_plasmid=''.join(rest_plasmid)
-            rest_plasmid_opt.append(rest_plasmid)
-    return plasmid_opt,rest_plasmid_opt"""
-    
-"""
-aa_options,NT_options=seq2aaS('CG')
-ntaa_dict=ntaa_options_2_ntaa_dict(aa_options,NT_options)
-plasmid='ACGTTGC'
-remove_site_Plasmid(plasmid,ntaa_dict,NT_options)
-
-def remove_site_Plasmid(cds):
-    AA_cds_seq=translate(cds)
-    n=0
-    for aasite in list1:
-        n+=1
-        if aasite in AA_cds_seq:
-            stratindx=AA_cds_seq.find(aasite)
-            endindx=stratindx+len(aasite)
-            if cds[3*startindx:3*endindx+1]==ntlist1[n]:
-                cds[3*startindx:3*endindx+1]=''
-            
-    return cds    """
-
-
-
-
-
-    
-
-
-
-
-
-

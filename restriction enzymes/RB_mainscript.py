@@ -1,60 +1,39 @@
 from RB_functions import *
 from Bio.Seq import *
 from Bio import SeqIO
+import time
 
 
-
-
-cds_path = r'final sequenecs IDT.fasta'
+tic1 = time.time()
+cds_path = r'mCherry_original.fasta'
 cds_seq = Seq('')
 for record in SeqIO.parse(cds_path, "fasta"):
-        cds_seq += record.seq           
+    cds_seq += record.seq
 
-BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis') ##REbase of Bacillus
-##Bacillus there's 23 pure sites,17 repeated sites,and 6 unkown "?" ==442 sites
-
-cds_add_bs, add_bs_start_end_idex_dict=insert_site_CDS(cds_seq,BS_ntaa_dict)
-cds_remove_bs=remove_site_from_plasmid(str(cds_seq), BS_NT_list)
-cds_add_remove_bs=remove_site_from_plasmid(cds_add_bs, BS_NT_list)
-
-
-bsfile = open("Bacillus_RE.txt", "w")
-
-bsfile.write(">add_Bacillus_RE\n" +cds_add_bs + "\n")
-bsfile.write(">Remove_Bacillus_RE\n" +cds_remove_bs+ "\n")
-bsfile.write(">Add_Remove_Bacillus_RE\n" +cds_add_remove_bs + "\n")
-
-bsfile.close()
-
-#EC_ntaa_dict,EC_NT_list = REseq_org('Escherichia coli')  ##REbase of E.coli
-## in E.coli there's 93 pure sites,341 repeated sites,and 8 unkown "?" ==442 sites 
-
-#cds_add_ecoli, add_ecoli_start_end_idex_dict=insert_site_CDS(cds_seq,EC_ntaa_dict)
-#cds_remove_ecoli=remove_site_from_plasmid(cds_seq, EC_NT_list)
-#cds_add_remove_ecoli=remove_site_from_plasmid(cds_add_ecoli, EC_NT_list)
-
-
-
-"""for site_list in BC_options_ntlist:
-    for site in site_list:
-        
-        [site,opptions]=seq2aaS(site)
-        BC_aalist.append(opptions)
-        BC_ntlist.append(site)
-#### In the DB itself!!! ###         
-'''BC_options_aalist=[seq2aaS(seq) for seq in BC_ntlist]'''
-
-
-no_there=[]
-for enzy_EC in range(len(EC_seq_list)):
-    for option_enzy_EC in EC_options_ntlist[enzy_EC]:
-        for enzy_BC in range(len(EC_seq_list)):
-            BC_seq_opp=BC_options_ntlist[enzy_BC+1]
-            if ~BC_seq_opp.count(option_enzy_EC):
-                x=1
-                #no_there[enzy_EC+1]=enzy_BC"""""
-
-
-
-
-
+cds_seq = 'CCTCGAGGCGTTCGGCCG'
+# BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis', cds_seq) ##REbase of Bacillus
+# EC_ntaa_dict,EC_NT_list = REseq_org('Escherichia coli', cds_seq)  ##REbase of E.coli
+BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis 168', cds_seq) ##REbase of Bacillus
+print(BS_NT_list)
+print(BS_ntaa_dict)
+# EC_ntaa_dict,EC_NT_list = REseq_org('Bacillus stearothermophilus Z130', cds_seq)  ##REbase of E.coli
+# print(EC_ntaa_dict,EC_NT_list)
+#
+# cds_add_bs, add_bs_start_end_idex_dict=insert_site_CDS(cds_seq,BS_ntaa_dict)
+# cds_add_ec, add_ecoli_start_end_idex_dict=insert_site_CDS(cds_seq,EC_ntaa_dict)
+#
+# add_bs_remove_ec=remove_site_from_plasmid(cds_add_bs, BS_NT_list)
+# add_ec_remove_bs=remove_site_from_plasmid(cds_add_ec, EC_NT_list)
+#
+# all_res_dict = {'cds_add_bs':cds_add_bs, 'cds_add_ec':cds_add_ec,
+#                 'add_bs_remove_ec':add_bs_remove_ec, 'add_ec_remove_bs':add_ec_remove_bs}
+#
+# for seq_name1, seq1 in all_res_dict.items():
+#     for seq_name2, seq2 in all_res_dict.items():
+#         change_num = sum(1 for a, b in zip(seq1, seq2) if a != b)
+#         print(seq_name1, seq_name2, change_num)
+#
+#
+# # #TODO: test, turn into multi organisis
+# # print(all_res_dict)
+# # write_fasta('all_res_dict', all_res_dict.values(), all_res_dict.keys())
