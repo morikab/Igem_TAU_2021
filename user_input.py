@@ -1,7 +1,5 @@
 from Bio import SeqIO
-import time
 
-tic = time.time()
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
@@ -179,4 +177,3 @@ usr_inp_exmpl =         {
 #output:
 full_inp_dict = parse_input(usr_inp_exmpl)
 
-print(time.time()-tic)
