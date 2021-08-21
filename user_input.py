@@ -1,5 +1,7 @@
 from Bio import SeqIO
+from calculating_cai import *
 
+print(genetic_code_dict)
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
@@ -98,8 +100,13 @@ def extract_gene_data(genbank_path):
     with open(genbank_path) as input_handle:
             for record in SeqIO.parse(input_handle, "genbank"):
                 for feature in record.features:
-                    if feature.type == "CDS" and 'gene' in feature.qualifiers.keys():
-                        name= feature.qualifiers['gene'][0]
+                    if feature.type == "CDS":
+                        if 'gene' in feature.qualifiers.keys():
+                            name= feature.qualifiers['gene'][0]
+                        elif 'locus_tag' in feature.qualifiers.keys():
+                            name = feature.qualifiers['locus_tag'][0]
+                        else:
+                            continue
                         if feature.location is not None \
                             and name not in gene_names:
                             cds = genome[feature.location.start: feature.location.end]
@@ -119,7 +126,14 @@ def extract_gene_data(genbank_path):
     prom_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome =genome) #fix!!
     cds_dict = {name_and_function[i]:cds_seqs[i] for i in range(entry_num)}
     intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=20, genome=genome, len_th=30)
-    return prom_dict, cds_dict, intergenic_dict
+
+    cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
+    cai_dict = {name_and_function[i]:CAI(cds_seqs[i], reference = cai_reference_set)
+                for i in range(entry_num)}
+
+
+
+    return prom_dict, cds_dict, intergenic_dict, cai_dict
 
 #final function
 def parse_input(usr_inp):
@@ -150,28 +164,29 @@ def parse_input(usr_inp):
         gb_file = SeqIO.read(gb_path, format='gb')
         org_name = find_org_name(gb_file)
         tgcn_dict = find_tgcn(gb_path)
-        geneName_to_prom, geneName_to_cds, posIdx_to_intergenic = extract_gene_data(gb_path)
-
+        geneName_to_prom, geneName_to_cds, posIdx_to_intergenic, cai_dict= extract_gene_data(gb_path)
+        print(cai_dict)
         full_inp_dict[org_name] = {
             'tgcn':tgcn_dict, #tgcn dict {codon:number of occurences}
             'gene_promoters':geneName_to_prom, #prom_dict {gene name and function: prom}
             'gene_cds':geneName_to_cds, #cds dict {gene name and function : cds}
             'intergenic':posIdx_to_intergenic, #intergenic dict {position along the genome: intergenic sequence}
+            'cai_dict':cai_dict,
             'optimized':val['optimized']} #is the sequence in the optimized or deoptimized group- bool
     return full_inp_dict
 
 
 
 #input:
-usr_inp_exmpl =         {
-    'opt1': {'genome_path': 'example_data\\Escherichia coli.gb',
-                'optimized': True},
-    'deopt1': {'genome_path': 'example_data\\Bacillus subtilis.gb',
-                'optimized': False},
+usr_inp_exmpl = {
+    # 'opt1': {'genome_path': 'example_data\\Escherichia coli.gb',
+    #             'optimized': True},
+    # 'deopt1': {'genome_path': 'example_data\\Bacillus subtilis.gb',
+    #             'optimized': False},
     'opt2': {'genome_path': 'example_data\\Sulfolobus acidocaldarius.gb',
                    'optimized': True},
-    'deopt2': {'genome_path': 'example_data\\Pseudomonas aeruginosa.gb',
-                   'optimized': False}
+    # 'deopt2': {'genome_path': 'example_data\\Pseudomonas aeruginosa.gb',
+    #                'optimized': False}
         }
 
 #output:
