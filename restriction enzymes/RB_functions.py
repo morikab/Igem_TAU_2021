@@ -2,6 +2,8 @@ import re
 from collections import defaultdict
 from dnachisel import DnaOptimizationProblem, AvoidPattern,EnforceTranslation
 import time
+import itertools
+import string
 
 def write_fasta(fid, list_seq, list_name):
     ofile = open(fid + '.fasta', "w+")
@@ -50,6 +52,37 @@ table = {
         'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
     }
 
+table_extended = {'AAA': ['K'], 'AAG': ['K'], 'AAC': ['N'], 'AAT': ['N'], 'AAN': ['K', 'N'], 'AGA': ['R'], 'AGG': ['R'],
+                  'AGC': ['S'], 'AGT': ['S'], 'AGN': ['R', 'S'], 'ACA': ['T'], 'ACG': ['T'], 'ACC': ['T'], 'ACT': ['T'],
+                  'ACN': ['T'], 'ATA': ['I'], 'ATG': ['M'], 'ATC': ['I'], 'ATT': ['I'], 'ATN': ['I', 'M'],
+                  'ANA': ['I', 'K', 'R', 'T'], 'ANG': ['K', 'M', 'R', 'T'], 'ANC': ['I', 'N', 'S', 'T'],
+                  'ANT': ['I', 'N', 'S', 'T'], 'ANN': ['I', 'K', 'M', 'N', 'R', 'S', 'T'], 'GAA': ['E'], 'GAG': ['E'],
+                  'GAC': ['D'], 'GAT': ['D'], 'GAN': ['D', 'E'], 'GGA': ['G'], 'GGG': ['G'], 'GGC': ['G'], 'GGT': ['G'],
+                  'GGN': ['G'], 'GCA': ['A'], 'GCG': ['A'], 'GCC': ['A'], 'GCT': ['A'], 'GCN': ['A'], 'GTA': ['V'],
+                  'GTG': ['V'], 'GTC': ['V'], 'GTT': ['V'], 'GTN': ['V'], 'GNA': ['A', 'E', 'G', 'V'],
+                  'GNG': ['A', 'E', 'G', 'V'], 'GNC': ['A', 'D', 'G', 'V'], 'GNT': ['A', 'D', 'G', 'V'],
+                  'GNN': ['A', 'D', 'E', 'G', 'V'], 'CAA': ['Q'], 'CAG': ['Q'], 'CAC': ['H'], 'CAT': ['H'],
+                  'CAN': ['H', 'Q'], 'CGA': ['R'], 'CGG': ['R'], 'CGC': ['R'], 'CGT': ['R'], 'CGN': ['R'], 'CCA': ['P'],
+                  'CCG': ['P'], 'CCC': ['P'], 'CCT': ['P'], 'CCN': ['P'], 'CTA': ['L'], 'CTG': ['L'], 'CTC': ['L'],
+                  'CTT': ['L'], 'CTN': ['L'], 'CNA': ['L', 'P', 'Q', 'R'], 'CNG': ['L', 'P', 'Q', 'R'],
+                  'CNC': ['H', 'L', 'P', 'R'], 'CNT': ['H', 'L', 'P', 'R'], 'CNN': ['H', 'L', 'P', 'Q', 'R'],
+                  'TAA': ['_'], 'TAG': ['_'], 'TAC': ['Y'], 'TAT': ['Y'], 'TAN': ['Y', '_'], 'TGA': ['_'], 'TGG': ['W'],
+                  'TGC': ['C'], 'TGT': ['C'], 'TGN': ['C', 'W', '_'], 'TCA': ['S'], 'TCG': ['S'], 'TCC': ['S'],
+                  'TCT': ['S'], 'TCN': ['S'], 'TTA': ['L'], 'TTG': ['L'], 'TTC': ['F'], 'TTT': ['F'], 'TTN': ['F', 'L'],
+                  'TNA': ['L', 'S', '_'], 'TNG': ['L', 'S', 'W', '_'], 'TNC': ['C', 'F', 'S', 'Y'],
+                  'TNT': ['C', 'F', 'S', 'Y'], 'TNN': ['C', 'F', 'L', 'S', 'W', 'Y', '_'], 'NAA': ['E', 'K', 'Q', '_'],
+                  'NAG': ['E', 'K', 'Q', '_'], 'NAC': ['D', 'H', 'N', 'Y'], 'NAT': ['D', 'H', 'N', 'Y'],
+                  'NAN': ['D', 'E', 'H', 'K', 'N', 'Q', 'Y', '_'], 'NGA': ['G', 'R', '_'], 'NGG': ['G', 'R', 'W'],
+                  'NGC': ['C', 'G', 'R', 'S'], 'NGT': ['C', 'G', 'R', 'S'], 'NGN': ['C', 'G', 'R', 'S', 'W', '_'],
+                  'NCA': ['A', 'P', 'S', 'T'], 'NCG': ['A', 'P', 'S', 'T'], 'NCC': ['A', 'P', 'S', 'T'],
+                  'NCT': ['A', 'P', 'S', 'T'], 'NCN': ['A', 'P', 'S', 'T'], 'NTA': ['I', 'L', 'V'], 'NTG': ['L', 'M', 'V'],
+                  'NTC': ['F', 'I', 'L', 'V'], 'NTT': ['F', 'I', 'L', 'V'], 'NTN': ['F', 'I', 'L', 'M', 'V'],
+                  'NNA': ['A', '(E', 'G', 'I', 'K', 'L', 'P', 'Q', 'R', 'S', 'T', 'V', '_'],
+                  'NNG': ['A', 'E', 'G', 'K', 'L', 'M', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', '_'],
+                  'NNC': ['A', 'C', 'D', 'F', 'G', 'H', 'I', 'L', 'N', 'P', 'R', 'S', 'T', 'V', 'Y'],
+                  'NNT': ['A', 'C', 'D', 'F', 'G', 'H', 'I', 'L', 'N', 'P', 'R', 'S', 'T', 'V', 'Y']}
+
+
 def translate(seq,table=table): #DONE
     protein = ""
     if len(seq) % 3 == 0:
@@ -60,6 +93,38 @@ def translate(seq,table=table): #DONE
     else:
         return ValueError('len(seq)%3 !=0')
 
+def all_combinations_of_sublists(lst_of_lst):
+    while len(lst_of_lst)>0:
+
+
+def translate_withN(seq,used_table=table_extended): #DONE
+    seq_opt_withN = []
+    residual = len(seq)%3
+    for i in range(3):
+        seq_opt_withN.append('N'*i + seq + 'N'*((3-i-residual)%3))
+
+    seq_aa = {}
+    for seq in seq_opt_withN:
+        opt_list = []
+        idex_opt_list = []
+        for i in range(0, len(seq), 3):
+            aa_opts = used_table[seq[i:i + 3]]
+            opt_list.append(aa_opts)
+            idex_opt_list.append(list(range(len(aa_opts))))
+        # print(idex_opt_list)
+        # print(list(itertools.product(*idex_opt_list)))
+        # seq_aa[seq] =
+    print(seq_aa)
+
+    # print(seq_aa)
+
+translate_withN('AAA')
+
+
+
+def str_itertools_product():
+    for item in itertools.product(string.ascii_lowercase, repeat=2):
+        yield "".join(list(item))
 
 
 def REbase_org(org): #DONE
@@ -140,33 +205,20 @@ def unpack_opt(list_lists1):
 def seq2aaS(recoSeq, plasmid_aa_cds):
     ''''recoSeq is the recognition sequence 
     the function return the aa possibile sequences for the recoSeq'''
-    n=len(recoSeq)
-    nuc_list = ['A', 'G', 'C', 'T' ]
-    if n%3 ==0:
-        NT_options = [recoSeq]
-    elif n%3 ==1:
-        double_nuc_list = []
-        for i in nuc_list:
-            for k in nuc_list:
-                double_nuc_list.append(k + i)
-        NT_options = [recoSeq+k for k in double_nuc_list ]+ [k+recoSeq for k in double_nuc_list]
-    else:
-        NT_options = [recoSeq+k for k in nuc_list ]+ [k+recoSeq for k in nuc_list]
 
-
-    print(1, NT_options)
     NT_options_final = []
     ntaa_dict={}
-    for nt_seq in NT_options:
-        aa_seq=translate(nt_seq)
-        print(2, aa_seq)
-        if aa_seq in plasmid_aa_cds:
-            print(1)
-            if aa_seq not in ntaa_dict:
-                ntaa_dict[aa_seq]=[nt_seq]
-            else:
-                ntaa_dict[aa_seq].append(nt_seq)
-            NT_options_final.append(nt_seq)
+    for nt_seq in recoseq_opt_withN:
+        aa_seqs=translate_withN(nt_seq, table=table_extended) #TODO: list of lists to list of proteins
+        aa_seqs =  list(itertools.product(*aa_seqs))
+        print(aa_seqs)
+        for aa_seq in aa_seqs:
+            if aa_seq in plasmid_aa_cds:
+                if aa_seq not in ntaa_dict:
+                    ntaa_dict[aa_seq]=[nt_seq]
+                else:
+                    ntaa_dict[aa_seq].append(nt_seq)
+                NT_options_final.append(nt_seq)
     return ntaa_dict,NT_options_final
 
 
@@ -223,3 +275,31 @@ def remove_site_from_plasmid(plasmid_nt_cds, re_nt_list):
     problem = DnaOptimizationProblem(sequence = plasmid_nt_cds, constraints = site_constraints)
     problem.resolve_constraints()
     return problem.sequence
+
+
+
+
+#
+# def codon_options(codon, table=table):
+#     codon_options = []
+#     aa_list = []
+#     for i in codon:
+#         if i in ['A', 'G', 'C', 'T']:
+#             codon_options.append([i])
+#         else:
+#             codon_options.append(['A', 'G', 'C', 'T'])
+#     for i1 in codon_options[0]:
+#         for i2 in codon_options[1]:
+#             for i3 in codon_options[2]:
+#                 aa_list.append(table[i1 + i2 + i3])
+#     return unique(aa_list)
+#
+#
+# all_codons = ['AAA', 'AAG', 'AAC', 'AAT', 'AAN', 'AGA', 'AGG', 'AGC', 'AGT', 'AGN', 'ACA', 'ACG', 'ACC', 'ACT', 'ACN', 'ATA', 'ATG', 'ATC', 'ATT', 'ATN', 'ANA', 'ANG', 'ANC', 'ANT', 'ANN', 'GAA', 'GAG', 'GAC', 'GAT', 'GAN', 'GGA', 'GGG', 'GGC', 'GGT', 'GGN', 'GCA', 'GCG', 'GCC', 'GCT', 'GCN', 'GTA', 'GTG', 'GTC', 'GTT', 'GTN', 'GNA', 'GNG', 'GNC', 'GNT', 'GNN', 'CAA', 'CAG', 'CAC', 'CAT', 'CAN', 'CGA', 'CGG', 'CGC', 'CGT', 'CGN', 'CCA', 'CCG', 'CCC', 'CCT', 'CCN', 'CTA', 'CTG', 'CTC', 'CTT', 'CTN', 'CNA', 'CNG', 'CNC', 'CNT', 'CNN', 'TAA', 'TAG', 'TAC', 'TAT', 'TAN', 'TGA', 'TGG', 'TGC', 'TGT', 'TGN', 'TCA', 'TCG', 'TCC', 'TCT', 'TCN', 'TTA', 'TTG', 'TTC', 'TTT', 'TTN', 'TNA', 'TNG', 'TNC', 'TNT', 'TNN', 'NAA', 'NAG', 'NAC', 'NAT', 'NAN', 'NGA', 'NGG', 'NGC', 'NGT', 'NGN', 'NCA', 'NCG', 'NCC', 'NCT', 'NCN', 'NTA', 'NTG', 'NTC', 'NTT', 'NTN', 'NNA', 'NNG', 'NNC', 'NNT', 'NNN']
+# all_codon_dict = {}
+# for codon in all_codons:
+#     all_codon_dict[codon] = codon_options(codon)
+#
+# print(all_codon_dict)
+
+

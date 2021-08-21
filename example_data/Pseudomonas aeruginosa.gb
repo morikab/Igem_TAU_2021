@@ -1,0 +1,54 @@
+LOCUS       JAGYKQ010000000           14 rc    DNA     linear   ENV 19-MAY-2021
+DEFINITION  MAG: Pseudomonas sp. isolate M30B71, whole genome shotgun
+            sequencing project.
+ACCESSION   JAGYKQ000000000
+VERSION     JAGYKQ000000000.1
+DBLINK      BioProject: PRJNA721826
+            BioSample: SAMN19005958
+KEYWORDS    WGS; Metagenome Assembled Genome; MAG.
+SOURCE      Pseudomonas sp. (salt lake metagenome)
+  ORGANISM  Pseudomonas sp.
+            Bacteria; Proteobacteria; Gammaproteobacteria; Pseudomonadales;
+            Pseudomonadaceae; Pseudomonas.
+REFERENCE   1  (bases 1 to 14)
+  AUTHORS   Chen,Y.-H.
+  TITLE     Complete and high-quality genomes of novel microbial species from a
+            meromictic lake using a new workflow combining long-read and
+            short-read sequencing platforms
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 14)
+  AUTHORS   Chen,Y.-H.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-MAY-2021) Biodiversity Research Center, Academia
+            Sinica, No. 128, Academia Road, Sec.2, Taipei City, Nankang 115,
+            Taiwan
+COMMENT     The Pseudomonas sp. whole genome shotgun (WGS) project has the
+            project accession JAGYKQ000000000.  This version of the project
+            (01) has the accession number JAGYKQ010000000, and consists of
+            sequences JAGYKQ010000001-JAGYKQ010000014.
+            
+            ##Genome-Assembly-Data-START##
+            Assembly Method        :: metaFlye v. 2.8
+            Genome Representation  :: Full
+            Expected Final Version :: Yes
+            Genome Coverage        :: 31.84x
+            Sequencing Technology  :: Oxford Nanopore
+            ##Genome-Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..14
+                     /organism="Pseudomonas sp."
+                     /mol_type="genomic DNA"
+                     /isolate="M30B71"
+                     /isolation_source="3.0 m mixolimnion layer of meromictic
+                     lake"
+                     /db_xref="taxon:306"
+                     /environmental_sample
+                     /country="Russia: Republic of Khakassia, Shirinsky
+                     District, Lake Shunet"
+                     /lat_lon="54.25 N 90.13 E"
+                     /collection_date="2010-07-21"
+                     /metagenome_source="salt lake metagenome"
+                     /note="metagenomic"
+WGS         JAGYKQ010000001-JAGYKQ010000014
+//
+
