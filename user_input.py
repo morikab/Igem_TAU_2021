@@ -1,9 +1,7 @@
 from Bio import SeqIO
 from promoters.calculating_cai import CAI
-import time
 
 
-tic = time.time()
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
@@ -19,7 +17,7 @@ def find_tgcn(gb_path):
     tgcn_dict = {}
     for record in SeqIO.parse(gb_path, "genbank"):
         for feature in record.features:
-            if str(feature.type).lower() == "trna" :
+            if str(feature.type).lower() == "trna" and 'note' in feature.qualifiers.keys():
                 note = ' '.join(feature.qualifiers['note'])
 
                 anticodon = note[note.find("(") + 1:note.find(")")]
@@ -94,7 +92,6 @@ def extract_gene_data(genbank_path):
     # cai_dict: cai score for each cds
         """
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
-    print(genome[:10])
     cds_seqs = []
     gene_names = []
     functions = []
@@ -134,8 +131,6 @@ def extract_gene_data(genbank_path):
 
     cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
     cai_scores = CAI(cds_seqs, reference = cai_reference_set)
-    # print(cai_reference_set)
-    # print(cai_scores[:50],'\n')
     cai_dict = {name_and_function[i]:cai_scores[i] for i in range(entry_num)}
     return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict
 
@@ -195,5 +190,4 @@ usr_inp_exmpl = {
 
 #output:
 full_inp_dict = parse_input(usr_inp_exmpl)
-print(time.time() -tic)
 
