@@ -5,7 +5,7 @@ import os
 org2 = 'Bacillus subtilis'
 
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
-cds_nt = SeqIO.read('C:\\Users\\7328046\\Documents\\university files\\second semester 2020-2021\\IGEM contest\\Model\\example_data\\mCherry_original.fasta',
+cds_nt = SeqIO.read('..\example_data\\mCherry_original.fasta',
                     "fasta").seq
 cds_aa = translate(cds_nt)
 
