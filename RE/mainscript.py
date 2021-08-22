@@ -1,22 +1,30 @@
-from RE.RB_functions_new import REbase_org, translate
-from user_input import user_inp1, user_inp2
+from RE.functions import REbase_org, translate
+from user_input import user_inp2
 import time
 
+org1 = 'Escherichia coli K-12'
+org2 = 'Bacillus subtilis 168'
+
+
 tic1 = time.time()
-cds_nt = user_inp2
-print(user_inp2)
+cds_nt = user_inp2.seq
 tic2 = time.time()
-print(tic2-tic1)
 cds_aa = translate(cds_nt)
-# BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis', cds_seq) ##REbase of Bacillus
-EC_ntaa_dict = REbase_org('Escherichia coli K-12', cds_aa)  ##REbase of E.coli
+
+
+
+
+EC_ntaa_dict = REbase_org('Escherichia coli', cds_aa)  ##REbase of E.coli
 tic3 = time.time()
-print(EC_ntaa_dict)
-print(tic3-tic2)
-BS_ntaa_dict = REbase_org('Bacillus subtilis 168', cds_aa) ##REbase of Bacillus
-print(BS_ntaa_dict)
+print(2, tic3-tic2)
+BS_ntaa_dict = REbase_org('Bacillus subtilis', cds_aa) ##REbase of Bacillus
 tic4 = time.time()
-print(tic4-tic3)
+print(3, tic4-tic3)
+
+
+
+
+
 
 
 

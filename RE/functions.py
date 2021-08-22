@@ -53,8 +53,6 @@ nt_to_aa = {
 
 
 
-
-
 def unique(list1):
     return sorted(set(list1))
 
@@ -144,7 +142,7 @@ def translate_ambiguous_3RFs(nt_seq, cds_aa):
 def REbase_org(org, cds_aa):  # DONE
     RE_org_ind = [i for i, k in enumerate(REbase)
                   if org in k]  ## index of the 3rd section of the "block"
-    rest_dict_org = {}  ## REbase dict.
+    enzyme_dict = {}  ## REbase dict.
     for k in RE_org_ind:
         site = REbase[k + 2][3:]
         if '?' in site or ',' in site:
@@ -153,44 +151,62 @@ def REbase_org(org, cds_aa):  # DONE
         ambiguous_site = relevant_seq(site)
         nt_to_aa = translate_ambiguous_3RFs(ambiguous_site, cds_aa)
         if nt_to_aa:
-            rest_dict_org[enzyme_name] = {
+            enzyme_dict[enzyme_name] = {
                 'ambiguous_site':ambiguous_site,
                 'nt_to_aa': nt_to_aa}
-    return rest_dict_org
+    return enzyme_dict
 
 
 
 
-def insert_site_CDS(cds, ntaa_dict):
+def insert_site_CDS(cds_nt, enzyme_dict):
     """this function insert req.site to cds according to ntaa_dict but it can insert more than site in same index
 and insert over what have been done before"""
-    AA_cds_seq = translate(cds)
-    start_end_idex_dict = {}
-    for aasite, ntsites in ntaa_dict.items():
-        if aasite in AA_cds_seq:
-            stratindx = AA_cds_seq.find(aasite)
-            endindx = stratindx + len(aasite)
-            cds = list(cds)
-            cds[3 * stratindx:3 * endindx] = list(ntsites[0])
-            cds = ''.join(cds)
-            start_end_idex_dict[ntsites[0]] = {'start': stratindx,
-                                               'end': stratindx + len(aasite),
-                                               'aa': aasite}
-            break
-    return cds, start_end_idex_dict
+    cds_aa = translate(cds_nt)
+    # start_end_idex_dict = {}
+    for sub_dict in enzyme_dict.values():
+        ntaa_dict = sub_dict['nt_to_aa']
+        for aasite, ntsites in ntaa_dict.items():
+            if aasite in cds_aa:
+                stratindx = cds_aa.find(aasite)
+                endindx = stratindx + len(aasite)
+                cds_nt = list(cds_nt)
+                cds_nt[3 * stratindx:3 * endindx] = list(ntsites[0])
+                cds_nt = ''.join(cds_nt)
+                # start_end_idex_dict[ntsites[0]] = {'start': stratindx,
+                #                                    'end': stratindx + len(aasite),
+                #                                    'aa': aasite}
+    return cds_nt
 
 
-def remove_site_from_plasmid(plasmid_nt_cds, re_nt_list):
+def remove_site_from_plasmid(cds_nt, enzyme_dict):
     # plasmid must be in the correct reading frame
-    plasmid_nt_cds = str(plasmid_nt_cds)
-    tested_re_nt_list = [nt for nt in re_nt_list if nt in plasmid_nt_cds]
+    cds_nt = str(cds_nt)
+    tested_re_nt_list = []
+    for sub_dict in enzyme_dict.values():
+        tested_re_nt_list = tested_re_nt_list + list(sub_dict['nt_to_aa'].keys())
     site_constraints = [AvoidPattern(nt) for nt in tested_re_nt_list] + [EnforceTranslation()]
-    problem = DnaOptimizationProblem(sequence=plasmid_nt_cds, constraints=site_constraints)
+    problem = DnaOptimizationProblem(sequence=cds_nt, constraints=site_constraints)
     problem.resolve_constraints()
     return problem.sequence
 
 
+def sites_in_cds(enzyme_dict, cds_nt):
+    found_sites = {}
+    for enzyme_name, enzyme_val in enzyme_dict.items():
+        if [i for i in  list(enzyme_val['nt_to_aa'].keys()) if i in cds_nt]:
+            found_sites[enzyme_name] = enzyme_val['ambiguous_site']
+    return found_sites
 
 
+def parse_inp1(usr_inp1):
+    optimized_org_names = []
+    deoptimized_org_names = []
+    for org_name, org_dict in usr_inp1.items():
+        if org_dict['optimized']:
+            optimized_org_names.append(org_name)
+        else:
+            deoptimized_org_names.append(org_name)
+    return optimized_org_names, deoptimized_org_names
 
 

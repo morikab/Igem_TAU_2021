@@ -1,8 +1,9 @@
 from Bio import SeqIO
-from promoters.calculating_cai import CAI
+from ORF.calculating_cai import CAI
 import os
 
-#TODO: add option to insert expression levels (non-mandetory)
+
+# TODO: add option to insert expression levels (non-mandetory)
 
 # write ideas for the promoter model
 
@@ -11,12 +12,14 @@ def reverse_complement(seq):
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
     return reverse_complement
 
-#RE model
+
+# RE model
 def find_org_name(gb_file):
     org_name = gb_file.description
     return ' '.join(org_name.split()[:2])
 
-#ORI model
+
+# ORI model
 def find_tgcn(gb_path):
     tgcn_dict = {}
     for record in SeqIO.parse(gb_path, "genbank"):
@@ -26,13 +29,13 @@ def find_tgcn(gb_path):
 
                 anticodon = note[note.find("(") + 1:note.find(")")]
                 if anticodon in tgcn_dict.keys():
-                    tgcn_dict[anticodon] +=1
+                    tgcn_dict[anticodon] += 1
                 else:
                     tgcn_dict[anticodon] = 1
     return tgcn_dict
 
 
-#promoter model
+# promoter model
 def extract_intergenic(cds_start, cds_stop, cds_strand, prom_length, genome, len_th=30):
     """
     extract intergenic sequences for streme intergenic motifs
@@ -46,12 +49,12 @@ def extract_intergenic(cds_start, cds_stop, cds_strand, prom_length, genome, len
     """
     for idx, vals in enumerate(zip(cds_start, cds_stop, cds_strand)):
         start, end, strand = vals
-        if strand ==1:
-            genome = genome[:start-prom_length] + '-'*(end-start+prom_length) + genome[end:]
-        else: #strand ==-1
-            genome = genome[:start] + '-' * (end - start + prom_length) + genome[end+prom_length:]
+        if strand == 1:
+            genome = genome[:start - prom_length] + '-' * (end - start + prom_length) + genome[end:]
+        else:  # strand ==-1
+            genome = genome[:start] + '-' * (end - start + prom_length) + genome[end + prom_length:]
     intergenic_list = genome.split('-')
-    return {k:i for k,i in enumerate(intergenic_list) if len(i)>len_th}
+    return {k: i for k, i in enumerate(intergenic_list) if len(i) > len_th}
 
 
 def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome):
@@ -70,18 +73,18 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
     genome_rev = genome
     for idx, vals in enumerate(zip(cds_start, cds_stop, cds_strand)):
         start, end, strand = vals
-        if strand ==1:
-            genome_fwd = genome[:start ] + '-' * (end - start) + genome[end:]
+        if strand == 1:
+            genome_fwd = genome[:start] + '-' * (end - start) + genome[end:]
         else:
             genome_rev = genome[:start] + '-' * (end - start) + genome[end:]
     for idx, vals in enumerate(zip(cds_start, cds_strand, cds_names)):
         start, strand, name = vals
-        if strand ==1:
-            prom = genome_fwd[start-prom_length:start]
+        if strand == 1:
+            prom = genome_fwd[start - prom_length:start]
         else:
-            prom = reverse_complement(genome_rev[start:start+prom_length])
-        if prom != '-'*prom_length and len(prom.replace('-',''))>0:
-            prom_dict[name] = prom.replace('-','')
+            prom = reverse_complement(genome_rev[start:start + prom_length])
+        if prom != '-' * prom_length and len(prom.replace('-', '')) > 0:
+            prom_dict[name] = prom.replace('-', '')
     return prom_dict
 
 
@@ -103,42 +106,43 @@ def extract_gene_data(genbank_path):
     ends = []
     strands = []
     with open(genbank_path) as input_handle:
-            for record in SeqIO.parse(input_handle, "genbank"):
-                for feature in record.features:
-                    if feature.type == "CDS":
-                        if 'gene' in feature.qualifiers.keys():
-                            name= feature.qualifiers['gene'][0]
-                        elif 'locus_tag' in feature.qualifiers.keys():
-                            name = feature.qualifiers['locus_tag'][0]
-                        else:
-                            continue
-                        if feature.location is not None \
+        for record in SeqIO.parse(input_handle, "genbank"):
+            for feature in record.features:
+                if feature.type == "CDS":
+                    if 'gene' in feature.qualifiers.keys():
+                        name = feature.qualifiers['gene'][0]
+                    elif 'locus_tag' in feature.qualifiers.keys():
+                        name = feature.qualifiers['locus_tag'][0]
+                    else:
+                        continue
+                    if feature.location is not None \
                             and name not in gene_names:
-                            cds = genome[feature.location.start: feature.location.end]
-                            function = ' '.join(feature.qualifiers['product'])
-                            if feature.location.strand ==-1:
-                                cds = reverse_complement(cds)
+                        cds = genome[feature.location.start: feature.location.end]
+                        function = ' '.join(feature.qualifiers['product'])
+                        if feature.location.strand == -1:
+                            cds = reverse_complement(cds)
 
-                            gene_names.append(name)
-                            cds_seqs.append(cds)
-                            functions.append(function)
-                            starts.append(feature.location.start)
-                            ends.append(feature.location.end)
-                            strands.append(feature.location.strand)
+                        gene_names.append(name)
+                        cds_seqs.append(cds)
+                        functions.append(function)
+                        starts.append(feature.location.start)
+                        ends.append(feature.location.end)
+                        strands.append(feature.location.strand)
 
     entry_num = len(gene_names)
-    name_and_function = [gene_names[i]+ '|' + functions[i] for i in range(entry_num)]
-    prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome =genome) #fix!!
-    prom400_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=400, genome =genome) #fix!!
-    cds_dict = {name_and_function[i]:cds_seqs[i] for i in range(entry_num)}
+    name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
+    prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
+    prom400_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=400, genome=genome)  # fix!!
+    cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
     intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=400, genome=genome, len_th=30)
 
     cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
-    cai_scores = CAI(cds_seqs, reference = cai_reference_set)
-    cai_dict = {name_and_function[i]:cai_scores[i] for i in range(entry_num)}
-    return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict
+    cai_scores, cai_weights = CAI(cds_seqs, reference=cai_reference_set)
+    cai_dict = {name_and_function[i]: cai_scores[i] for i in range(entry_num)}
+    return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights
 
-#final function
+
+# final function
 def parse_input(usr_inp):
     '''
     :param usr_inp: in the following format
@@ -167,32 +171,30 @@ def parse_input(usr_inp):
         gb_file = SeqIO.read(gb_path, format='gb')
         org_name = find_org_name(gb_file)
         tgcn_dict = find_tgcn(gb_path)
-        prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict= extract_gene_data(gb_path)
+        prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
         full_inp_dict[org_name] = {
-            'tgcn':tgcn_dict, #tgcn dict {codon:number of occurences}
-            '200bp_promoters':prom200_dict, #prom_dict {gene name and function: prom}
+            'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences}
+            '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}
             '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}
-            'gene_cds':cds_dict, #cds dict {gene name and function : cds}
-            'intergenic':intergenic_dict, #intergenic dict {position along the genome: intergenic sequence}
-            'cai_dict':cai_dict,
-            'optimized':val['optimized']} #is the sequence in the optimized or deoptimized group- bool
+            'gene_cds': cds_dict,  # cds dict {gene name and function : cds}
+            'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}
+            'caiScore_dict': cai_dict,
+            'cai_profile': cai_weights,
+            'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
     return full_inp_dict
 
 
-#input:
+# input:
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
-user_inp1_raw = {
-    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-                'optimized': True},
-    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                'optimized': False},
-    'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                   'optimized': True},
-    'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
-                   'optimized': False}
-        }
-
-user_inp1 = parse_input(user_inp1_raw)
+# user_inp1_raw = {
+#     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+#              'optimized': True},
+#     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+#               'optimized': False},
+#     'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+#             'optimized': True},
+#     'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
+#                'optimized': False}}
+#
+# user_inp1 = parse_input(user_inp1_raw)
 user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
-print(user_inp2)
-# user_inp3 = promoter option fasta

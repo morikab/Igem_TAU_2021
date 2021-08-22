@@ -6,6 +6,9 @@ from collections import Counter
 import warnings
 from Bio import BiopythonWarning
 
+#LIYAM code
+
+
 warnings.simplefilter("ignore", BiopythonWarning)
 
 genetic_code_dict = {
@@ -204,5 +207,5 @@ def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code=11)
                     sequence_weights.append(sum(weights.values()) / len(weights.values()))    #if codon not in table (like if it conatians N or other ambigous chars- it will be ignored (not counted in the seq length)
         cai_scores.append(float(gmean(sequence_weights)))
     # return the geometric mean of the weights raised to one over the length of the sequence
-    return cai_scores
+    return cai_scores, weights
 
