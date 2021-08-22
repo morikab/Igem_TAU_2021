@@ -1,7 +1,9 @@
 from Bio import SeqIO
-from calculating_cai import *
+from promoters.calculating_cai import CAI
+import time
 
-print(genetic_code_dict)
+
+tic = time.time()
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
@@ -89,8 +91,10 @@ def extract_gene_data(genbank_path):
     # prom_dic: gene name to prom
     # cds_dict: gene name to cds
     # intergenic_dict: idx is a placing along the genome, and the value is the intergenic sequence
+    # cai_dict: cai score for each cds
         """
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
+    print(genome[:10])
     cds_seqs = []
     gene_names = []
     functions = []
@@ -123,17 +127,17 @@ def extract_gene_data(genbank_path):
 
     entry_num = len(gene_names)
     name_and_function = [gene_names[i]+ '|' + functions[i] for i in range(entry_num)]
-    prom_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome =genome) #fix!!
+    prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome =genome) #fix!!
+    prom400_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=400, genome =genome) #fix!!
     cds_dict = {name_and_function[i]:cds_seqs[i] for i in range(entry_num)}
-    intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=20, genome=genome, len_th=30)
+    intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=400, genome=genome, len_th=30)
 
     cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
-    cai_dict = {name_and_function[i]:CAI(cds_seqs[i], reference = cai_reference_set)
-                for i in range(entry_num)}
-
-
-
-    return prom_dict, cds_dict, intergenic_dict, cai_dict
+    cai_scores = CAI(cds_seqs, reference = cai_reference_set)
+    # print(cai_reference_set)
+    # print(cai_scores[:50],'\n')
+    cai_dict = {name_and_function[i]:cai_scores[i] for i in range(entry_num)}
+    return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict
 
 #final function
 def parse_input(usr_inp):
@@ -164,31 +168,32 @@ def parse_input(usr_inp):
         gb_file = SeqIO.read(gb_path, format='gb')
         org_name = find_org_name(gb_file)
         tgcn_dict = find_tgcn(gb_path)
-        geneName_to_prom, geneName_to_cds, posIdx_to_intergenic, cai_dict= extract_gene_data(gb_path)
-        print(cai_dict)
+        prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict= extract_gene_data(gb_path)
         full_inp_dict[org_name] = {
             'tgcn':tgcn_dict, #tgcn dict {codon:number of occurences}
-            'gene_promoters':geneName_to_prom, #prom_dict {gene name and function: prom}
-            'gene_cds':geneName_to_cds, #cds dict {gene name and function : cds}
-            'intergenic':posIdx_to_intergenic, #intergenic dict {position along the genome: intergenic sequence}
+            '200bp_promoters':prom200_dict, #prom_dict {gene name and function: prom}
+            '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}
+            'gene_cds':cds_dict, #cds dict {gene name and function : cds}
+            'intergenic':intergenic_dict, #intergenic dict {position along the genome: intergenic sequence}
             'cai_dict':cai_dict,
             'optimized':val['optimized']} #is the sequence in the optimized or deoptimized group- bool
     return full_inp_dict
 
 
-
 #input:
 usr_inp_exmpl = {
-    # 'opt1': {'genome_path': 'example_data\\Escherichia coli.gb',
-    #             'optimized': True},
-    # 'deopt1': {'genome_path': 'example_data\\Bacillus subtilis.gb',
-    #             'optimized': False},
+    'opt1': {'genome_path': 'example_data\\Escherichia coli.gb',
+                'optimized': True},
+    'deopt1': {'genome_path': 'example_data\\Bacillus subtilis.gb',
+                'optimized': False},
     'opt2': {'genome_path': 'example_data\\Sulfolobus acidocaldarius.gb',
                    'optimized': True},
-    # 'deopt2': {'genome_path': 'example_data\\Pseudomonas aeruginosa.gb',
-    #                'optimized': False}
+    'deopt2': {'genome_path': 'example_data\\Pseudomonas aeruginosa.gb',
+                   'optimized': False}
         }
+
 
 #output:
 full_inp_dict = parse_input(usr_inp_exmpl)
+print(time.time() -tic)
 
