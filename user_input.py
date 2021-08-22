@@ -1,6 +1,10 @@
 from Bio import SeqIO
 from promoters.calculating_cai import CAI
+import os
 
+#TODO: add option to insert expression levels (non-mandetory)
+
+# write ideas for the promoter model
 
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
@@ -176,18 +180,19 @@ def parse_input(usr_inp):
 
 
 #input:
-usr_inp_exmpl = {
-    'opt1': {'genome_path': 'example_data\\Escherichia coli.gb',
+base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+user_inp1_raw = {
+    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
                 'optimized': True},
-    'deopt1': {'genome_path': 'example_data\\Bacillus subtilis.gb',
+    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
                 'optimized': False},
-    'opt2': {'genome_path': 'example_data\\Sulfolobus acidocaldarius.gb',
+    'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
                    'optimized': True},
-    'deopt2': {'genome_path': 'example_data\\Pseudomonas aeruginosa.gb',
+    'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
                    'optimized': False}
         }
 
-
-#output:
-full_inp_dict = parse_input(usr_inp_exmpl)
-
+user_inp1 = parse_input(user_inp1_raw)
+user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
+print(user_inp2)
+# user_inp3 = promoter option fasta

@@ -1,21 +1,25 @@
-from RB_functions import *
-from Bio.Seq import *
-from Bio import SeqIO
+from RE.RB_functions_new import REbase_org, translate
+from user_input import user_inp1, user_inp2
 import time
 
-
 tic1 = time.time()
-cds_path = r'mCherry_original.fasta'
-cds_seq = Seq('')
-for record in SeqIO.parse(cds_path, "fasta"):
-    cds_seq += record.seq
-
-cds_seq = 'CCTCGAGGCGTTCGGCCG'
+cds_nt = user_inp2
+print(user_inp2)
+tic2 = time.time()
+print(tic2-tic1)
+cds_aa = translate(cds_nt)
 # BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis', cds_seq) ##REbase of Bacillus
-# EC_ntaa_dict,EC_NT_list = REseq_org('Escherichia coli', cds_seq)  ##REbase of E.coli
-BS_ntaa_dict,BS_NT_list = REseq_org('Bacillus subtilis 168', cds_seq) ##REbase of Bacillus
-print(BS_NT_list)
+EC_ntaa_dict = REbase_org('Escherichia coli K-12', cds_aa)  ##REbase of E.coli
+tic3 = time.time()
+print(EC_ntaa_dict)
+print(tic3-tic2)
+BS_ntaa_dict = REbase_org('Bacillus subtilis 168', cds_aa) ##REbase of Bacillus
 print(BS_ntaa_dict)
+tic4 = time.time()
+print(tic4-tic3)
+
+
+
 # EC_ntaa_dict,EC_NT_list = REseq_org('Bacillus stearothermophilus Z130', cds_seq)  ##REbase of E.coli
 # print(EC_ntaa_dict,EC_NT_list)
 #

@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from dnachisel import DnaOptimizationProblem, AvoidPattern,EnforceTranslation
+from dnachisel import DnaOptimizationProblem, AvoidPattern,EnforceTranslation, EnforcePatternOccurence
 import time
 import itertools
 import string
@@ -31,7 +31,6 @@ sa={'R':['G','A'],'Y':['C','T'],'M':['A','C'],'K':['G','T'],
     'S':['G','C'],'W':['A','T'],'B':['G','C','T'],
     'D':['A','G','T'],'H':['A','C','T'],'V':['A','G','C'],
     'N':['A','G','C','T']}
-
 
 table = {
         'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
@@ -93,38 +92,30 @@ def translate(seq,table=table): #DONE
     else:
         return ValueError('len(seq)%3 !=0')
 
-def all_combinations_of_sublists(lst_of_lst):
-    while len(lst_of_lst)>0:
 
+def itertools_prod_for_strs(list_of_lists):
+    '''
+    :param list_of_lists: ex:[['a', 'b'], ['c', 'd', 'g'], ['e', 'f']]
+    :return: ex:['ace', 'acf', 'ade', 'adf', 'age', 'agf', 'bce', 'bcf', 'bde', 'bdf', 'bge', 'bgf']
+    '''
+    list_of_idxlist = [list(range(len(i))) for i in list_of_lists]
+    itertools_prod = itertools.product(*list_of_idxlist)
 
-def translate_withN(seq,used_table=table_extended): #DONE
-    seq_opt_withN = []
-    residual = len(seq)%3
-    for i in range(3):
-        seq_opt_withN.append('N'*i + seq + 'N'*((3-i-residual)%3))
-
-    seq_aa = {}
-    for seq in seq_opt_withN:
-        opt_list = []
-        idex_opt_list = []
-        for i in range(0, len(seq), 3):
-            aa_opts = used_table[seq[i:i + 3]]
-            opt_list.append(aa_opts)
-            idex_opt_list.append(list(range(len(aa_opts))))
-        # print(idex_opt_list)
-        # print(list(itertools.product(*idex_opt_list)))
-        # seq_aa[seq] =
-    print(seq_aa)
-
-    # print(seq_aa)
-
-translate_withN('AAA')
+    final_str_list = []
+    for idx_tup in itertools_prod:
+        string = ""
+        for sublist_idx, str_idex in enumerate(idx_tup):
+            string +=list_of_lists[sublist_idx][str_idex]
+        final_str_list.append(string)
+    return final_str_list
 
 
 
-def str_itertools_product():
-    for item in itertools.product(string.ascii_lowercase, repeat=2):
-        yield "".join(list(item))
+
+
+# def str_itertools_product():
+#     for item in itertools.product(string.ascii_lowercase, repeat=2):
+#         yield "".join(list(item))
 
 
 def REbase_org(org): #DONE
@@ -170,6 +161,7 @@ def comp_seq(seq1,seq2):
     seq1=seq_opps(seq1)
     seq2=seq_opps(seq2)
     return re.search(seq2,seq1)
+
 def unique(list1):
     return sorted(set(list1))
 
@@ -200,26 +192,24 @@ def unpack_opt(list_lists1):
     return list_frame          
                 
 
+def translate_withN(seq, cds_aa, used_table=table_extended):
+    seq_opt_withN = []
+    residual = len(seq)%3
+    for i in range(3):
+        seq_opt_withN.append('N'*i + seq + 'N'*((3-i-residual)%3))
 
+    seq_aa = {}
+    for seq in seq_opt_withN:
+        opt_list = []
+        for i in range(0, len(seq), 3):
+            aa_opts = used_table[seq[i:i + 3]]
+            opt_list.append(aa_opts)
+        possible_seqs = [i for i in itertools_prod_for_strs(opt_list) if i in cds_aa]
 
-def seq2aaS(recoSeq, plasmid_aa_cds):
-    ''''recoSeq is the recognition sequence 
-    the function return the aa possibile sequences for the recoSeq'''
+        if len(possible_seqs)>0:
+            seq_aa[seq] = itertools_prod_for_strs(opt_list)
+    return seq_aa
 
-    NT_options_final = []
-    ntaa_dict={}
-    for nt_seq in recoseq_opt_withN:
-        aa_seqs=translate_withN(nt_seq, table=table_extended) #TODO: list of lists to list of proteins
-        aa_seqs =  list(itertools.product(*aa_seqs))
-        print(aa_seqs)
-        for aa_seq in aa_seqs:
-            if aa_seq in plasmid_aa_cds:
-                if aa_seq not in ntaa_dict:
-                    ntaa_dict[aa_seq]=[nt_seq]
-                else:
-                    ntaa_dict[aa_seq].append(nt_seq)
-                NT_options_final.append(nt_seq)
-    return ntaa_dict,NT_options_final
 
 
 def REseq_org(org, plasmid_nt_cds):
@@ -233,13 +223,13 @@ def REseq_org(org, plasmid_nt_cds):
     for seq in org_seq_list:
         seq_opts_list =seq_opts_list + seq_opps(seq) #all options according to SA
     seq_opts_list = unique(seq_opts_list)
+    print(seq_opts_list)
 
     for seq_opt in seq_opts_list:
-        ntaa_dict,NT_options=seq2aaS(seq_opt, plasmid_aa_cds)
+        ntaa_dict =translate_withN(seq_opt, plasmid_aa_cds, used_table=table_extended)
         if len (ntaa_dict) == 0 :
             continue
-        org_NT_options=org_NT_options+NT_options
-        print(org_NT_options)
+        org_NT_options=org_NT_options+list(ntaa_dict.keys())
         for aa_site,nt_site in ntaa_dict.items():
             if aa_site not in org_seq_opts:
                 org_seq_opts[aa_site]=nt_site
@@ -247,6 +237,8 @@ def REseq_org(org, plasmid_nt_cds):
                 org_seq_opts[aa_site]=org_seq_opts[aa_site]+nt_site
 
     return org_seq_opts,org_NT_options
+
+
 
         
 def insert_site_CDS(cds,ntaa_dict):
