@@ -149,6 +149,8 @@ def REbase_org(org, cds_aa):  # DONE
             continue
         enzyme_name = REbase[k - 2][3:]
         ambiguous_site = relevant_seq(site)
+        if ambiguous_site in [i['ambiguous_site'] for i in enzyme_dict.values()]:
+            continue
         nt_to_aa = translate_ambiguous_3RFs(ambiguous_site, cds_aa)
         if nt_to_aa:
             enzyme_dict[enzyme_name] = {

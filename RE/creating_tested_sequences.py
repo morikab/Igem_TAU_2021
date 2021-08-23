@@ -14,7 +14,7 @@ tic2 = time.time()
 EC_enzyme_dict = REbase_org('Escherichia coli K-12', cds_aa)
 print('number of relevant Escherichia coli K-12 REs: ', len(EC_enzyme_dict))
 
-EC_full_dict = REbase_org('Escherichia coli K-12', cds_aa) #should be 'Escherichia coli'
+EC_full_dict = REbase_org('Escherichia coli', cds_aa) #should be 'Escherichia coli'
 print('number of relevant Escherichia coli REs: ', len(EC_full_dict))
 
 
