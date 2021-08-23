@@ -47,21 +47,6 @@ def mast(motif_path, seq_path, output_path=".", ev=10):
 
 
 """
-This method runs STREME several times for different parameters (primary, control, k)
-@param start: path to the directory containing all relevant fasta files
-"""
-def all_streme(start):
-    seq = {'Bh':['Eh', 'Bl'], 'Eh':['Bh', 'El']}
-    end = '.fasta'
-    
-    for k in [3]:
-        for primary in seq.keys():
-            for control in seq[primary]:
-                streme(start+primary+end, start+control+end, k, start+','.join([primary, control,str(k)]))
-                print('STREME done:', primary, control, k)
-
-
-"""
 This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
 @param p_path: path to a directory containing all files of primary organism (output of sequences_for_meme.py on primary)
 @param c_path: path to a directory containing all files of control organism (output of sequences_for_meme.py on control)
@@ -100,22 +85,6 @@ def one_streme(name1, start1, name2, start2):
     streme(primary_path=path1, control_path=path2, kmer=k, output_path='_'.join([name1, name2]), minw=minw, maxw=maxw)
 
 run_streme('bacillus', 'ecoli')
-"""
-This method runs MAST several times for different parameters (primary, control, k)
-@param start: path to the directory containing all folders with STREME output
-"""
-def all_mast(start):
-    seq = {'Bh':['Eh', 'Bl'], 'Eh':['Bh', 'El']}
-    fasta_end = ".fasta"
-    streme_end = '/streme.txt'
-    streme = [','.join([pr, ct, '3']) for pr in seq.keys() for ct in seq[pr]]
-    fastas = [file for file in seq.keys()]
-    
-
-    for txt in streme:
-        for fasta in fastas:
-            mast(os.path.join(start+txt, streme_end), start+fasta+fasta_end, start+'mast_motif_'+txt+'_seq_'+fasta, ev=5000)
-            print('MAST done:', 'motif:', txt, 'seq:', fasta)
 
 
 """
