@@ -21,6 +21,9 @@ BS_ntaa_dict = REbase_org('Bacillus subtilis', cds_aa) ##REbase of Bacillus
 tic4 = time.time()
 print(3, tic4-tic3)
 
+#create final sequence variable
+
+final_seq = 'str after ORF optimization, taking out deoptimized and adding optimized'
 
 
 

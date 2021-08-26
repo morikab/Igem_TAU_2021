@@ -1,6 +1,8 @@
 import os
 import pandas as pd
-
+###################
+# in progress!!!!!#
+###################
 
 # תעיפי את הפרומוטורים שלא ב 30% העליונים מבחינת ביטוי
 # תעיפי את כל הפרומוטורים  שהם לא ב 15% העליונים לפי   TH=0.5 ולפי 400.
@@ -75,3 +77,4 @@ prom400_and_exp_level = pd.merge(filtered_by_prom400, filtered_by_exp_level)
 
 final_filtered = prom400_and_exp_level.sort_values('th=' + str(max(th_options)) + ', len=200, rank')
 final_filtered.to_csv(os.path.join(base_fid, org + ' filtered_options.csv'), index=False)
+

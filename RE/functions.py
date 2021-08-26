@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from dnachisel import DnaOptimizationProblem, AvoidPattern, EnforceTranslation, EnforcePatternOccurence
+from dnachisel import DnaOptimizationProblem, AvoidPattern, EnforceTranslation
 import time
 import itertools
 import string

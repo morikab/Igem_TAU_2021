@@ -6,7 +6,6 @@ import os
 # TODO: add option to insert expression levels (non-mandetory)
 
 # write ideas for the promoter model
-
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
@@ -173,28 +172,30 @@ def parse_input(usr_inp):
         tgcn_dict = find_tgcn(gb_path)
         prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
         full_inp_dict[org_name] = {
-            'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences}
-            '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}
-            '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}
-            'gene_cds': cds_dict,  # cds dict {gene name and function : cds}
-            'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}
-            'caiScore_dict': cai_dict,
-            'cai_profile': cai_weights,
+            'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
+            '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
+            '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
+            'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
+            'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
+            'caiScore_dict': cai_dict, # ORF and promoter
+            'cai_profile': cai_weights, # ORF model
             'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
     return full_inp_dict
 
 
-# input:
+#TODO: add everything to the same dict.
+# input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
-# user_inp1_raw = {
-#     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-#              'optimized': True},
-#     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-#               'optimized': False},
-#     'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-#             'optimized': True},
-#     'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
-#                'optimized': False}}
+user_inp1_raw = {
+    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+             'optimized': True},
+     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+               'optimized': False},
+     'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+             'optimized': True},
+    'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
+               'optimized': False}}
 #
-# user_inp1 = parse_input(user_inp1_raw)
+user_inp1 = parse_input(user_inp1_raw)
 user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
+# usr_inp3 = fasta file of promotres
