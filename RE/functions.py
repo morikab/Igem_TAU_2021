@@ -86,11 +86,11 @@ def itertools_prod_for_strs(list_of_lists):
         final_str_list.append(string)
     return final_str_list
 
-def write_fasta(fid, list_seq, list_name):
-    ofile = open(fid + '.fasta', "w+")
-    for i in range(len(list_seq)):
-        ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
-    ofile.close()
+# def write_fasta(fid, list_seq, list_name):
+#     ofile = open(fid + '.fasta', "w+")
+#     for i in range(len(list_seq)):
+#         ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
+#     ofile.close()
 # --------------------------------------------------------
 
 

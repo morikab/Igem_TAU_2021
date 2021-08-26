@@ -134,3 +134,5 @@ selective_dict = extract_pssm_from_xml(selective_streme_fid)
 intergenic_dict = extract_pssm_from_xml(intergenic_streme_fid)
 
 selected_motifs_from_selective_dict = find_selective_and_intergenic(selective_dict, intergenic_dict, final_percent_of_motifs=50)
+
+

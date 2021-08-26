@@ -5,6 +5,12 @@ import os
 
 # TODO: add option to insert expression levels (non-mandetory)
 
+def write_fasta(fid, list_seq, list_name):
+    ofile = open(fid + '.fasta', "w+")
+    for i in range(len(list_seq)):
+        ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
+    ofile.close()
+
 # write ideas for the promoter model
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
@@ -85,6 +91,11 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
         if prom != '-' * prom_length and len(prom.replace('-', '')) > 0:
             prom_dict[name] = prom.replace('-', '')
     return prom_dict
+
+def extract_highly_expressed_gene_names(expression_estimation):
+    # todo: finish
+    list_of_highly_exp_genes = []
+    return list_of_highly_exp_genes
 
 
 def extract_gene_data(genbank_path):
@@ -174,12 +185,20 @@ def parse_input(usr_inp):
         full_inp_dict[org_name] = {
             'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
             '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
-            '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
+            'third_most_HE': {name:seq for name,seq in prom200_dict.items()
+                        if name in extract_highly_expressed_gene_names(cai_dict)},
+            # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
             'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
             'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
-            'caiScore_dict': cai_dict, # ORF and promoter
+            'expression_estimation': cai_dict, # {'gene_name': expression} ORF and promoter
             'cai_profile': cai_weights, # ORF model
             'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
+
+        #todo: add
+        # 'sequence': SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
+        # 'prom_list': None,
+        # 'expression_csv': None
+        # to the parsed input dictionary
     return full_inp_dict
 
 
@@ -187,6 +206,9 @@ def parse_input(usr_inp):
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 user_inp1_raw = {
+    'sequence':SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
+    'prom_list': None,
+    'expression_csv': None,
     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
              'optimized': True},
      'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
