@@ -3,6 +3,8 @@ from collections import Counter
 from Bio.Seq import Seq
 import numpy as np
 #from statistics import geometric_mean
+from Igem_TAU_2021.user_input import find_tgcn
+
 
 from tqdm import tqdm
 
@@ -81,37 +83,28 @@ def get_TAI(cds, Sij, tRNA_fa):
     W_dict = weight_cal(cds, Sij, tGCN)
     return W_dict
 
-def extract_tRNA_dict(genome_path):
-    """
-
-    :param genome_path: .gb
-    :return:
-    """
-
-
 # ---------------------------------------------------
 
 class TAI(object):
 
-    def __init__(self, genome_path):
+    def __init__(self, genome_path, cds_path):
         """
 
         :param genome_path: genbank file
+        :param cds_path: cds file (fasta)
         """
         self.Sij = Sij
         self.genome_path = genome_path
 
-    def __call__(self, sequence):
-        """
+        cds_seq = Seq('')
+        for record in SeqIO.parse(cds_path, "fasta"):
+            cds_seq += record.seq
 
-        :param sequence: Seq object
-        :return: TAI weight of the sequence
-        """
-        W_dict = get_TAI(sequence, self.Sij, self.tRNA_fa)
+        self.tRNA_fa = find_tgcn(genome_path) # todo: problem with tgcn output, get_TAI wants it to be fasta
+
+        W_dict = get_TAI(cds_seq, self.Sij, self.tRNA_fa)
         TAI_weight = TAI_cal(W_dict)
-        return TAI_weight
-
-
+        self.index = TAI_weight
 
 
 # ---------------------------------------------------

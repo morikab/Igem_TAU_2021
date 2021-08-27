@@ -3,9 +3,8 @@ from collections import namedtuple
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-from src.CAI import load_genome, CAI
-from src.TAI import Sij, get_TAI
-from src.TAI import TAI_cal
+from Igem_TAU_2021.ORF.CAI import load_genome, CAI
+from Igem_TAU_2021.ORF.TAI import TAI
 
 import os
 ############################
@@ -60,14 +59,9 @@ class Organism(object):
 
 
     def add_tai_index(self, ratio):
-        cds_seq = Seq('')
-        for record in SeqIO.parse(self.cds_path, "fasta"):
-            cds_seq += record.seq
 
-        tai_index = get_TAI(cds_seq, self.Sij, self.tGCN_path)
-
-        switched_TAI_dict = TAI_cal(tai_index)
-        self.features.append(Feature(index_name='TAI', weights=switched_TAI_dict, ratio=ratio))
+        tai_index = TAI(self.genome_path, self.cds_path)
+        self.features.append(Feature(index_name='TAI', weights=tai_index, ratio=ratio))
 
 
     def add_cai_index(self, ratio):
