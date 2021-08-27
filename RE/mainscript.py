@@ -1,5 +1,4 @@
 from RE.functions import REbase_org, translate
-from user_input import user_inp2
 import time
 
 org1 = 'Escherichia coli K-12'

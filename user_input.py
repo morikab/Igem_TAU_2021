@@ -256,7 +256,7 @@ def parse_input(usr_inp):
             for prom_name, prom_Seq in org_dict['third_most_HE'].items():
                 selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
     full_inp_dict['selected_prom'] = selected_prom
-    full_inp_dict['sequence'] = usr_inp['sequence']
+    full_inp_dict['sequence'] = str(SeqIO.read(usr_inp['sequence'], 'fasta'))
     return full_inp_dict
 
 
