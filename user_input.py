@@ -2,8 +2,18 @@ from Bio import SeqIO
 from ORF.calculating_cai import CAI
 import os
 
+### stable version!
 
-# TODO: add option to insert expression levels (non-mandetory)
+
+
+print('##########################')
+print('# USER INPUT INFORMATION #')
+print('##########################')
+
+
+def fasta_to_dict(fasta_fid):
+    fasta_dict = {record.description:str(record.seq) for record in SeqIO.parse(fasta_fid, 'fasta') }
+    return fasta_dict
 
 def write_fasta(fid, list_seq, list_name):
     ofile = open(fid + '.fasta', "w+")
@@ -92,9 +102,13 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
             prom_dict[name] = prom.replace('-', '')
     return prom_dict
 
-def extract_highly_expressed_gene_names(expression_estimation):
-    # todo: finish
-    list_of_highly_exp_genes = []
+
+
+def extract_highly_expressed_gene_names(expression_estimation, percent_used =1/3):
+    exp_list = list(expression_estimation.values())
+    exp_list.sort(reverse=True)
+    exp_th = exp_list[round(percent_used*len(exp_list))]
+    list_of_highly_exp_genes = [gene_name for gene_name in expression_estimation.keys() if expression_estimation[gene_name]>exp_th]
     return list_of_highly_exp_genes
 
 
@@ -152,6 +166,57 @@ def extract_gene_data(genbank_path):
     return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights
 
 
+
+def parse_single_input(val):
+    '''
+    create the relevant information for each organism
+    :param val: the dictionary supplied for every organism:
+    {'genome_path': '.gb'
+                'genes_HE': '.csv'
+                'optimized': False }
+    :return:
+    @org_name = scientific organism name
+    @org_dict = {
+        'tgcn': {anti codon:number of occurences}, for ORF model
+        '200bp_promoters': {gene name and function: prom}, promoter model
+        'third_most_HE': same as 200bp_promoters but only third most highly expressed promoters
+        'gene_cds':  {gene name and function : cds}, for ORF model
+        'intergenic':{position along the genome: intergenic sequence}, promoter model
+        'expression_estimation_of_all_genes': {'gene name and function: estimated expression }when the expression csv is not given- the CAI is used as expression levels
+        'CAI_score_of_all_genes': {'gene_name': cai} ORF and promoter
+        'cai_profile': {codon:cai score},  # ORF model
+        'optimized': bool- True if organism is optimized}
+    '''
+    gb_path = val['genome_path']
+    gb_file = SeqIO.read(gb_path, format='gb')
+    org_name = find_org_name(gb_file)
+    print(f'\nInformation about {org_name}:')
+    if  val['optimized']:
+        print('Organism is optimized')
+    else:
+        print('Organism is deoptimized')
+    tgcn_dict = find_tgcn(gb_path)
+    print(f'Number of tRNA genes found: {sum(tgcn_dict.values())}, for {len(tgcn_dict)} anticodons out of 61')
+    prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
+    print(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
+    highly_expressed_gene_name_list = extract_highly_expressed_gene_names(cai_dict)
+
+    org_dict = {
+        'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
+        '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
+        'third_most_HE': {name: seq for name, seq in prom200_dict.items()
+                      if name in highly_expressed_gene_name_list},
+        # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
+        'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
+        'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
+        'expression_estimation_of_all_genes': cai_dict,  # when the expression csv is not given- the CAI is used as expression levels
+        'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
+        'cai_profile': cai_weights,  # ORF model
+        'optimized': val['optimized']}
+    return org_name, org_dict
+
+
+
 # final function
 def parse_input(usr_inp):
     '''
@@ -166,59 +231,52 @@ def parse_input(usr_inp):
                 'optimized': False
                 }
         }
-    :return: an extended dictionary with the following format (each entry looks lite this):
-            full_inp_dict[Scientific organism name] = {
-            'tgcn': #tgcn dict {codon:number of occurences}
-            'gene_promoters': #prom_dict {gene name and function: prom}
-            'gene_cds': #cds dict {gene name and function : cds}
-            'intergenic': #intergenic dict {position along the genome: intergenic sequence}
-            'optimized': #is the sequence in the optimized or deoptimized group- bool
-            }
+    :return: an extended dictionary with the following items:
+    @selected_prom : final used list of promoters for MAST
+    @sequence : the ORF to optimize
+    and for each organism- the key is the scientific organism name, and the value is parse_single_input for the organism's
+    input
     '''
     full_inp_dict = {}
-    for key, val in usr_inp.items():
-        gb_path = val['genome_path']
-        gb_file = SeqIO.read(gb_path, format='gb')
-        org_name = find_org_name(gb_file)
-        tgcn_dict = find_tgcn(gb_path)
-        prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
-        full_inp_dict[org_name] = {
-            'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
-            '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
-            'third_most_HE': {name:seq for name,seq in prom200_dict.items()
-                        if name in extract_highly_expressed_gene_names(cai_dict)},
-            # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
-            'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
-            'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
-            'expression_estimation_af_all_genes': cai_dict, # when the expression csv is not given- the CAI is used as expression levels
-            'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
-            'cai_profile': cai_weights, # ORF model
-            'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
+    for key, val in usr_inp.items() :
+        if key in ['sequence', 'selected_promoters']:
+            continue
+        org_name, org_dict = parse_single_input(val)
+        full_inp_dict[org_name] = org_dict # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
 
-        #todo: add
-        # 'sequence': SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
-        # 'prom_list': None,
-        # 'expression_csv': None
-        # to the parsed input dictionary
+
+    #add non org specific keys to dict
+    selected_prom = {}
+    if usr_inp['selected_promoters'] is not None:  #
+        prom_fasta_fid = usr_inp['selected_promoters']
+        print(f'promoter options ranked are given in the following file {prom_fasta_fid}')
+        selected_prom = fasta_to_dict(prom_fasta_fid)
+    else:
+        for org, org_dict in full_inp_dict.items():
+            for prom_name, prom_Seq in org_dict['third_most_HE'].items():
+                selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
+    full_inp_dict['selected_prom'] = selected_prom
+    full_inp_dict['sequence'] = usr_inp['sequence']
     return full_inp_dict
 
 
-#TODO: add everything to the same dict.
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+
 user_inp1_raw = {
     'sequence':SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
-    'prom_list': None,
-    'expression_csv': None,
+    'selected_promoters': os.path.join(base_path, 'ORF_optimized_sequences.fasta'), #or None, # or a fasta file of promoter name and promoter
     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+             'expression_csv': None, #todo: add treatment for expression data
              'optimized': True},
      'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                'expression_csv': None,
                'optimized': False},
      'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+              'expression_csv': None,
              'optimized': True},
     'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
+               'expression_csv': None,
                'optimized': False}}
-#
-user_inp1 = parse_input(user_inp1_raw)
-user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
-# usr_inp3 = fasta file of promotres
+
+user_inp = parse_input(user_inp1_raw)
