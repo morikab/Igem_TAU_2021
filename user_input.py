@@ -190,7 +190,8 @@ def parse_input(usr_inp):
             # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
             'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
             'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
-            'expression_estimation': cai_dict, # {'gene_name': expression} ORF and promoter
+            'expression_estimation_af_all_genes': cai_dict, # when the expression csv is not given- the CAI is used as expression levels
+            'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
             'cai_profile': cai_weights, # ORF model
             'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
 
