@@ -3,9 +3,14 @@ import glob
 import xml.etree.ElementTree as et
 from Bio import SeqIO
 import re
+from user_input import parse_input, write_fasta
+import csv
 
-global dna
+global dna, opt_path, deopt_path, end
 dna = "ACGT"
+opt_path = 'opt_files'
+deopt_path = 'deopt_files'
+end = '.fasta'
 
 """
 This method uses STREME to find motifs that are enriched in one set of promoters and aren't present in the other
@@ -47,25 +52,54 @@ def mast(motif_path, seq_path, output_path=".", ev=10):
 
 
 """
-This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
-@param p_path: path to a directory containing all files of primary organism (output of sequences_for_meme.py on primary)
-@param c_path: path to a directory containing all files of control organism (output of sequences_for_meme.py on control)
+This method creates fasta files from input dictionary
+@param data_dict: a dictionary containing all extracted data for each input organism
 """
-def run_streme(p_path, c_path):   
-    all_p_files = glob.glob(os.path.join(p_path, '*.fasta'))
-    org1 = all_p_files[0].split('/')[-1].split('_')[0]
+def create_files_for_meme(data_dict):
+    os.mkdir(opt_path)
+    os.mkdir(deopt_path)
+    for org in data_dict.keys():
+        org_data = data_dict[org]
+        if org_data['optimized']:
+            org_path = os.path.join(opt_path, org)
+        else:
+            org_path = os.path.join(deopt_path, org)
+        os.mkdir(org_path)
+        file_path = os.path.join(org_path, org)
+        ###inter and 100 not necessary for control organisms???
+        write_fasta(file_path + '_100_200', list(org_data['200bp_promoters'].values()), list(org_data['200bp_promoters'].keys()))
+        write_fasta(file_path + '_inter',   list(org_data['intergenic'].values()),      list(org_data['intergenic'].keys()))
+        write_fasta(file_path + '_33_200',  list(org_data['third_most_HE'].values()),   list(org_data['third_most_HE'].keys()))
+
+
+"""
+This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
+@param data_dict: a dictionary containing all input information for each organism
+"""
+def run_streme(data_dict):
+    #create files for STREME from input dictionary
+    create_files_for_meme(data_dict) ### maybe call it outside???
+    out_path = 'streme_outputs'
+    os.mkdir(out_path)
     
-    all_c_files = glob.glob(os.path.join(c_path, '*.fasta'))
-    org2 = all_c_files[0].split('/')[-1].split('_')[0]
-    
-    name1 = '_'.join([org1, '100', '200'])
-    name2 = '_'.join([org1, 'inter'])
-    one_streme(name1, p_path, name2, p_path)
-            
-    name1 = '_'.join([org1, '50', '200'])
-    name2 = '_'.join([org2, '50', '200'])
-    one_streme(name1, p_path, name2, c_path)
-        
+    for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
+
+        #first run: opt organism vs. intergenic
+        org_name = opt_org.split(os.sep)[-2]
+        dir_name = os.path.join(opt_path, org_name)
+        name1 = '_'.join([org_name, '100', '200'])
+        name2 = '_'.join([org_name, 'inter'])
+        one_streme(name1, dir_name, name2, dir_name, out_path)
+
+        #second run: opt organism HE vs. all deopt organisms HE
+        for deopt_org in glob.glob(os.path.join(deopt_path, "*", "")):
+             de_org_name = deopt_org.split(os.sep)[-2]
+             de_dir_name = os.path.join(deopt_path, de_org_name)
+             name1 = '_'.join([org_name, '33', '200'])
+             name2 = '_'.join([de_org_name, '33', '200'])
+             one_streme(name1, dir_name, name2, de_dir_name, out_path)
+             
+
 
 """
 This method executes one run of STREME for a specific set of files
@@ -73,18 +107,19 @@ This method executes one run of STREME for a specific set of files
 @param start1: path to the directory containing the file name1
 @param name2: name of the control file
 @param start2: path to the directory containing the file name2
+@param out_path: (optional) directory in which to store output files from STREME
 """
-def one_streme(name1, start1, name2, start2):
+def one_streme(name1, start1, name2, start2, out_path=""):
     k = 3
     minw = 6
     maxw = 20
-    end = '.fasta'
     
     path1 = os.path.join(start1, name1 + end)
     path2 = os.path.join(start2, name2 + end)
-    streme(primary_path=path1, control_path=path2, kmer=k, output_path='_'.join([name1, name2]), minw=minw, maxw=maxw)
-
-run_streme('bacillus', 'ecoli')
+    out_dir = '_'.join([name1, name2])
+    if len(out_path) > 0:
+        out_dir = os.path.join(out_path, out_dir)
+    streme(primary_path=path1, control_path=path2, kmer=k, output_path=out_dir, minw=minw, maxw=maxw)
 
 
 """
@@ -95,11 +130,11 @@ Saves results in the same folder (doesn't create a new folder)
 @param promoter_path400: path to the file containing promoter sequences of length 400 (only if promoter_path200 is not chosen by user)
 """
 def run_mast(motif_path, promoter_path200, promoter_path400=None):
-    motif_name = motif_path.split('/')[-1].split('.')[0] #modified motif file- not in original folder anymore (get only name of file without ext or path)
-    promoter_name200 = promoter_path200.split('/')[-1].split('.')[0] #get only file name without ext or path
+    motif_name = motif_path.split(os.sep)[-1].split('.')[0] #modified motif file- not in original folder anymore (get only name of file without ext or path)
+    promoter_name200 = promoter_path200.split(os.sep)[-1].split('.')[0] #get only file name without ext or path
     mast(motif_path, promoter_path200, output_path='_'.join(['motif', motif_name, 'seq', promoter_name200]))
     if promoter_path400 is not None:
-        promoter_name400 = promoter_path400.split('/')[-1]
+        promoter_name400 = promoter_path400.split(os.sep)[-1]
         mast(motif_path, promoter_path400, output_path='_'.join(['motif', motif_name, 'seq', promoter_name400]))
     
 
@@ -113,7 +148,7 @@ The motifs which stay in the file are those that were found to be both selective
 """
 def filter_motifs(motif_d, streme_xml):
     chosen = list(motif_d.keys())
-    name = streme_xml.split('/')[-2] #get parameters-written in the name of the folder that was outputted from streme (file name is simply 'streme'..)
+    name = streme_xml.split(os.sep)[-2] #get parameters-written in the name of the folder that was outputted from streme (file name is simply 'streme'..)
     tree = et.parse(streme_xml)
     root = tree.getroot()
     for element in root.findall('.//motifs'):
@@ -148,7 +183,7 @@ def modify_promoter(p_file, mast_xml):
         
         for seg in seq.findall('seg'):
             for hit in seg.findall('hit'): #for each motif that matched the promoter
-                if hit.get('rc') == 'n': ##### check if need to always run without RC
+                if hit.get('rc') == 'n': ### check if need to always run without RC???
                     start = int(hit.get('pos'))
                     motif_idx = int(hit.get('idx'))
                     motif_seq = motifs[motif_idx].get('id').split('-')[1].upper()
@@ -180,3 +215,19 @@ def find_letter(motif, motif_seq, index):
     pssm = [float(pos.get(letter)) for letter in dna]
     best_letter = dna[pssm.index(max(pssm))]
     return best_letter
+
+
+
+"""
+base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+user_inp1_raw = {
+     'bacillus': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+              'optimized': True},
+     'ecoli': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+               'optimized': False}}
+user_inp1 = parse_input(user_inp1_raw)
+print('finished dict')
+#create_files_for_meme(user_inp1)
+run_streme(user_inp1)
+print('finished files')
+"""
