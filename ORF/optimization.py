@@ -1,5 +1,4 @@
 from Bio.Seq import Seq
-from Bio import SeqIO
 
 synonymous_codons = {
     "C": ["TGT", "TGC"],
@@ -40,7 +39,7 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
 
     optimized_sequence = Seq('')
 
-    optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms)# optimal codons->dict(AA:codon)
+    optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms) # optimal codons->dict(AA:codon)
 
     target_protein = target_gene.protein_seq
 
@@ -105,10 +104,10 @@ def loss_function(high_expression_organisms, low_expression_organisms, codons, l
     loss = {}
     if local_maximum:
         for high_expression_organism in high_expression_organisms:
-            loss = iterate_through_feature(list(high_expression_organism), codons, loss, high_expression=True)
+            loss = iterate_through_feature([high_expression_organism], codons, loss, high_expression=True)
 
         for low_expression_organism in low_expression_organisms:
-            loss = iterate_through_feature(list(low_expression_organism), codons, loss, high_expression=False)
+            loss = iterate_through_feature([low_expression_organism], codons, loss, high_expression=False)
     else:
         loss = iterate_through_feature(high_expression_organisms, codons, loss, high_expression=True)
         loss = iterate_through_feature(low_expression_organisms, codons, loss, high_expression=True)
@@ -144,9 +143,9 @@ def iterate_through_feature(organisms, codons, loss, high_expression):
             for codon in codons:
                 loss[codon] = 0
                 if high_expression:
-                    loss[codon] += f.ratio * (f.weights[codon] / max_value - 1) ^ 2
+                    loss[codon] += f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
                 else:
-                    loss[codon] += f.ratio * (f.weights[codon] / max_value) ^ 2
+                    loss[codon] += f.ratio * ((f.weights[codon] / max_value) ** 2)
 
     return loss
 
@@ -179,7 +178,7 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, eva
     optimal_codons = {}
 
     for aa, codons in synonymous_codons.items():
-        loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons)
+        loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, local_maximum=True)
         optimal_codons[aa] = min(loss, key=loss.get)
 
     return optimal_codons

@@ -1,5 +1,5 @@
 from Bio import SeqIO
-from ORF.calculating_cai import CAI
+from Igem_TAU_2021.ORF.calculating_cai import CAI
 import os
 
 ### stable version!
@@ -142,16 +142,17 @@ def extract_gene_data(genbank_path):
                     if feature.location is not None \
                             and name not in gene_names:
                         cds = genome[feature.location.start: feature.location.end]
-                        function = ' '.join(feature.qualifiers['product'])
-                        if feature.location.strand == -1:
-                            cds = reverse_complement(cds)
+                        if len(cds) % 3 == 0:
+                            function = ' '.join(feature.qualifiers['product'])
+                            if feature.location.strand == -1:
+                                cds = reverse_complement(cds)
 
-                        gene_names.append(name)
-                        cds_seqs.append(cds)
-                        functions.append(function)
-                        starts.append(feature.location.start)
-                        ends.append(feature.location.end)
-                        strands.append(feature.location.strand)
+                            gene_names.append(name)
+                            cds_seqs.append(cds)
+                            functions.append(function)
+                            starts.append(feature.location.start)
+                            ends.append(feature.location.end)
+                            strands.append(feature.location.strand)
 
     entry_num = len(gene_names)
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
@@ -260,6 +261,7 @@ def parse_input(usr_inp):
     return full_inp_dict
 
 
+<<<<<<< Updated upstream
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 
@@ -280,3 +282,20 @@ user_inp1_raw = {
                'optimized': False}}
 
 user_inp = parse_input(user_inp1_raw)
+=======
+# input:
+# base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+# user_inp1_raw = {
+#     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+#              'optimized': True},
+#     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+#               'optimized': False},
+#     'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+#             'optimized': True},
+#     'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
+#                'optimized': False}}
+#
+# user_inp1 = parse_input(user_inp1_raw)
+# user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
+#
+>>>>>>> Stashed changes

@@ -1,12 +1,9 @@
 from collections import namedtuple
 
-from Bio import SeqIO
 from Bio.Seq import Seq
 
-from Igem_TAU_2021.ORF.CAI import load_genome, CAI
 from Igem_TAU_2021.ORF.TAI import TAI
 
-import os
 ############################
 #
 #
@@ -18,8 +15,8 @@ import os
 Feature = namedtuple(typename='Feature', field_names='index_name weights ratio')
 
 class Organism(object):
-    # todo: implement creating tGCN from genome (.gb), so that no tGCN_path argument is needed
-    def __init__(self, name, genome_path, features_to_generate, mrna_levels_path=None, mrna_level_threshold=0.2):
+
+    def __init__(self, name, gene_cds, tgcn, cai_weights, features_to_generate=None):
 
         """
 
@@ -30,19 +27,11 @@ class Organism(object):
         """
 
         self.name = name
+        print('=========== Defining ' + self.name + ' ===============')
 
-        self.genome_path = genome_path
-        self.cds_path = os.path.dirname(self.genome_path)+'/'+name+'_cds'
-        self.mrna_levels_path = mrna_levels_path
-
-        if self.mrna_levels_path is None:
-            genes_HE_path = None
-        else:
-            genes_HE_path = os.path.dirname(self.mrna_levels_path)+'/'+name+'_highly_expressed_genes'
-
-        load_genome(self.genome_path, self.cds_path, self.mrna_levels_path, mrna_level_threshold,
-                    genes_HE_path=genes_HE_path)
-
+        self.gene_cds = gene_cds
+        self.tgcn = tgcn
+        self.cai_weights = cai_weights
         self.features_to_generate = features_to_generate
         self.features = []
 
@@ -60,28 +49,26 @@ class Organism(object):
 
     def add_tai_index(self, ratio):
 
-        tai_index = TAI(self.genome_path, self.cds_path)
-        self.features.append(Feature(index_name='TAI', weights=tai_index, ratio=ratio))
+        tai_weights = TAI(self.gene_cds, self.tgcn).index
+        self.features.append(Feature(index_name='TAI', weights=tai_weights, ratio=ratio))
 
 
     def add_cai_index(self, ratio):
 
-        cai_index = CAI(self.cds_path).index
-        self.features.append(Feature(index_name='CAI', weights=cai_index, ratio=ratio))
+        self.features.append(Feature(index_name='CAI', weights=self.cai_weights, ratio=ratio))
 
 
 # --------------------------------------------------------------------------------
 
 class Gene(Seq):
 
-    def __init__(self, dna_seq_path):
+    def __init__(self, dna_seq_record):
 
         """
-        :param dna_seq_path: .txt file - nucleotides sequence
+        :param dna_seq_path: fasta file - nucleotides sequence
         """
 
-        with open(dna_seq_path, 'r') as f:
-            dna_data = f.read()
+        dna_data = str(dna_seq_record.seq)
 
         super().__init__(dna_data)
         self.protein_seq = self.translate()

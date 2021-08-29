@@ -1,9 +1,6 @@
-from Bio import SeqIO
 from collections import Counter
 from Bio.Seq import Seq
 import numpy as np
-#from statistics import geometric_mean
-from Igem_TAU_2021.user_input import find_tgcn
 
 
 from tqdm import tqdm
@@ -12,11 +9,11 @@ def geometric_mean(iterable):
     a = np.log(iterable)
     return np.exp(a.mean())
 
-def antiCodon_L(tRNA_list):
+def antiCodon_L(tgcn_dict):
     """This function get tRNA list of microorganism and return countered tGCN (tRNA Gene Copy Number)"""
 
     antiCodon_list = []
-    for row in tqdm(tRNA_list.keys()):
+    for row in tqdm(tgcn_dict.keys()):
         antiCodon = row[-7:-4]
         antiCodon_list += [antiCodon]
     tGCN = Counter(antiCodon_list)
@@ -29,9 +26,12 @@ def print_counter(c):
     return
 
 
-def weight_cal(my_seq, Sij, tGCN):
+def weight_cal(cds_dict, Sij, tGCN):
     """ get the sequence with Sij table and tGCN (from prev. func) and return list of codons' weight."""
 
+    my_seq = Seq(''.join(list(cds_dict.values()))) # merging all coding sequences into one big sequence
+                                                    # (because the rest of the code treats an input as one sequence)
+    print(len(my_seq))
     W_dict = {}
     for i in tqdm((np.arange(0, len(my_seq)-1, 3))):  # where to start scanning len%3!=0 - waiting for liyam answer
 
@@ -76,33 +76,17 @@ def TAI_cal(W_dict):
 
     return W_norm_switched
 
-
-def get_TAI(cds, Sij, tRNA_fa):
-    tRNA_list = SeqIO.to_dict(SeqIO.parse(tRNA_fa, "fasta"))
-    tGCN = antiCodon_L(tRNA_list)
-    W_dict = weight_cal(cds, Sij, tGCN)
-    return W_dict
-
 # ---------------------------------------------------
 
 class TAI(object):
 
-    def __init__(self, genome_path, cds_path):
+    def __init__(self, cds_dict, tgcn):
         """
-
-        :param genome_path: genbank file
         :param cds_path: cds file (fasta)
         """
         self.Sij = Sij
-        self.genome_path = genome_path
 
-        cds_seq = Seq('')
-        for record in SeqIO.parse(cds_path, "fasta"):
-            cds_seq += record.seq
-
-        self.tRNA_fa = find_tgcn(genome_path) # todo: problem with tgcn output, get_TAI wants it to be fasta
-
-        W_dict = get_TAI(cds_seq, self.Sij, self.tRNA_fa)
+        W_dict = weight_cal(cds_dict, self.Sij, tgcn)
         TAI_weight = TAI_cal(W_dict)
         self.index = TAI_weight
 
@@ -130,6 +114,7 @@ seq_file = r'..\..\data\tRNA\K12.txt'
 #        'A:A': 0.68,
 #        'T:G': 0.95}
 
+# todo: is that from c serevisiae?
 Sij = {'A:T': 0,
        'G:C': 0,
        'T:A': 0,
@@ -170,3 +155,18 @@ tRNA_fa = r'..\..\data\tRNA\eschColi_K_12_MG1655-tRNAs.fa'
 TAI_W = get_TAI(seq_file, Sij, tRNA_fa)
 print(TAI_W)
 """
+
+####################################################
+# Deprecated functions:
+
+
+def get_TAI(cds, Sij, tGCN):
+    """
+
+    :param cds: coding sequence
+    :param Sij:
+    :param tGCN:
+    :return:
+    """
+    W_dict = weight_cal(cds, Sij, tGCN)
+    return W_dict
