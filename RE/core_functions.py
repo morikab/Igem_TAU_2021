@@ -3,8 +3,7 @@ from collections import defaultdict
 from dnachisel import DnaOptimizationProblem, AvoidPattern, EnforceTranslation
 import time
 import itertools
-import string
-
+import os
 
 
 
@@ -16,7 +15,10 @@ import string
 # 1. Enzyme Name
 # 2. Recognition Site
 # 3. Microrganism                       """
-f = open(r'REbase_16.8.txt')
+
+base_path = os.path.join(os.path.dirname(__file__))
+
+f = open(os.path.join(base_path, 'REbase_16.8.txt'))
 content = f.readlines()
 REbase = [x.strip() for x in content]
 
@@ -86,14 +88,6 @@ def itertools_prod_for_strs(list_of_lists):
         final_str_list.append(string)
     return final_str_list
 
-# def write_fasta(fid, list_seq, list_name):
-#     ofile = open(fid + '.fasta', "w+")
-#     for i in range(len(list_seq)):
-#         ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
-#     ofile.close()
-# --------------------------------------------------------
-
-
 
 # creation of an extended_dict- translate ambiguous genetic code
 extended_dict = {}
@@ -106,10 +100,9 @@ for i0, i0_val in ambiguous_code.items():
 # --------------------------------------------------------
 
 
-
-
 # extracting sequences from
 def relevant_seq(re_raw_seq):
+    'removing irrelevant chars from RE sites from the REDB'
     re_raw_seq = re_raw_seq.replace('^', '')
     re_raw_seq = re.sub(r'\([^)]*\)', '', re_raw_seq)
     return re_raw_seq
@@ -119,8 +112,6 @@ def unambiguous_seqs(seq, amb_to_nt=ambiguous_code):
     'translates ambigious code into all seq options- str to list of strs, based on the amb_to_nt dictionary'
     list_of_nt_lists = [amb_to_nt[i] for i in seq]
     return itertools_prod_for_strs(list_of_nt_lists)
-
-
 
 
 def translate_ambiguous_3RFs(nt_seq, cds_aa):
@@ -140,6 +131,16 @@ def translate_ambiguous_3RFs(nt_seq, cds_aa):
 
 
 def REbase_org(org, cds_aa):  # DONE
+    '''
+    parsing the REbase and creating a dictionary with the relevant sites from
+    enzymes originated in org
+    :param org: scientific name of investigated organism
+    :param cds_aa: aa sequence of the cds
+    :return: a dict in the following format:
+                enzyme_dict[enzyme_name] = {
+                'ambiguous_site':ambiguous_site, #contaiinng characters from the ambiguous_code dictionary
+                'nt_to_aa': nt_to_aa} #non ambigiosus sites translated (in all 3 RFs)
+    '''
     RE_org_ind = [i for i, k in enumerate(REbase)
                   if org in k]  ## index of the 3rd section of the "block"
     enzyme_dict = {}  ## REbase dict.
@@ -161,9 +162,9 @@ def REbase_org(org, cds_aa):  # DONE
 
 
 
-def insert_site_CDS(cds_nt, enzyme_dict):
+def insert_site_CDS(enzyme_dict, cds_nt):
     """this function insert req.site to cds according to ntaa_dict but it can insert more than site in same index
-and insert over what have been done before"""
+    and insert over what have been done before"""
     cds_aa = translate(cds_nt)
     # start_end_idex_dict = {}
     for sub_dict in enzyme_dict.values():
@@ -175,14 +176,11 @@ and insert over what have been done before"""
                 cds_nt = list(cds_nt)
                 cds_nt[3 * stratindx:3 * endindx] = list(ntsites[0])
                 cds_nt = ''.join(cds_nt)
-                # start_end_idex_dict[ntsites[0]] = {'start': stratindx,
-                #                                    'end': stratindx + len(aasite),
-                #                                    'aa': aasite}
     return cds_nt
 
 
 def remove_site_from_plasmid(cds_nt, enzyme_dict):
-    # plasmid must be in the correct reading frame
+    'plasmid must be in the correct reading frame'
     cds_nt = str(cds_nt)
     tested_re_nt_list = []
     for sub_dict in enzyme_dict.values():
@@ -194,21 +192,19 @@ def remove_site_from_plasmid(cds_nt, enzyme_dict):
 
 
 def sites_in_cds(enzyme_dict, cds_nt):
-    found_sites = {}
+    '''
+    find out if and what sites are found in the cds_nt
+    :param enzyme_dict: REbase_org output dict
+    :param cds_nt: the str of the final sequence
+    :return: {enzyme_name:ambiguous_site }
+    '''
+    found_sites_dict = {}
     for enzyme_name, enzyme_val in enzyme_dict.items():
         if [i for i in  list(enzyme_val['nt_to_aa'].keys()) if i in cds_nt]:
-            found_sites[enzyme_name] = enzyme_val['ambiguous_site']
-    return found_sites
+            found_sites_dict[enzyme_name] = enzyme_val['ambiguous_site']
+    return found_sites_dict
 
 
-def parse_inp1(usr_inp1):
-    optimized_org_names = []
-    deoptimized_org_names = []
-    for org_name, org_dict in usr_inp1.items():
-        if org_dict['optimized']:
-            optimized_org_names.append(org_name)
-        else:
-            deoptimized_org_names.append(org_name)
-    return optimized_org_names, deoptimized_org_names
+
 
 

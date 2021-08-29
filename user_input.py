@@ -36,6 +36,10 @@ def find_org_name(gb_file):
 
 # ORI model
 def find_tgcn(gb_path):
+    #todo: fix this-
+    # each genbank file has a different way to represent the tRNAs in it-
+    # some do not specify the anticodon (just the amino acid)
+    # some have it in the notes and some have an "anticodon" sub-feature to use.
     tgcn_dict = {}
     for record in SeqIO.parse(gb_path, "genbank"):
         for feature in record.features:
@@ -246,32 +250,50 @@ def parse_input(usr_inp):
 
 
     #add non org specific keys to dict
+    orf_fasta_fid= usr_inp['sequence']
+    orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
+    prom_fasta_fid = usr_inp['selected_promoters']
     selected_prom = {}
-    if usr_inp['selected_promoters'] is not None:  #
-        prom_fasta_fid = usr_inp['selected_promoters']
-        print(f'promoter options ranked are given in the following file {prom_fasta_fid}')
+    print(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
+    print(f'containing this sequence: {orf_seq}')
+    if prom_fasta_fid is not None:  #
         selected_prom = fasta_to_dict(prom_fasta_fid)
+        print(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
+              f'which contains {len(selected_prom)} promoters')
     else:
+        print(f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
+              f'promoters from the 1/3 most highly expressed genes of all organisms are used- ')
         for org, org_dict in full_inp_dict.items():
-            for prom_name, prom_Seq in org_dict['third_most_HE'].items():
-                selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
+            if org_dict['optimized']:
+                org_third_he_prom_dict = org_dict['third_most_HE']
+                for prom_name, prom_Seq in org_third_he_prom_dict.items():
+                    selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
+                print(f'{len(org_third_he_prom_dict)} promoters are selected from {org}')
+        print(f'Resulting in a total of {len(selected_prom)} used for promoter selection and optimization')
+
     full_inp_dict['selected_prom'] = selected_prom
-    full_inp_dict['sequence'] = str(SeqIO.read(usr_inp['sequence'], 'fasta'))
+    full_inp_dict['sequence'] = orf_seq
     return full_inp_dict
 
 
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 
+
+
 user_inp1_raw = {
-    'sequence':SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
-    'selected_promoters': os.path.join(base_path, 'ORF_optimized_sequences.fasta'), #or None, # or a fasta file of promoter name and promoter
-    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-             'expression_csv': None, #todo: add treatment for expression data
-             'optimized': True},
-     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                'expression_csv': None,
-               'optimized': False},
+    'sequence':os.path.join(base_path, 'mCherry_original.fasta'),
+
+    # selected promoters for promoter optimization could be a fasta file of promoter name and promoter or be passed as None if not supplied by user
+    'selected_promoters': None,
+    # 'selected_promoters': os.path.join(base_path, 'ORF_optimized_sequences.fasta')
+
+    # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+    #          'expression_csv': None, #todo: add treatment for expression data
+    #          'optimized': True},
+    #  'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+    #             'expression_csv': None,
+    #            'optimized': False},
      'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
               'expression_csv': None,
              'optimized': True},
@@ -280,3 +302,4 @@ user_inp1_raw = {
                'optimized': False}}
 
 user_inp = parse_input(user_inp1_raw)
+# print(user_inp['sequence'])

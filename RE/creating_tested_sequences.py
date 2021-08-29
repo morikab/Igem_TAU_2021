@@ -1,4 +1,4 @@
-from RE.functions import *
+from RE.core_functions import *
 import time
 from Bio import SeqIO
 import os

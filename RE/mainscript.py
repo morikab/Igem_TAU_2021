@@ -1,53 +1,34 @@
-from RE.functions import REbase_org, translate
-import time
+from RE.multi_org_functions import *
+from user_input import user_inp
 
-org1 = 'Escherichia coli K-12'
-org2 = 'Bacillus subtilis 168'
+print('\n\n\n###############################')
+print('# RESTRICTION ENZYME ANALYSIS #')
+print('###############################')
 
-
-tic1 = time.time()
-cds_nt = user_inp2.seq
-tic2 = time.time()
+cds_nt = user_inp['sequence']
 cds_aa = translate(cds_nt)
 
+#finding the optimixed and deoptimized RE dictionaries
+optimized_org_names, deoptimized_org_names = parse_inp1(user_inp)
+print('\nOptimized organisms:')
+optimized_RE_dict = multi_organism_RE_dict(optimized_org_names, cds_aa)
+print('\nDeptimized organisms:')
+deoptimized_RE_dict = multi_organism_RE_dict(deoptimized_org_names, cds_aa)
 
+# inserting sites for all optimized organisms
+# todo: use multi_organism_RE_dict after completing and finish this- do not call it just cds_nt
+add_cds_nt = multi_org_insert_site(deoptimized_RE_dict, cds_nt)
 
+# removing sites for all deoptimized organism
+final_cds_nt = multi_org_remove_site(optimized_RE_dict, add_cds_nt)
 
-EC_ntaa_dict = REbase_org('Escherichia coli', cds_aa)  ##REbase of E.coli
-tic3 = time.time()
-print(2, tic3-tic2)
-BS_ntaa_dict = REbase_org('Bacillus subtilis', cds_aa) ##REbase of Bacillus
-tic4 = time.time()
-print(3, tic4-tic3)
+# checking result:
 
-#create final sequence variable
+print(f'Initial sequence before translation and restriction enzyme optimization: '
+      f'{cds_nt}\n')
+total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt)
 
-final_seq = 'str after ORF optimization, taking out deoptimized and adding optimized'
+print(f'Final sequence after translation and restriction enzyme optimization: '
+      f'{final_cds_nt}\n')
+total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt)
 
-
-
-
-
-
-
-# EC_ntaa_dict,EC_NT_list = REseq_org('Bacillus stearothermophilus Z130', cds_seq)  ##REbase of E.coli
-# print(EC_ntaa_dict,EC_NT_list)
-#
-# cds_add_bs, add_bs_start_end_idex_dict=insert_site_CDS(cds_seq,BS_ntaa_dict)
-# cds_add_ec, add_ecoli_start_end_idex_dict=insert_site_CDS(cds_seq,EC_ntaa_dict)
-#
-# add_bs_remove_ec=remove_site_from_plasmid(cds_add_bs, BS_NT_list)
-# add_ec_remove_bs=remove_site_from_plasmid(cds_add_ec, EC_NT_list)
-#
-# all_res_dict = {'cds_add_bs':cds_add_bs, 'cds_add_ec':cds_add_ec,
-#                 'add_bs_remove_ec':add_bs_remove_ec, 'add_ec_remove_bs':add_ec_remove_bs}
-#
-# for seq_name1, seq1 in all_res_dict.items():
-#     for seq_name2, seq2 in all_res_dict.items():
-#         change_num = sum(1 for a, b in zip(seq1, seq2) if a != b)
-#         print(seq_name1, seq_name2, change_num)
-#
-#
-# # #TODO: test, turn into multi organisis
-# # print(all_res_dict)
-# # write_fasta('all_res_dict', all_res_dict.values(), all_res_dict.keys())
