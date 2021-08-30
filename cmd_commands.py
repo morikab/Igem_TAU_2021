@@ -59,17 +59,18 @@ def create_files_for_meme(data_dict):
     os.mkdir(opt_path)
     os.mkdir(deopt_path)
     for org in data_dict.keys():
-        org_data = data_dict[org]
-        if org_data['optimized']:
-            org_path = os.path.join(opt_path, org)
-        else:
-            org_path = os.path.join(deopt_path, org)
-        os.mkdir(org_path)
-        file_path = os.path.join(org_path, org)
-        ###inter and 100 not necessary for control organisms???
-        write_fasta(file_path + '_100_200', list(org_data['200bp_promoters'].values()), list(org_data['200bp_promoters'].keys()))
-        write_fasta(file_path + '_inter',   list(org_data['intergenic'].values()),      list(org_data['intergenic'].keys()))
-        write_fasta(file_path + '_33_200',  list(org_data['third_most_HE'].values()),   list(org_data['third_most_HE'].keys()))
+        if org not in ['selected_prom', 'sequence']:
+            org_data = data_dict[org]
+            if org_data['optimized']:
+                org_path = os.path.join(opt_path, org)
+            else:
+                org_path = os.path.join(deopt_path, org)
+            os.mkdir(org_path)
+            file_path = os.path.join(org_path, org)
+            #inter and 100 not necessary for control organisms???
+            write_fasta(file_path + '_100_200', list(org_data['200bp_promoters'].values()), list(org_data['200bp_promoters'].keys()))
+            write_fasta(file_path + '_inter',   list(org_data['intergenic'].values()),      list(org_data['intergenic'].keys()))
+            write_fasta(file_path + '_33_200',  list(org_data['third_most_HE'].values()),   list(org_data['third_most_HE'].keys()))
 
 
 """
