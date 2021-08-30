@@ -53,6 +53,8 @@ def multi_org_final_found_sites(RE_dict, final_cds_nt):
         print(f'For {org}, {len(found_sites_dict)} sites were found in the final coding sequence,'
               f'belonging to the following enzymes')
         for enzyme_name in found_sites_dict.keys():
+            print(enzyme_name)
+            print(found_sites_dict)
             ambiguous_site = found_sites_dict[enzyme_name]['ambiguous_site']
             print(f'{enzyme_name}, which has the ambiguous site {ambiguous_site}')
 

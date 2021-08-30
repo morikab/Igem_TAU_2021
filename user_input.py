@@ -150,6 +150,10 @@ def extract_gene_data(genbank_path):
                         if feature.location.strand == -1:
                             cds = reverse_complement(cds)
 
+
+
+                        if len(cds)%3 !=0:
+                            continue
                         gene_names.append(name)
                         cds_seqs.append(cds)
                         functions.append(function)

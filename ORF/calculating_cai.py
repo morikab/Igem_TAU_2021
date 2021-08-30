@@ -170,14 +170,15 @@ def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code=11)
     where :math:`w_k` is the relative adaptiveness of the :math:`k` th codon in
     the gene (page 1286).
     Args:
-        sequence (str): The DNA sequence to calculate the CAI for.
+        sequence_lst (list): list of  DNA sequences to calculate the CAI for.
         weights (dict, optional): The relative adaptiveness of the codons in the reference set.
         RSCUs (dict, optional): The RSCU of the reference set.
         reference (list): The reference set of sequences.
     Note:
         One of ``weights``, ``reference`` or ``RSCUs`` is required.
     Returns:
-        float: The CAI of the sequence.
+        cai_scores: list of floats of The CAI of the sequence.
+        weights: the weights dictionary used to calculate the CAI scores.
     Raises:
         TypeError: When anything other than one of either reference sequences, or RSCU dictionary, or weights is provided.
         ValueError: See :func:`RSCU` for details.
