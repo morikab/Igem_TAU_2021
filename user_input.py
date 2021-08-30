@@ -261,7 +261,7 @@ def parse_input(usr_inp):
     return full_inp_dict
 
 
-<<<<<<< Updated upstream
+
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 
@@ -282,7 +282,7 @@ user_inp1_raw = {
                'optimized': False}}
 
 user_inp = parse_input(user_inp1_raw)
-=======
+
 # input:
 # base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 # user_inp1_raw = {
@@ -298,4 +298,3 @@ user_inp = parse_input(user_inp1_raw)
 # user_inp1 = parse_input(user_inp1_raw)
 # user_inp2 = SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta")
 #
->>>>>>> Stashed changes

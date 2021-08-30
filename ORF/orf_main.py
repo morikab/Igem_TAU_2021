@@ -1,9 +1,8 @@
 from Igem_TAU_2021.ORF.optimization import optimize_sequence
 from Igem_TAU_2021.ORF.organism import Organism, Gene
 
-def orf_main(target_gene_seq_record, full_input_dict):
+def orf_main(full_input_dict):
     """
-    :param target_gene_seq: target gene aa sequence (Seq record)
     :param full_input_dict: input from GUI parser (dict). Format:
     full_inp_dict[org_name] = {
             'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences}
@@ -15,16 +14,23 @@ def orf_main(target_gene_seq_record, full_input_dict):
             'cai_profile': cai_weights,
             'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
 
+            @selected_prom : final used list of promoters for MAST
+            @sequence : the ORF to optimize
+
     :return: optimized sequence (Biopython Seq)
     """
 
-    target_gene = Gene(target_gene_seq_record)
+    target_gene = Gene(full_input_dict['sequence'])
+
+    input_organisms = full_input_dict
+    input_organisms.pop('sequence')
+    input_organisms.pop('selected_prom')
 
     high_expression_organisms = [Organism(name=org_name, gene_cds=dict['gene_cds'], tgcn=dict['tgcn'], cai_weights=dict['cai_profile'])
-                                 for org_name, dict in full_input_dict.items() if dict['optimized']]
+                                 for org_name, dict in input_organisms.items() if dict['optimized']]
 
     low_expression_organisms = [Organism(name=org_name, gene_cds=dict['gene_cds'], tgcn=dict['tgcn'], cai_weights=dict['cai_profile'])
-                                 for org_name, dict in full_input_dict.items() if not dict['optimized']]
+                                 for org_name, dict in input_organisms.items() if not dict['optimized']]
 
     optimized_sequence = optimize_sequence(target_gene=target_gene,
                       high_expression_organisms=high_expression_organisms, low_expression_organisms=low_expression_organisms)
