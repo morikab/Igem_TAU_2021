@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from Bio.Seq import Seq
 
-from Igem_TAU_2021.ORF.TAI import TAI
+from ORF.TAI import TAI
 
 ############################
 #
@@ -68,7 +68,7 @@ class Gene(Seq):
         :param dna_seq_path: fasta file - nucleotides sequence
         """
 
-        dna_data = str(dna_seq_record.seq)
+        dna_data = str(dna_seq_record)
 
         super().__init__(dna_data)
         self.protein_seq = self.translate()

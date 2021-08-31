@@ -54,6 +54,7 @@ def weight_cal(cds_dict, Sij, tGCN):
                     W += (1-S)*tGC_curr
 
         W_dict[codon] = W
+    #todo: what to do when the tgcn_dict is empty
     factor = max(W_dict.values())
     for k in W_dict:
         W_dict[k] = W_dict[k]/factor
