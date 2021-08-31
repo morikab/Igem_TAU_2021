@@ -142,10 +142,13 @@ def iterate_through_feature(organisms, codons, loss, high_expression):
 
             for codon in codons:
                 loss[codon] = 0
-                if high_expression:
-                    loss[codon] += f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
-                else:
-                    loss[codon] += f.ratio * ((f.weights[codon] / max_value) ** 2)
+                try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
+                    if high_expression:
+                        loss[codon] += f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
+                    else:
+                        loss[codon] += f.ratio * ((f.weights[codon] / max_value) ** 2)
+                except:
+                    continue
 
     return loss
 
@@ -156,13 +159,16 @@ def find_max_value_per_feature(organisms, feature_name, codons):
     for organism in organisms:
         for feature in organism.features:
             if feature.index_name == feature_name:
-                values.extend([feature.weights[codon] for codon in codons])
+                try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
+                    values.extend([feature.weights[codon] for codon in codons])
+                except:
+                    values.append(0)
     max_value = max(values)
 
     if max_value == 0:
         max_value = 0.000001
 
-    return  max_value
+    return max_value
 # --------------------------------------------------------------
 def find_optimal_codons(high_expression_organisms, low_expression_organisms, evaluation_function=loss_function):
     """

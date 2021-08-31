@@ -263,28 +263,28 @@ def parse_input(usr_inp):
 
 
 # input: from yarin
-base_path = os.path.join(os.path.dirname(__file__), 'example_data')
-
-user_inp1_raw = {
-    'sequence':SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
-    'selected_promoters': os.path.join(base_path, 'ORF_optimized_sequences.fasta'), #or None, # or a fasta file of promoter name and promoter
-    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-             'expression_csv': None, #todo: add treatment for expression data
-             'optimized': True},
-     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                'expression_csv': None,
-               'optimized': False},
-     'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-              'expression_csv': None,
-             'optimized': True},
-    'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
-               'expression_csv': None,
-               'optimized': False}}
-
-user_inp = parse_input(user_inp1_raw)
+# base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+#
+# user_inp1_raw = {
+#     'sequence':SeqIO.read(os.path.join(base_path, 'mCherry_original.fasta'), "fasta"),
+#     'selected_promoters': os.path.join(base_path, 'ORF_optimized_sequences.fasta'), #or None, # or a fasta file of promoter name and promoter
+#     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+#              'expression_csv': None, #todo: add treatment for expression data
+#              'optimized': True},
+#      'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+#                 'expression_csv': None,
+#                'optimized': False},
+#      'opt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+#               'expression_csv': None,
+#              'optimized': True},
+#     'deopt2': {'genome_path': os.path.join(base_path, 'Pseudomonas aeruginosa.gb'),
+#                'expression_csv': None,
+#                'optimized': False}}
+#
+# user_input = parse_input(user_inp1_raw)
 
 # input:
-# base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+#base_path = os.path.join(os.path.dirname(__file__), 'example_data')
 # user_inp1_raw = {
 #     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
 #              'optimized': True},
