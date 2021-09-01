@@ -1,16 +1,18 @@
 from Bio import SeqIO
 from ORF.calculating_cai import CAI
 import os
-from  user_IO.input_functions import  *
+from user_IO.input_functions import *
+
+from logger_factory import LoggerFactory
+
+# initialize the logger object
+logger = LoggerFactory.create_logger("user_IO")
 
 ### stable version!
 
-
-
-print('##########################')
-print('# USER INPUT INFORMATION #')
-print('##########################')
-
+logger.info('##########################')
+logger.info('# USER INPUT INFORMATION #')
+logger.info('##########################')
 
 
 def parse_single_input(val):
@@ -36,31 +38,32 @@ def parse_single_input(val):
     gb_path = val['genome_path']
     gb_file = SeqIO.read(gb_path, format='gb')
     org_name = find_org_name(gb_file)
-    print(f'\nInformation about {org_name}:')
-    if  val['optimized']:
-        print('Organism is optimized')
+    logger.info(f'\nInformation about {org_name}:')
+    if val['optimized']:
+        logger.info('Organism is optimized')
     else:
-        print('Organism is deoptimized')
+        logger.info('Organism is deoptimized')
     tgcn_dict = find_tgcn(gb_path)
-    print(f'Number of tRNA genes found: {sum(tgcn_dict.values())}, for {len(tgcn_dict)} anticodons out of 61')
+    logger.info(f'Number of tRNA genes found: {sum(tgcn_dict.values())}, for {len(tgcn_dict)} anticodons out of 61')
     prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
-    print(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
+    logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
     highly_expressed_gene_name_list = extract_highly_expressed_gene_names(cai_dict)
 
     org_dict = {
         'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
         '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
         'third_most_HE': {name: seq for name, seq in prom200_dict.items()
-                      if name in highly_expressed_gene_name_list},
+                          if name in highly_expressed_gene_name_list},
         # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
         'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
-        'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}, promoter model
-        'expression_estimation_of_all_genes': cai_dict,  # when the expression csv is not given- the CAI is used as expression levels
+        'intergenic': intergenic_dict,
+    # intergenic dict {position along the genome: intergenic sequence}, promoter model
+        'expression_estimation_of_all_genes': cai_dict,
+    # when the expression csv is not given- the CAI is used as expression levels
         'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
         'cai_profile': cai_weights,  # ORF model
         'optimized': val['optimized']}
     return org_name, org_dict
-
 
 
 # final function
@@ -84,34 +87,34 @@ def parse_input(usr_inp):
     input
     '''
     full_inp_dict = {}
-    for key, val in usr_inp['organisms'].items() :
+    for key, val in usr_inp['organisms'].items():
         if key in ['sequence', 'selected_promoters']:
             continue
         org_name, org_dict = parse_single_input(val)
-        full_inp_dict[org_name] = org_dict # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
+        full_inp_dict[
+            org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
 
-
-    #add non org specific keys to dict
-    orf_fasta_fid= usr_inp['sequence']
+    # add non org specific keys to dict
+    orf_fasta_fid = usr_inp['sequence']
     orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
     prom_fasta_fid = usr_inp['selected_promoters']
     selected_prom = {}
-    print(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
-    print(f'containing this sequence: {orf_seq}')
+    logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
+    logger.info(f'containing this sequence: {orf_seq}')
     if prom_fasta_fid is not None:  #
         selected_prom = fasta_to_dict(prom_fasta_fid)
-        print(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
-              f'which contains {len(selected_prom)} promoters')
+        logger.info(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
+                    f'which contains {len(selected_prom)} promoters')
     else:
-        print(f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
-              f'promoters from the 1/3 most highly expressed genes of all organisms are used- ')
+        logger.info(f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
+                    f'promoters from the 1/3 most highly expressed genes of all organisms are used- ')
         for org, org_dict in full_inp_dict.items():
             if org_dict['optimized']:
                 org_third_he_prom_dict = org_dict['third_most_HE']
                 for prom_name, prom_Seq in org_third_he_prom_dict.items():
                     selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
-                print(f'{len(org_third_he_prom_dict)} promoters are selected from {org}')
-        print(f'Resulting in a total of {len(selected_prom)} used for promoter selection and optimization')
+                logger.info(f'{len(org_third_he_prom_dict)} promoters are selected from {org}')
+        logger.info(f'Resulting in a total of {len(selected_prom)} used for promoter selection and optimization')
 
     full_inp_dict['selected_prom'] = selected_prom
     full_inp_dict['sequence'] = orf_seq
@@ -121,8 +124,6 @@ def parse_input(usr_inp):
 # input: from yarin
 base_path = os.path.join(os.path.dirname(__file__), '../example_data')
 
-
-
 user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
@@ -130,25 +131,23 @@ user_inp_raw = {
         # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
         #                    'optimized': True,
         #                    'expression_csv': None},
-                 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                            'optimized': False,
-                            'expression_csv': None},
+        'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                   'optimized': False,
+                   'expression_csv': None},
         #          'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
         #                   'optimized': False,
         #                   'expression_csv': None},
         #          'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
         #                      'optimized': True,
         #                      'expression_csv': None}
-                                               },
-                'opt3':{'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
-                'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
-                         'optimized': True,
-                         'expression_csv': None}
-    }
-
-
+    },
+    'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
+             'optimized': True,
+             'expression_csv': None},
+    'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
+             'optimized': True,
+             'expression_csv': None}
+}
 
 user_inp = parse_input(user_inp_raw)
-# print(user_inp['sequence'])
+# logger.info(user_inp['sequence'])

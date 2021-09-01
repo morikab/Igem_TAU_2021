@@ -1,25 +1,29 @@
+from logger_factory import LoggerFactory
 from RE.multi_org_functions import *
 from ORF.orf_main import orf_main
 from user_IO.input_main import user_inp
 
-print('\n\n\n###############################')
-print('# CODING SEQUENCE ENGINEERING #')
-print('###############################')
+# initialize the logger object
+logger = LoggerFactory.create_logger("RE")
 
-print('\nIn this model, the ORF of the gene is analysed and synthetic changes are introduced into it in order to:'
-      '     1. optimize translation and ribosome density for all optimized organisms, while deoptimizing it for the '
-      '        other group simultaneously'
-      '     2. remove restriction sites recognized by restriction enzymes from the optimized group'
-      '     3. insert restriction sites of enzymes present in the deoptimized group')
+logger.info('###############################')
+logger.info('# CODING SEQUENCE ENGINEERING #')
+logger.info('###############################')
+
+logger.info('In this model, the ORF of the gene is analysed and synthetic changes are introduced into it in order to:'
+            '     1. optimize translation and ribosome density for all optimized organisms, '
+            '        while deoptimizing it for the other group simultaneously'
+            '     2. remove restriction sites recognized by restriction enzymes from the optimized group'
+            '     3. insert restriction sites of enzymes present in the deoptimized group')
 # cds_nt = orf_main(user_inp)
 cds_nt = user_inp['sequence']
 cds_aa = translate(cds_nt)
 
 #finding the optimixed and deoptimized RE dictionaries
 optimized_org_names, deoptimized_org_names = parse_inp1(user_inp)
-print('\nOptimized organisms:')
+logger.info('Optimized organisms:')
 optimized_RE_dict = multi_organism_RE_dict(optimized_org_names, cds_aa)
-print('\nDeptimized organisms:')
+logger.info('Deptimized organisms:')
 deoptimized_RE_dict = multi_organism_RE_dict(deoptimized_org_names, cds_aa)
 
 # inserting sites for all optimized organisms
@@ -31,11 +35,10 @@ final_cds_nt = multi_org_remove_site(optimized_RE_dict, add_cds_nt)
 
 # checking result:
 
-print(f'Initial sequence before translation and restriction enzyme optimization: '
-      f'{cds_nt}\n')
+logger.info(f'Initial sequence before translation and restriction enzyme optimization: '
+            f'{cds_nt}\n')
 total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, cds_nt)
 
-print(f'Final sequence after translation and restriction enzyme optimization: '
-      f'{final_cds_nt}\n')
+logger.info(f'Final sequence after translation and restriction enzyme optimization: '
+            f'{final_cds_nt}\n')
 total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt)
-
