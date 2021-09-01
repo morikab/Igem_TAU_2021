@@ -33,7 +33,7 @@ final_cds_nt = multi_org_remove_site(optimized_RE_dict, add_cds_nt)
 
 print(f'Initial sequence before translation and restriction enzyme optimization: '
       f'{cds_nt}\n')
-total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt)
+total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, cds_nt)
 
 print(f'Final sequence after translation and restriction enzyme optimization: '
       f'{final_cds_nt}\n')

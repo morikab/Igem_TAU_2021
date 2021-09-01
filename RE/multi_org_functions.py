@@ -1,4 +1,4 @@
-from RE.core_functions import *
+from RE.re_functions import *
 
 def parse_inp1(usr_inp1):
     'separate the input into 2 lists- list of optimized organism names'
@@ -26,7 +26,7 @@ def multi_organism_RE_dict(org_list, cds_aa):
 
 
 def multi_org_insert_site(deoptimized_RE_dict, cds_nt):
-    # todo: make this function- this is quite a challenge because the order in which i try to insert
+    # todo: make a better version. currently I am going over the options
     # the sites matters, because insertion of one site can delete recognition of a different site.
     cds_nt_added_sites = cds_nt
     for org_RE_dict in deoptimized_RE_dict.values():
@@ -53,10 +53,10 @@ def multi_org_final_found_sites(RE_dict, final_cds_nt):
         print(f'For {org}, {len(found_sites_dict)} sites were found in the final coding sequence,'
               f'belonging to the following enzymes')
         for enzyme_name in found_sites_dict.keys():
-            print(enzyme_name)
-            print(found_sites_dict)
-            ambiguous_site = found_sites_dict[enzyme_name]['ambiguous_site']
-            print(f'{enzyme_name}, which has the ambiguous site {ambiguous_site}')
+            print(enzyme_name, ': ', found_sites_dict[enzyme_name])
+            # print(found_sites_dict)
+#            ambiguous_site = found_sites_dict[enzyme_name]['ambiguous_site']
+#            print(f'{enzyme_name}, which has the ambiguous site {ambiguous_site}')
 
 
 def total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt):
