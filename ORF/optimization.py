@@ -185,6 +185,8 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, eva
 
     for aa, codons in synonymous_codons.items():
         loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, local_maximum=True)
+        print(loss)
+        print(loss.get)
         optimal_codons[aa] = min(loss, key=loss.get)
 
     return optimal_codons

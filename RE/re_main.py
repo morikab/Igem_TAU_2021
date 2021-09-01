@@ -1,6 +1,7 @@
 from RE.multi_org_functions import *
 from ORF.orf_main import orf_main
 from user_IO.input_main import user_inp
+
 print('\n\n\n###############################')
 print('# CODING SEQUENCE ENGINEERING #')
 print('###############################')
@@ -10,7 +11,8 @@ print('\nIn this model, the ORF of the gene is analysed and synthetic changes ar
       '        other group simultaneously'
       '     2. remove restriction sites recognized by restriction enzymes from the optimized group'
       '     3. insert restriction sites of enzymes present in the deoptimized group')
-cds_nt = orf_main(user_inp)
+# cds_nt = orf_main(user_inp)
+cds_nt = user_inp['sequence']
 cds_aa = translate(cds_nt)
 
 #finding the optimixed and deoptimized RE dictionaries
