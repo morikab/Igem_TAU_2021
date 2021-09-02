@@ -14,38 +14,12 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, input: typing.Optional[typing.Dict] = None) -> typing.Dict:
+    def run_module(cls, user_inp_raw, input: typing.Optional[typing.Dict] = None) -> typing.Dict:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
-
-        # TODO - use input var from yarin
-        base_path = os.path.join(os.path.dirname(__file__), '../example_data')
-        user_inp_raw = {
-            'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
-            'selected_promoters': None,
-            'organisms': {
-                # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-                #                    'optimized': True,
-                #                    'expression_csv': None},
-                'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                           'optimized': False,
-                           'expression_csv': None},
-                #          'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                #                   'optimized': False,
-                #                   'expression_csv': None},
-                #          'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                #                      'optimized': True,
-                #                      'expression_csv': None}
-            },
-            'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-                     'optimized': True,
-                     'expression_csv': None},
-            'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
-                     'optimized': True,
-                     'expression_csv': None}
-        }
-
+        #
+        # # TODO - use input var from yarin
         return cls._parse_input(user_inp_raw)
 
     @classmethod

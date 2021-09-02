@@ -12,9 +12,9 @@ class UserOutputModule(object):
 
     @classmethod
     def run_module(cls, module_input: typing.Optional[typing.Dict] = None) -> typing.Dict:
-        logger.info('##########################')
+        logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
-        logger.info('##########################')
+        logger.info('###########################')
 
         # TODO - fix the dict according to spec + create zip out of the relevant logs + data
         return {
