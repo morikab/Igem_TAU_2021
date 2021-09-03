@@ -4,7 +4,9 @@ import RE
 import Zscore_calculation
 import user_IO
 import os
+import time
 
+tic = time.time()
 logger = LoggerFactory.create_logger("main")
 
 
@@ -53,3 +55,6 @@ def run_modules(user_inp_raw):
 
 if __name__ == "__main__":
     run_modules(user_inp_raw)
+toc=time.time()
+
+print('time: ', toc-tic)

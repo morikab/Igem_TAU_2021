@@ -4,8 +4,8 @@ import pandas as pd
 
 
 class ZscoreModule(object):
-    @staticmethod
 
+    @staticmethod
     def run_module(final_seq, inp_dict):
         '''
             This function is aimed to calculate an optimization index
