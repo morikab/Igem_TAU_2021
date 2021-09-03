@@ -45,8 +45,8 @@ user_inp_raw = {
 def run_modules(user_inp_raw):
     input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
     orf_optimized_cds_nt_cai = ORF.ORFModule.run_module(input_dict, 'cai')
-    orf_optimized_cds_nt_tai = ORF.ORFModule.run_module(input_dict, 'tai')
-    cds_nt_final_cai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt_cai) #todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
+    # orf_optimized_cds_nt_tai = ORF.ORFModule.run_module(input_dict, 'tai')
+    cds_nt_final_cai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
     # cds_nt_final_tai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt)
     mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict)#todo: update szcore to work on tai as well    print(mean_Zscore)
     final_output = user_IO.UserOutputModule.run_module(cds_nt_final_cai, mean_Zscore)
@@ -55,6 +55,6 @@ def run_modules(user_inp_raw):
 
 if __name__ == "__main__":
     run_modules(user_inp_raw)
-toc=time.time()
+toc = time.time()
 
 print('time: ', toc-tic)

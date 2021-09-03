@@ -1,5 +1,4 @@
 from RE.multi_org_functions import *
-import typing
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("RE")

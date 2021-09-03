@@ -4,9 +4,10 @@ from ORF.organism import Organism, Gene
 #todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
 #and are they close
 
-class ORFModule(object):
-    @staticmethod
 
+class ORFModule(object):
+
+    @staticmethod
     def run_module(full_input_dict, feature):
         """
         :param full_input_dict: input from GUI parser (dict). Format:
@@ -29,14 +30,18 @@ class ORFModule(object):
         target_gene = full_input_dict['sequence']
         input_organisms = full_input_dict['organisms']
 
+        high_expression_organisms = [
+            Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'],
+                     feature_to_generate=feature)
+            for org_name, dict in input_organisms.items() if dict['optimized']]
 
-        high_expression_organisms = [Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'], feature_to_generate=feature)
-                                     for org_name, dict in input_organisms.items() if dict['optimized']]
-
-        low_expression_organisms = [Organism(name=org_name,tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'], feature_to_generate=feature)
-                                     for org_name, dict in input_organisms.items() if not dict['optimized']]
+        low_expression_organisms = [
+            Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'],
+                     feature_to_generate=feature)
+            for org_name, dict in input_organisms.items() if not dict['optimized']]
 
         optimized_sequence = optimize_sequence(target_gene=target_gene,
-                          high_expression_organisms=high_expression_organisms, low_expression_organisms=low_expression_organisms)
+                                               high_expression_organisms=high_expression_organisms,
+                                               low_expression_organisms=low_expression_organisms)
 
         return optimized_sequence
