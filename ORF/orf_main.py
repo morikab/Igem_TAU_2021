@@ -1,11 +1,8 @@
 from Igem_TAU_2021.ORF.optimization import optimize_sequence
 from Igem_TAU_2021.ORF.organism import Organism, Gene
-<<<<<<< Updated upstream
-=======
 
 #todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
 #and are they close
->>>>>>> Stashed changes
 
 def orf_main(full_input_dict):
     """
