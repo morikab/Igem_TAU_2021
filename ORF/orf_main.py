@@ -4,6 +4,7 @@ from ORF.organism import Organism, Gene
 #todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
 #and are they close
 
+
 def orf_main(full_input_dict):
     """
     :param full_input_dict: input from GUI parser (dict). Format:
