@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-class ORFzscoreCalculationModule(object):
+class ZscoreModule(object):
     @staticmethod
 
     def run_module(final_seq, inp_dict):

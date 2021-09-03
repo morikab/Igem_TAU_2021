@@ -39,7 +39,7 @@ class UserInputModule(object):
         :return: an extended dictionary with the following items:
         @selected_prom : final used list of promoters for MAST
         @sequence : the ORF to optimize
-        and for each organism- the key is the scientific organism name, and the value is _parse_single_input for the organism's
+        @organism: contains the org names as keys, and for each organism- the key is the scientific organism name, and the value is _parse_single_input for the organism's
         input
         '''
         full_inp_dict = {}
