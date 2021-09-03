@@ -16,7 +16,7 @@ Feature = namedtuple(typename='Feature', field_names='index_name weights ratio')
 
 class Organism(object):
 
-    def __init__(self, name, tai_weights, cai_weights):
+    def __init__(self, name, tai_weights, cai_weights, feature_to_generate):
 
         """
 
@@ -33,9 +33,11 @@ class Organism(object):
         self.tai_weights = tai_weights
         self.cai_weights = cai_weights
         self.features = []
-
-        self.features.append(Feature(index_name='TAI', weights=self.tai_weights, ratio=0.5))
-        self.features.append(Feature(index_name='CAI', weights=self.cai_weights, ratio=0.5))
+        # leave the ratio key cause we might want to combine optimizations later
+        if feature_to_generate == 'tai':
+            self.features.append(Feature(index_name='TAI', weights=self.tai_weights, ratio=1))
+        elif feature_to_generate == 'cai':
+            self.features.append(Feature(index_name='CAI', weights=self.cai_weights, ratio=1))
 
 
 

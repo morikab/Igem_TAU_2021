@@ -7,7 +7,7 @@ from ORF.organism import Organism, Gene
 class ORFModule(object):
     @staticmethod
 
-    def run_module(full_input_dict):
+    def run_module(full_input_dict, feature):
         """
         :param full_input_dict: input from GUI parser (dict). Format:
         full_inp_dict[org_name] = {
@@ -30,10 +30,10 @@ class ORFModule(object):
         input_organisms = full_input_dict['organisms']
 
 
-        high_expression_organisms = [Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'])
+        high_expression_organisms = [Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'], feature_to_generate=feature)
                                      for org_name, dict in input_organisms.items() if dict['optimized']]
 
-        low_expression_organisms = [Organism(name=org_name,tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'])
+        low_expression_organisms = [Organism(name=org_name,tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'], feature_to_generate=feature)
                                      for org_name, dict in input_organisms.items() if not dict['optimized']]
 
         optimized_sequence = optimize_sequence(target_gene=target_gene,

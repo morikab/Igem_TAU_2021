@@ -18,7 +18,6 @@ def antiCodon_L(tgcn_dict):
         antiCodon = row[-7:-4]
         antiCodon_list += [antiCodon]
     tGCN = Counter(antiCodon_list)
-    #print_counter(tGCN)
     return tGCN
 
 def print_counter(c):
@@ -52,7 +51,6 @@ def weight_cal(Sij, tGCN):
         W_dict[codon] = W
     #todo: what to do when the tgcn_dict is empty
     factor = max(W_dict.values())
-    print(W_dict)
     for k in W_dict:
         W_dict[k] = W_dict[k]/factor
 
