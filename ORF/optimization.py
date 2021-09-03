@@ -1,28 +1,6 @@
 from Bio.Seq import Seq
+from shared_functions_and_vars import translate, synonymous_codons
 
-synonymous_codons = {
-    "C": ["TGT", "TGC"],
-    "D": ["GAT", "GAC"],
-    "S": ["TCT", "TCG", "TCA", "TCC", "AGC", "AGT"],
-    "Q": ["CAA", "CAG"],
-    "M": ["ATG"],
-    "N": ["AAC", "AAT"],
-    "P": ["CCT", "CCG", "CCA", "CCC"],
-    "K": ["AAG", "AAA"],
-    "*": ["TAG", "TGA", "TAA"],
-    "T": ["ACC", "ACA", "ACG", "ACT"],
-    "F": ["TTT", "TTC"],
-    "A": ["GCA", "GCC", "GCG", "GCT"],
-    "G": ["GGT", "GGG", "GGA", "GGC"],
-    "I": ["ATC", "ATA", "ATT"],
-    "L": ["TTA", "TTG", "CTC", "CTT", "CTG", "CTA"],
-    "H": ["CAT", "CAC"],
-    "R": ["CGA", "CGC", "CGG", "CGT", "AGG", "AGA"],
-    "W": ["TGG"],
-    "V": ["GTA", "GTC", "GTG", "GTT"],
-    "E": ["GAG", "GAA"],
-    "Y": ["TAT", "TAC"],
-}
 # --------------------------------------------------------------
 
 def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, n_initiation_codons=12):
@@ -37,11 +15,11 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
     The function calculates the difference between the features of each codon. Each feature has its own weight (ratio)
     """
 
-    optimized_sequence = Seq('')
+    optimized_sequence = ''
 
     optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms) # optimal codons->dict(AA:codon)
 
-    target_protein = target_gene.protein_seq
+    target_protein = translate(target_gene)
 
     # optimize the initiation
 
@@ -185,8 +163,6 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, eva
 
     for aa, codons in synonymous_codons.items():
         loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, local_maximum=True)
-        print(loss)
-        print(loss.get)
         optimal_codons[aa] = min(loss, key=loss.get)
 
     return optimal_codons

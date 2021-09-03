@@ -26,14 +26,14 @@ class ORFModule(object):
         :return: optimized sequence (Biopython Seq)
         """
 
-        target_gene = Gene(full_input_dict['sequence'])
+        target_gene = full_input_dict['sequence']
         input_organisms = full_input_dict['organisms']
 
 
-        high_expression_organisms = [Organism(name=org_name, gene_cds=dict['gene_cds'], tgcn=dict['tgcn'], cai_weights=dict['cai_profile'])
+        high_expression_organisms = [Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'])
                                      for org_name, dict in input_organisms.items() if dict['optimized']]
 
-        low_expression_organisms = [Organism(name=org_name, gene_cds=dict['gene_cds'], tgcn=dict['tgcn'], cai_weights=dict['cai_profile'])
+        low_expression_organisms = [Organism(name=org_name,tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'])
                                      for org_name, dict in input_organisms.items() if not dict['optimized']]
 
         optimized_sequence = optimize_sequence(target_gene=target_gene,

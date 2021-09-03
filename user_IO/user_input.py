@@ -66,7 +66,7 @@ class UserInputModule(object):
             logger.info(
                 f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
                 f'promoters from the 1/3 most highly expressed genes of all organisms are used- ')
-            for org, org_dict in full_inp_dict.items():
+            for org, org_dict in full_inp_dict['organisms'].items():
                 if org_dict['optimized']:
                     org_third_he_prom_dict = org_dict['third_most_HE']
                     for prom_name, prom_Seq in org_third_he_prom_dict.items():

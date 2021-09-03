@@ -1,25 +1,5 @@
-from Bio import SeqIO
 from ORF.calculating_cai import CAI
 from shared_functions_and_vars import *
-from ORF.TAI import TAI
-
-#functions for input_main code
-
-# def fasta_to_dict(fasta_fid):
-#     fasta_dict = {record.description:str(record.seq) for record in SeqIO.parse(fasta_fid, 'fasta') }
-#     return fasta_dict
-#
-# def write_fasta(fid, list_seq, list_name):
-#     ofile = open(fid + '.fasta', "w+")
-#     for i in range(len(list_seq)):
-#         ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
-#     ofile.close()
-#
-# # write ideas for the promoter model
-# def reverse_complement(seq):
-#     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
-#     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
-#     return reverse_complement
 
 
 # RE model
@@ -42,7 +22,8 @@ def find_tgcn(gb_path):
                 else:
                     continue
                 if len(anticodon) == 3:
-                    anticodon.replace('u', 't')
+                    anticodon = anticodon.upper()
+                    anticodon = anticodon.replace('U', 'T')
                     if anticodon in tgcn_dict.keys():
                         tgcn_dict[anticodon] += 1
                     else:

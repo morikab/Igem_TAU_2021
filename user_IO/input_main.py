@@ -1,5 +1,3 @@
-from Bio import SeqIO
-import os
 from user_IO.input_functions import  *
 
 ### stable version!
