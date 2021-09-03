@@ -1,7 +1,6 @@
 from Bio import SeqIO
-from Igem_TAU_2021.ORF.calculating_cai import CAI
 import os
-from Igem_TAU_2021.user_IO.input_functions import  *
+from user_IO.input_functions import  *
 
 ### stable version!
 
@@ -118,37 +117,3 @@ def parse_input(usr_inp):
     return full_inp_dict
 
 
-# input: from yarin
-# base_path = os.path.join(os.path.dirname(__file__), '../example_data')
-#
-#
-#
-# user_inp_raw = {
-#     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
-#     'selected_promoters': None,
-#     'organisms': {
-#         # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-#         #                    'optimized': True,
-#         #                    'expression_csv': None},
-#                  'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-#                             'optimized': False,
-#                             'expression_csv': None},
-#         #          'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-#         #                   'optimized': False,
-#         #                   'expression_csv': None},
-#         #          'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-#         #                      'optimized': True,
-#         #                      'expression_csv': None}
-#                                                },
-#                 'opt3':{'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-#                              'optimized': True,
-#                              'expression_csv': None},
-#                 'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
-#                          'optimized': True,
-#                          'expression_csv': None}
-#     }
-#
-#
-#
-# user_inp = parse_input(user_inp_raw)
-# print(user_inp['sequence'])

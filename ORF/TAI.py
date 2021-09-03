@@ -1,6 +1,7 @@
 from collections import Counter
 from Bio.Seq import Seq
 import numpy as np
+from shared_functions_and_vars import *
 
 
 from tqdm import tqdm
@@ -26,23 +27,18 @@ def print_counter(c):
     return
 
 
-def weight_cal(cds_dict, Sij, tGCN):
+def weight_cal(Sij, tGCN):
     """ get the sequence with Sij table and tGCN (from prev. func) and return list of codons' weight."""
 
-    my_seq = Seq(''.join(list(cds_dict.values()))) # merging all coding sequences into one big sequence
-                                                    # (because the rest of the code treats an input as one sequence)
-    print(len(my_seq))
-    W_dict = {}
-    for i in tqdm((np.arange(0, len(my_seq)-1, 3))):  # where to start scanning len%3!=0 - waiting for liyam answer
 
-        codon = my_seq[i:i+3]
-        codon_pos3 = my_seq[i+2]
+    W_dict = {}
+    codon_list = ['ATA', 'ATC', 'ATT', 'ATG', 'ACA', 'ACC', 'ACG', 'ACT', 'AAC', 'AAT', 'AAA', 'AAG', 'AGC', 'AGT', 'AGA', 'AGG', 'CTA', 'CTC', 'CTG', 'CTT', 'CCA', 'CCC', 'CCG', 'CCT', 'CAC', 'CAT', 'CAA', 'CAG', 'CGA', 'CGC', 'CGG', 'CGT', 'GTA', 'GTC', 'GTG', 'GTT', 'GCA', 'GCC', 'GCG', 'GCT', 'GAC', 'GAT', 'GAA', 'GAG', 'GGA', 'GGC', 'GGG', 'GGT', 'TCA', 'TCC', 'TCG', 'TCT', 'TTC', 'TTT', 'TTA', 'TTG', 'TAC', 'TAT', 'TGC', 'TGT', 'TGG']
+    for codon in codon_list:  # where to start scanning len%3!=0 - waiting for liyam answer
         W = 0
         for key in Sij.keys():
-
-            if key[2] == codon_pos3:
+            if key[2] == codon[-1]:
                 S = Sij[key]
-                i_codon = codon.reverse_complement()
+                i_codon = reverse_complement(codon)
                 anticodon_pos1 = key[0]
                 anti_codon = anticodon_pos1 + i_codon[1:3]
                 tGC_curr = tGCN.get(str(anti_codon))
@@ -56,6 +52,7 @@ def weight_cal(cds_dict, Sij, tGCN):
         W_dict[codon] = W
     #todo: what to do when the tgcn_dict is empty
     factor = max(W_dict.values())
+    print(W_dict)
     for k in W_dict:
         W_dict[k] = W_dict[k]/factor
 
@@ -81,42 +78,18 @@ def TAI_cal(W_dict):
 
 class TAI(object):
 
-    def __init__(self, cds_dict, tgcn):
+    def __init__(self,  tgcn):
         """
         :param cds_path: cds file (fasta)
         """
         self.Sij = Sij
 
-        W_dict = weight_cal(cds_dict, self.Sij, tgcn)
+        W_dict = weight_cal(self.Sij, tgcn)
         TAI_weight = TAI_cal(W_dict)
         self.index = TAI_weight
 
 
-# ---------------------------------------------------
-seq_file = r'..\..\data\tRNA\K12.txt'
-
-# antiCodon:Codon
-# antiCodon:Codon
-# Sij = {'A:T': 0,
-#        'G:C': 0,
-#        'T:A': 0,
-#        'C:G': 0,
-#        'G:T': 1,
-#        'A:C': 0.254414541,
-#        'A:A': 0.810328488,
-#        'T:G': 1}
-
-# Sij = {'A:T': 0,
-#        'G:C': 0,
-#        'T:A': 0,
-#        'C:G': 0.41,
-#        'G:T': 0.63,
-#        'A:C': 0.9749,
-#        'A:A': 0.68,
-#        'T:G': 0.95}
-
-# todo: is that from c serevisiae?
-Sij = {'A:T': 0,
+Sij = {'A:T': 0, #from yeast!!
        'G:C': 0,
        'T:A': 0,
        'C:G': 0.41,
@@ -125,49 +98,3 @@ Sij = {'A:T': 0,
        'A:A': 0.68,
        'T:G': 0.89}
 
-# Sij = {'A:T': 0,
-#        'G:C': 0,
-#        'T:A': 0,
-#        'C:G': 0.561,
-#        'G:T': 0.28,
-#        'A:C': 0.9999,
-#        'A:A': 0.68,
-#        'T:G': 0.89}
-
-#Good S's!
-"""
-Sij = {'A:T': 0,
-       'G:C': 0,
-       'T:A': 0,
-       'C:G': 0,
-       'G:T': 0.41,
-       'A:C': 0.63,
-       'A:A': 0.9749,
-       'T:G': 0.68,
-       'C:A': 0.95}
-"""
-"""
-# Check if replacing is legal! U T / I A
-tRNA_fa = r'..\..\data\tRNA\eschColi_K_12_MG1655-tRNAs.fa'
-# SeC (TCA) -> in the codon table STOP
-#  ACT not exceeded
-# ACA
-
-TAI_W = get_TAI(seq_file, Sij, tRNA_fa)
-print(TAI_W)
-"""
-
-####################################################
-# Deprecated functions:
-
-
-def get_TAI(cds, Sij, tGCN):
-    """
-
-    :param cds: coding sequence
-    :param Sij:
-    :param tGCN:
-    :return:
-    """
-    W_dict = weight_cal(cds, Sij, tGCN)
-    return W_dict

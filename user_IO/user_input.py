@@ -1,6 +1,7 @@
 import os
 import typing
 from user_IO.input_functions import *
+from ORF.TAI import TAI
 
 from logger_factory import LoggerFactory
 
@@ -43,12 +44,12 @@ class UserInputModule(object):
         input
         '''
         full_inp_dict = {}
+        full_inp_dict['organisms'] = {}
         for key, val in usr_inp['organisms'].items():
-            if key in ['sequence', 'selected_promoters']:
-                continue
+#            if key in ['sequence', 'selected_promoters']:
+#                continue
             org_name, org_dict = cls._parse_single_input(val)
-            full_inp_dict[
-                org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
+            full_inp_dict['organisms'][org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
 
         # add non org specific keys to dict
         orf_fasta_fid = usr_inp['sequence']
@@ -113,7 +114,6 @@ class UserInputModule(object):
         highly_expressed_gene_name_list = extract_highly_expressed_gene_names(cai_dict)
 
         org_dict = {
-            'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences} for ORF model
             '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
             'third_most_HE': {name: seq for name, seq in prom200_dict.items()
                               if name in highly_expressed_gene_name_list},
@@ -124,6 +124,7 @@ class UserInputModule(object):
             'expression_estimation_of_all_genes': cai_dict,
             # when the expression csv is not given- the CAI is used as expression levels
             'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
-            'cai_profile': cai_weights,  # ORF model
+            'cai_profile': cai_weights,  # {dna_codon:cai_score}
+            'tai_profile': TAI(tgcn_dict).index,  # {dna_codon:tai_score}
             'optimized': val['optimized']}
         return org_name, org_dict

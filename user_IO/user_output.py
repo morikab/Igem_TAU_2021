@@ -10,16 +10,16 @@ class UserOutputModule(object):
     def get_name() -> str:
         return "User Output"
 
-    @classmethod
-    def run_module(cls, module_input: typing.Optional[typing.Dict] = None) -> typing.Dict:
+    @staticmethod
+    def run_module(cds_sequence, zscore):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
 
         # TODO - fix the dict according to spec + create zip out of the relevant logs + data
         return {
-            'final sequence: ': module_input["cds"],  # str
-            'Zscore': None,  # int
+            'final sequence: ': cds_sequence,  # str
+            'Zscore': zscore,  # int
             'final promoter': None,  # str
             'promoter score': None,  # int
             'promoter fasta': None,  # fasta file

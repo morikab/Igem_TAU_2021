@@ -1,4 +1,5 @@
 from logger_factory import LoggerFactory
+import ORF
 import RE
 import Zscore_calculation
 import user_IO
@@ -24,9 +25,9 @@ user_inp_raw = {
                     #           'optimized': False,
                     #           'expression_csv': None},
                     #
-                    # 'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                    #          'optimized': True,
-                    #          'expression_csv': None},
+                    'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
+                             'optimized': True,
+                             'expression_csv': None},
 
                     # 'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
                     #          'optimized': True,
@@ -40,14 +41,12 @@ user_inp_raw = {
 
 
 def run_modules(user_inp_raw):
-    input_dict = user_IO.UserInputModule.run_module(user_inp_raw)
-#    cds_nt_final = RE.REModule.run_module(input_dict)
-#    mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(cds_nt_final, input_dict)
-    mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(input_dict['sequence'], input_dict)
-    print(mean_Zscore)
-    print(all_Zscores)
-#    final_output = user_IO.UserOutputModule.run_module(cds_nt_final)
-#    logger.info("Final output: %s", final_output)
+    input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
+    orf_optimized_cds_nt = ORF.ORFModule.run_module(input_dict)
+    cds_nt_final = RE.REModule.run_module(input_dict, orf_optimized_cds_nt)
+    mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(cds_nt_final, input_dict)
+    final_output = user_IO.UserOutputModule.run_module(cds_nt_final, mean_Zscore)
+    logger.info("Final output: %s", final_output)
 
 
 if __name__ == "__main__":

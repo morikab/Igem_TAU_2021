@@ -9,7 +9,7 @@ def parse_inp1(usr_inp1):
     'and deoptimized organism names'
     optimized_org_names = []
     deoptimized_org_names = []
-    for org_name, org_dict in usr_inp1.items():
+    for org_name, org_dict in usr_inp1['organisms'].items():
         try:
             if org_dict['optimized']:
                 optimized_org_names.append(org_name)

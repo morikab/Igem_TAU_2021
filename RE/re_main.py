@@ -1,6 +1,5 @@
 from RE.multi_org_functions import *
 import typing
-from ORF.orf_main import orf_main
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("RE")
@@ -11,8 +10,8 @@ class REModule(object):
     def get_name() -> str:
         return "Restriction Enzymes"
 
-    @classmethod
-    def run_module(cls, input: typing.Optional[typing.Dict] = None) -> typing.Dict:
+    @staticmethod
+    def run_module(input_dict, cds_nt):
         logger.info('###############################')
         logger.info('# CODING SEQUENCE ENGINEERING #')
         logger.info('###############################')
@@ -24,10 +23,9 @@ class REModule(object):
                     '\n     2. remove restriction sites recognized by restriction enzymes from the optimized group'
                     '\n     3. insert restriction sites of enzymes present in the deoptimized group')
 
-        cds_nt = input['sequence']
         cds_aa = translate(cds_nt)
 
-        optimized_org_names, deoptimized_org_names = parse_inp1(input)
+        optimized_org_names, deoptimized_org_names = parse_inp1(input_dict)
         logger.info('Optimized organisms:')
         optimized_RE_dict = multi_organism_RE_dict(optimized_org_names, cds_aa)
         logger.info('Deptimized organisms:')

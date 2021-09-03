@@ -1,24 +1,25 @@
 from Bio import SeqIO
 from ORF.calculating_cai import CAI
-
+from shared_functions_and_vars import *
+from ORF.TAI import TAI
 
 #functions for input_main code
 
-def fasta_to_dict(fasta_fid):
-    fasta_dict = {record.description:str(record.seq) for record in SeqIO.parse(fasta_fid, 'fasta') }
-    return fasta_dict
-
-def write_fasta(fid, list_seq, list_name):
-    ofile = open(fid + '.fasta', "w+")
-    for i in range(len(list_seq)):
-        ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
-    ofile.close()
-
-# write ideas for the promoter model
-def reverse_complement(seq):
-    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
-    reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
-    return reverse_complement
+# def fasta_to_dict(fasta_fid):
+#     fasta_dict = {record.description:str(record.seq) for record in SeqIO.parse(fasta_fid, 'fasta') }
+#     return fasta_dict
+#
+# def write_fasta(fid, list_seq, list_name):
+#     ofile = open(fid + '.fasta', "w+")
+#     for i in range(len(list_seq)):
+#         ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
+#     ofile.close()
+#
+# # write ideas for the promoter model
+# def reverse_complement(seq):
+#     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+#     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
+#     return reverse_complement
 
 
 # RE model
@@ -29,10 +30,6 @@ def find_org_name(gb_file):
 
 # ORI model
 def find_tgcn(gb_path):
-    #todo: fix this-
-    # each genbank file has a different way to represent the tRNAs in it-
-    # some do not specify the anticodon (just the amino acid)
-    # some have it in the notes and some have an "anticodon" sub-feature to use.
     tgcn_dict = {}
     for record in SeqIO.parse(gb_path, "genbank"):
         for feature in record.features:
@@ -44,10 +41,12 @@ def find_tgcn(gb_path):
                     anticodon = note[note.find("(") + 1:note.find(")")]
                 else:
                     continue
-                if anticodon in tgcn_dict.keys():
-                    tgcn_dict[anticodon] += 1
-                else:
-                    tgcn_dict[anticodon] = 1
+                if len(anticodon) == 3:
+                    anticodon.replace('u', 't')
+                    if anticodon in tgcn_dict.keys():
+                        tgcn_dict[anticodon] += 1
+                    else:
+                        tgcn_dict[anticodon] = 1
     return tgcn_dict
 
 
