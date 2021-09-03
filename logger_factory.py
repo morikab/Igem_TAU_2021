@@ -14,6 +14,9 @@ class LoggerFactory(object):
         logging module
         """
         logger = logging.getLogger(log_file_name)
+        if logger.handlers:
+            # If we already set the handlers for the logger, just return the initialized logger.
+            return logger
         logger.setLevel(logging.INFO)
         logger.addHandler(logging.StreamHandler())
         # Make sure logs directory exists
