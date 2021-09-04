@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class LoggerFactory(object):
-    _LOG_DIRECTORY = "logs"
+    LOG_DIRECTORY = "logs"
     _LOG_SUFFIX = "log"
 
     @classmethod
@@ -20,10 +20,10 @@ class LoggerFactory(object):
         logger.setLevel(logging.INFO)
         logger.addHandler(logging.StreamHandler())
         # Make sure logs directory exists
-        Path(cls._LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
+        Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
         # Generate log file
-        log_file_path = os.path.join(cls._LOG_DIRECTORY, log_file_name + "." + cls._LOG_SUFFIX)
-        log_file_handler = logging.FileHandler(log_file_path)
+        log_file_path = os.path.join(cls.LOG_DIRECTORY, log_file_name + "." + cls._LOG_SUFFIX)
+        log_file_handler = logging.FileHandler(log_file_path, mode="w")
         log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         log_file_handler.setFormatter(logging.Formatter(log_format))
         logger.addHandler(log_file_handler)
