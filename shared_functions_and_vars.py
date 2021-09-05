@@ -85,3 +85,6 @@ def translate(seq, table=nt_to_aa):  # DONE
         return protein
     else:
         return ValueError('len(seq)%3 !=0')
+
+def unique(list1):
+    return sorted(set(list1))

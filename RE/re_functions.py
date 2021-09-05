@@ -30,8 +30,7 @@ REbase = [x.strip() for x in content]
 
 
 
-def unique(list1):
-    return sorted(set(list1))
+
 
 
 def flatten(t):
