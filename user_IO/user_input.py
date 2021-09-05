@@ -100,6 +100,7 @@ class UserInputModule(object):
             'optimized': bool- True if organism is optimized}
         '''
         gb_path = val['genome_path']
+        exp_csv_fid = val['expression_csv']
         gb_file = SeqIO.read(gb_path, format='gb')
         org_name = find_org_name(gb_file)
         logger.info(f'\nInformation about {org_name}:')
@@ -109,22 +110,23 @@ class UserInputModule(object):
             logger.info('Organism is deoptimized')
         tgcn_dict = find_tgcn(gb_path)
         logger.info(f'Number of tRNA genes found: {sum(tgcn_dict.values())}, for {len(tgcn_dict)} anticodons out of 61')
-        prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights = extract_gene_data(gb_path)
+
+        prom200_dict, cds_dict, intergenic_dict, cai_dict, cai_weights, estimated_expression = \
+            extract_gene_data(gb_path, exp_csv_fid)
+
         logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
         highly_expressed_gene_name_list = extract_highly_expressed_gene_names(cai_dict)
 
         org_dict = {
-            '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}, promoter model
+            '200bp_promoters': prom200_dict,
             'third_most_HE': {name: seq for name, seq in prom200_dict.items()
                               if name in highly_expressed_gene_name_list},
-            # '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}, promoter model
             'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
             'intergenic': intergenic_dict,
-            # intergenic dict {position along the genome: intergenic sequence}, promoter model
-            'expression_estimation_of_all_genes': cai_dict,
-            # when the expression csv is not given- the CAI is used as expression levels
+            'expression_estimation_of_all_genes': estimated_expression, # when the expression csv is not given- the CAI is used as expression levels
             'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
             'tai_profile': TAI(tgcn_dict).index,  # {dna_codon:tai_score}
             'optimized': val['optimized']}
+
         return org_name, org_dict

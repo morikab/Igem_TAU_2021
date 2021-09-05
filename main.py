@@ -17,11 +17,11 @@ user_inp_raw = {
     'organisms': {
                    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
                             'optimized': True,
-                            'expression_csv': None},
+                            'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
 
                     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
                                'optimized': False,
-                               'expression_csv': None},
+                               'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
 
                     'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
                               'optimized': False,
