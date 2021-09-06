@@ -5,13 +5,21 @@ from Bio import SeqIO
 import re
 from shared_functions_and_vars import write_fasta
 import user_IO
-import csv
+from promoters.intersect_motifs_2_org_final import *
+import pandas as pd
+import numpy as np
 
-global dna, opt_path, deopt_path, end
+
+global dna, opt_path, deopt_path, end, organism_dict
 dna = "ACGT"
 opt_path = 'opt_files'
 deopt_path = 'deopt_files'
 end = '.fasta'
+organism_dict = {'opt': [], 'deopt': []}
+#organism_dict = {
+#    'opt': ['Escherichia_coli', 'Mycobacterium_tuberculosis', 'Pantoea_ananatis', 'Azospirillum_brasilense'],
+#    'deopt': ['Bacillus_subtilis', 'Sulfolobus_acidocaldarius']
+#    }
 
 """
 This method uses STREME to find motifs that are enriched in one set of promoters and aren't present in the other
@@ -64,8 +72,10 @@ def create_files_for_meme(data_dict):
         org_data = orgs_dict[org]
         org = org.replace(' ', '_')
         if org_data['optimized']:
+            organism_dict['opt'].append(org)
             org_path = os.path.join(opt_path, org)
         else:
+            organism_dict['deopt'].append(org)
             org_path = os.path.join(deopt_path, org)
         os.mkdir(org_path)
         file_path = os.path.join(org_path, org)
@@ -74,33 +84,6 @@ def create_files_for_meme(data_dict):
         write_fasta(file_path + '_inter',   list(org_data['intergenic'].values()),      list(org_data['intergenic'].keys()))
         write_fasta(file_path + '_33_200',  list(org_data['third_most_HE'].values()),   list(org_data['third_most_HE'].keys()))
 
-
-"""
-This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
-@param data_dict: a dictionary containing all input information for each organism
-"""
-def run_streme(data_dict):
-    #create files for STREME from input dictionary
-    create_files_for_meme(data_dict) ### maybe call it outside???
-    out_path = 'streme_outputs'
-    os.mkdir(out_path)
-    for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
-
-        #first run: opt organism vs. intergenic
-        org_name = opt_org.split(os.sep)[-2]
-        dir_name = os.path.join(opt_path, org_name)
-        name1 = '_'.join([org_name, '100', '200'])
-        name2 = '_'.join([org_name, 'inter'])
-        one_streme(name1, dir_name, name2, dir_name, out_path)
-
-        #second run: opt organism HE vs. all deopt organisms HE
-        for deopt_org in glob.glob(os.path.join(deopt_path, "*", "")):
-             de_org_name = deopt_org.split(os.sep)[-2]
-             de_dir_name = os.path.join(deopt_path, de_org_name)
-             name1 = '_'.join([org_name, '33', '200'])
-             name2 = '_'.join([de_org_name, '33', '200'])
-             one_streme(name1, dir_name, name2, de_dir_name, out_path)
-             
 
 """
 This method executes one run of STREME for a specific set of files
@@ -121,6 +104,30 @@ def one_streme(name1, start1, name2, start2, out_path=""):
     if len(out_path) > 0:
         out_dir = os.path.join(out_path, out_dir)
     streme(primary_path=path1, control_path=path2, kmer=k, output_path=out_dir, minw=minw, maxw=maxw)
+
+
+"""
+This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
+"""
+def run_streme():
+    out_path = 'streme_outputs'
+    os.mkdir(out_path)
+    for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
+
+        #first run: opt organism vs. intergenic
+        org_name = opt_org.split(os.sep)[-2]
+        dir_name = os.path.join(opt_path, org_name)
+        name1 = '_'.join([org_name, '100', '200'])
+        name2 = '_'.join([org_name, 'inter'])
+        one_streme(name1, dir_name, name2, dir_name, out_path)
+
+        #second run: opt organism HE vs. all deopt organisms HE
+        for deopt_org in glob.glob(os.path.join(deopt_path, "*", "")):
+             de_org_name = deopt_org.split(os.sep)[-2]
+             de_dir_name = os.path.join(deopt_path, de_org_name)
+             name1 = '_'.join([org_name, '33', '200'])
+             name2 = '_'.join([de_org_name, '33', '200'])
+             one_streme(name1, dir_name, name2, de_dir_name, out_path)
 
 
 """
@@ -213,3 +220,171 @@ def find_letter(motif, motif_seq, index):
     pssm = [float(pos.get(letter)) for letter in dna]
     best_letter = dna[pssm.index(max(pssm))]
     return best_letter
+
+######################################################
+###### Motif filtering for multi-organism model ######
+######################################################
+
+"""
+This method checks if an intergenic STREME output file is from
+an optimized organism
+@param fname: name of a STREME output file
+
+@return: True if the file is from an optimized organism, False otherwise
+"""
+def is_optimized(fname):
+    name = fname.split(os.sep)[-2]
+    org_name = '_'.join(name.split('_')[:2])
+    if org_name in organism_dict['opt']:
+        return True
+    return False
+    
+
+"""
+This method gets all xml STREME output files from intergenic runs
+
+@return: a list of file names
+"""
+def find_all_inter_files():
+    all_files = glob.glob(os.path.join('streme_outputs', "**", "*.xml"), recursive=True)
+    inter_files = [f for f in all_files if 'inter' in f]
+    return inter_files
+
+
+"""
+This method gets all xml STREME output files from selective runs
+
+@return: a list of file names
+"""
+def find_all_selective_files():
+    all_files = glob.glob(os.path.join('streme_outputs', "**", "*.xml"), recursive=True)
+    selective_files = [f for f in all_files if 'inter' not in f]
+    return selective_files
+
+
+"""
+This method creates a new xml STREME file with all intergenic motifs in all runs
+
+@return: a pointer to an ElementTree object containing the data in xml format
+"""
+def unionize_motifs():
+    ### all outputs or only opt organisms??? currently all
+    inter_files = find_all_inter_files()
+
+    base_file = inter_files[0]
+    base_tree = et.parse(base_file)
+    base_root = base_tree.getroot()
+    base_element = base_root.find('.//motifs')
+    
+    for xml_file in inter_files[1:]:
+        tree = et.parse(xml_file)
+        root = tree.getroot()
+        element = root.find('.//motifs')
+        for motif in element.findall('motif'):
+            base_element.append(motif)
+
+    base_tree.write('unionized_motifs.xml')
+    return base_tree
+
+
+"""
+This method finds all intergenic motifs with low correlation to selective ones
+@param C_set: dictionary of the unionized intergenic motifs with pssms
+@param file_list: a list of files to calculate their motifs' correlation to C_set
+@threshold: used to decide which correlation scores are too low
+
+@return: a list of motif indices to delete from the xml file
+"""
+def get_motifs_to_delete(C_set, file_list, threshold: float):
+    to_delete = set()
+    for file in file_list:
+        if is_optimized(file):
+            print('File:::::',file)
+            S_x = extract_pssm_from_xml(file)
+            corr_df, pval_df = compare_pssm_sets(C_set, S_x)
+            corr_df['max'] = corr_df.max(axis=1)
+            print('Max correlation:\n', corr_df['max'])
+            low_idx = list(np.where(corr_df['max'] < threshold)[0])
+            print('Indices to delete:', low_idx)
+            to_delete.update(low_idx) #mark all motifs with low correlation
+
+    return to_delete
+
+
+"""
+This method creates a final STREME file with only motifs that are both
+selective and intergenic in all optimized organisms
+@param base_tree: an ElementTree object containing all intergenic motifs
+@param D1: threshold for intergenic correlation calculation
+@param D2: threshold for selective correlation calculation
+"""
+def multi_filter_motifs(base_tree, D1, D2):
+    selective_files = find_all_selective_files()
+    inter_files = find_all_inter_files()
+    C_set = extract_pssm_from_xml('unionized_motifs.xml')
+
+    base_root = base_tree.getroot()
+    base_element = base_root.find('.//motifs')
+
+    #first check: each set S_x where x in A, has at least one motif with correlation > D1 to the C_set motif
+    to_delete1 = get_motifs_to_delete(C_set, inter_files, D1)
+
+    #second check: each set S_xy where x in A and y in B, has at least one motif with correlation > D2 to the C_set motif
+    to_delete2 = get_motifs_to_delete(C_set, selective_files, D2)
+    
+    to_delete = set.union(to_delete1, to_delete2)
+    #print(to_delete1, to_delete2)
+    for i, motif in enumerate(base_element.findall('motif')):
+        if i in to_delete:
+            base_element.remove(motif)
+
+    base_tree.write('final_motif_set.xml')
+
+
+"""
+This method calls the xml pipeline to create final motif set
+@param D1: threshold for intergenic correlation calculation
+@param D2: threshold for selective correlation calculation
+""" 
+def create_final_motif_xml(D1: float, D2: float):
+    tree = unionize_motifs()
+    multi_filter_motifs(tree, D1, D2)
+
+
+
+
+base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+user_inp_raw = {
+    'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
+    'selected_promoters': None,
+    'organisms': {
+                   'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+                            'optimized': True,
+                            'expression_csv': None},
+
+                    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                               'optimized': False,
+                               'expression_csv': None},
+
+                    'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+                              'optimized': False,
+                              'expression_csv': None},
+
+                    'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
+                             'optimized': True,
+                             'expression_csv': None},
+
+                    'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
+                             'optimized': True,
+                             'expression_csv': None},
+
+                    'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
+                             'optimized': True,
+                             'expression_csv': None}
+    }
+}
+
+input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
+create_files_for_meme(input_dict)
+run_streme()
+create_final_motif_xml(0.2, 0.2)
