@@ -1,11 +1,17 @@
 from ORF.calculating_cai import CAI
 from shared_functions_and_vars import *
+import pandas as pd
+from logger_factory import LoggerFactory
+import operator
 
+logger = LoggerFactory.create_logger("user_input")
 
 # RE model
 def find_org_name(gb_file):
     org_name = gb_file.description
     return ' '.join(org_name.split()[:2])
+
+
 
 
 # ORI model
@@ -86,6 +92,8 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
 
 
 def extract_highly_expressed_gene_names(expression_estimation, percent_used =1/3):
+    #todo: there is a bug with the csv
+
     exp_list = list(expression_estimation.values())
     exp_list.sort(reverse=True)
     exp_th = exp_list[round(percent_used*len(exp_list))]
@@ -93,7 +101,7 @@ def extract_highly_expressed_gene_names(expression_estimation, percent_used =1/3
     return list_of_highly_exp_genes
 
 
-def extract_gene_data(genbank_path):
+def extract_gene_data(genbank_path, expression_csv_fid=None):
     """
     regorgnize relevant genebank data
     :param genbank_path: cds file path
@@ -103,6 +111,8 @@ def extract_gene_data(genbank_path):
     # intergenic_dict: idx is a placing along the genome, and the value is the intergenic sequence
     # cai_dict: cai score for each cds
         """
+
+
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
     cds_seqs = []
     gene_names = []
@@ -110,6 +120,31 @@ def extract_gene_data(genbank_path):
     starts = []
     ends = []
     strands = []
+    estimated_expression = {}
+
+    if expression_csv_fid is not None:
+        try:
+            expression_df = pd.read_csv(expression_csv_fid)
+
+            gene_name_to_mrna_level = {}
+            for idx, pair in enumerate(zip(expression_df.gene.to_list(), expression_df.mRNA_level.to_list())):
+                measured_gene_name, expression_level = pair
+                try:
+                    gene_name_to_mrna_level[measured_gene_name.lower()] = float(expression_level)
+                except:
+                    continue
+            mrna_levels = list(gene_name_to_mrna_level.values())
+            mrna_names =  list(gene_name_to_mrna_level.keys())
+        except:
+            expression_csv_fid = None
+            logger.info('Expression data file is corrupt. \nMake sure that: ')
+            logger.info('1. File is in csv format')
+            logger.info('2. Gene names fit their NCBI naming ')
+            logger.info('3. Column with the gene names is labeled "gene"  ')
+            logger.info('4. Column with the gene expression levels is labeled "mRNA_level" ')
+
+
+
     with open(genbank_path) as input_handle:
         for record in SeqIO.parse(input_handle, "genbank"):
             for feature in record.features:
@@ -138,15 +173,39 @@ def extract_gene_data(genbank_path):
                         ends.append(feature.location.end)
                         strands.append(feature.location.strand)
 
+                        if expression_csv_fid is not None:
+                            try:
+                                mrna_level = [mrna_levels[index] for index in range(len(mrna_names)) if mrna_names[index] == name.lower()][0]
+                                estimated_expression[name + '|'+function] = mrna_level
+                            except:
+                                continue
+
     entry_num = len(gene_names)
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
     prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
-    prom400_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=400, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
     intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=400, genome=genome, len_th=30)
 
-    cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
-    cai_scores, cai_weights = CAI(cds_seqs, reference=cai_reference_set)
+    ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
+    if len(estimated_expression) <len(ribosomal_proteins): #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+        cai_scores, cai_weights = CAI(cds_seqs, reference=ribosomal_proteins)
+        estimated_expression = cai_scores
+        if expression_csv_fid is not None:
+            logger.info(
+                f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
+        else:
+            logger.info('CAI will be used as an estimated expression measurement')
+
+    else:
+        sorted_estimated_expression = dict(
+            sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
+        highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
+        highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
+        cai_scores, cai_weights = CAI(cds_seqs, reference=highly_expressed_cds_seqs)
+        logger.info(f'Expression levels were found for {len(estimated_expression)}')
+
     cai_dict = {name_and_function[i]: cai_scores[i] for i in range(entry_num)}
-    return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights
+
+    return prom200_dict, cds_dict, intergenic_dict, cai_dict, cai_weights, estimated_expression
+
 
