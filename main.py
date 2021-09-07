@@ -15,9 +15,9 @@ user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
     'organisms': {
-                   'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-                            'optimized': True,
-                            'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
+#                    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+#                             'optimized': True,
+#                             'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
 
                     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
                                'optimized': False,
