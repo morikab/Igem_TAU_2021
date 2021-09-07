@@ -67,7 +67,7 @@ def fasta_to_dict(fasta_fid):
 def write_fasta(fid, list_seq, list_name):
     ofile = open(fid + '.fasta', "w+")
     for i in range(len(list_seq)):
-        ofile.write(">" + list_name[i] + "\n" + list_seq[i] + "\n")
+        ofile.write(">" + str(list_name[i]) + "\n" + str(list_seq[i]) + "\n")
     ofile.close()
 
 # write ideas for the promoter model
