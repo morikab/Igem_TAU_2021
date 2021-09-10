@@ -24,22 +24,24 @@ def index():
 @app.route('/success', methods=['POST', 'GET'])
 def success():
     if request.method == "POST":
-        data = request.form.to_dict(flat=False)
-        display_data = request.form.to_dict()
-        uploaded_files = []
+        data = request.form.to_dict()
         print(data)
         if request.files:
-            for f in request.files.values():
+            uploaded_files = []
+            uploaded_data = {}
+            for key, f in request.files.items():
                 filename = secure_filename(f.filename)
                 if filename == '':
                     continue
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                uploaded_data[key] = filename
                 uploaded_files.append(filename)
-            display_data['uploaded files'] = uploaded_files
-            print('files uploaded successfully', uploaded_files)
+            data['uploaded files'] = uploaded_files
+            print('files uploaded successfully: ', uploaded_files)
+            print('Data uploaded organized: ', uploaded_data)
         else:
             print('No files uploaded')
-        return render_template("success.html", data=display_data)
+        return render_template("success.html", data=data)
     return redirect("/")
 
 
