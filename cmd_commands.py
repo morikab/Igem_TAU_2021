@@ -8,6 +8,7 @@ import user_IO
 from promoters.intersect_motifs_2_org_final import *
 import pandas as pd
 import numpy as np
+#from mast_analysis import extract_motifs_from_xml
 
 
 global dna, opt_path, deopt_path, end, organism_dict
@@ -16,11 +17,12 @@ opt_path = 'opt_files'
 deopt_path = 'deopt_files'
 end = '.fasta'
 organism_dict = {'opt': [], 'deopt': []}
-#organism_dict = {
-#    'opt': ['Escherichia_coli', 'Mycobacterium_tuberculosis', 'Pantoea_ananatis', 'Azospirillum_brasilense'],
-#    'deopt': ['Bacillus_subtilis', 'Sulfolobus_acidocaldarius']
-#    }
-
+"""
+organism_dict = {
+    'opt': ['Escherichia_coli', 'Mycobacterium_tuberculosis', 'Pantoea_ananatis', 'Azospirillum_brasilense'],
+    'deopt': ['Bacillus_subtilis', 'Sulfolobus_acidocaldarius']
+    }
+"""
 """
 This method uses STREME to find motifs that are enriched in one set of promoters and aren't present in the other
 
@@ -83,6 +85,13 @@ def create_files_for_meme(data_dict):
         write_fasta(file_path + '_100_200', list(org_data['200bp_promoters'].values()), list(org_data['200bp_promoters'].keys()))
         write_fasta(file_path + '_inter',   list(org_data['intergenic'].values()),      list(org_data['intergenic'].keys()))
         write_fasta(file_path + '_33_200',  list(org_data['third_most_HE'].values()),   list(org_data['third_most_HE'].keys()))
+
+    promoter_dict = data_dict['selected_prom']
+    new_p_dict = dict()
+    for p in promoter_dict.keys():
+        new_p_key = p.replace(' ', '_')
+        new_p_dict[new_p_key] = promoter_dict[p]
+    write_fasta('promoters', list(new_p_dict.values()), list(new_p_dict.keys()))
 
 
 """
@@ -171,10 +180,11 @@ NOTE: currently only modifies sites where motif match was with the original sequ
 @param p_file: path to a fasta file of promoters (must be same promoters as the MAST run)
 @param mast_xml: MAST output XML file
 
-@return a dictionary of promoters where the keys are the promoter names and the values are the modified sequences
+@return a dictionary of promoters where the keys are the promoter names and the values are dictionaries with promoter information
 """
 def modify_promoter(p_file, mast_xml):
     promoters = SeqIO.to_dict(SeqIO.parse(p_file, 'fasta'))
+    #print(list(promoters.keys())[0:10])
     new_promoters = dict()
     tree = et.parse(mast_xml)
     root = tree.getroot()
@@ -182,13 +192,18 @@ def modify_promoter(p_file, mast_xml):
     motifs = list(root.findall('.//motif'))
 
     for seq in root.findall('.//sequence'): #for each promoter that was found to have significant matches to motifs
-        p_name = seq.get('name')
-        p_len = seq.get('length')
-        promoter = str(promoters[p_name].seq).upper()
-        
-        for seg in seq.findall('seg'):
-            for hit in seg.findall('hit'): #for each motif that matched the promoter
-                if hit.get('rc') == 'n': ### check if need to always run without RC???
+        strand = seq.find('score').get('strand')
+        if strand == 'forward':
+            p_name = seq.get('name').strip().replace(' ', '_')
+            p_comment = seq.get('comment').strip().replace(' ', '_')
+            p_name = '_'.join([p_name, p_comment])
+            #print(p_name)
+            p_len = seq.get('length')
+            promoter = str(promoters[p_name].seq).upper()
+            org_promoter = promoter
+            evalue = float(seq.find('score').get('evalue'))
+            for seg in seq.findall('seg'):
+                for hit in seg.findall('hit'): #for each motif that matched the promoter
                     start = int(hit.get('pos'))
                     motif_idx = int(hit.get('idx'))
                     motif_seq = motifs[motif_idx].get('id').split('-')[1].upper()
@@ -200,7 +215,7 @@ def modify_promoter(p_file, mast_xml):
                         letter = find_letter(motifs[motif_idx], motif_seq, mm)
                         promoter = promoter[:pos] + letter + promoter[pos + 1:]
 
-        new_promoters[p_name] = promoter
+        new_promoters[p_name] = {'original_seq': org_promoter, 'evalue': evalue, 'modified_seq': promoter}
 
     return new_promoters
                 
@@ -221,6 +236,26 @@ def find_letter(motif, motif_seq, index):
     best_letter = dna[pssm.index(max(pssm))]
     return best_letter
 
+
+"""
+This method writes the results of the promoter optimization into a text file
+@param promoter_dict: a dictionary where promoter names are keys and a dictionary containing promoter info is the value; output of modify_promoter
+@param p_num: number of promoters to write into the file. These will be the ones with best E-value scores.
+"""
+def write_results(promoter_dict, p_num):
+    text = ''
+    for p_name, p_info in list(promoter_dict.items())[:p_num]:
+        text += 'promoter name:\n' + p_name.replace('_', ' ') + '\n\n'
+        org_seq = p_info['original_seq']
+        text += 'original sequence:\n' + org_seq + '\n\n'
+        new_seq = p_info['modified_seq']
+        text += 'modified sequence:\n' + new_seq + '\n\n'
+        evalue = p_info['evalue']
+        text += 'E-value:\n' + str(evalue) + '\n\n'
+
+    with open('chosen_promoter.txt', 'w') as f:
+        f.write(text)
+        
 ######################################################
 ###### Motif filtering for multi-organism model ######
 ######################################################
@@ -268,8 +303,8 @@ This method creates a new xml STREME file with all intergenic motifs in all runs
 @return: a pointer to an ElementTree object containing the data in xml format
 """
 def unionize_motifs():
-    ### all outputs or only opt organisms??? currently all
-    inter_files = find_all_inter_files()
+    ### all outputs or only opt organisms??? currently all #####################
+    inter_files = [f for f in find_all_inter_files() if is_optimized(f)]
 
     base_file = inter_files[0]
     base_tree = et.parse(base_file)
@@ -299,13 +334,10 @@ def get_motifs_to_delete(C_set, file_list, threshold: float):
     to_delete = set()
     for file in file_list:
         if is_optimized(file):
-            print('File:::::',file)
             S_x = extract_pssm_from_xml(file)
             corr_df, pval_df = compare_pssm_sets(C_set, S_x)
             corr_df['max'] = corr_df.max(axis=1)
-            print('Max correlation:\n', corr_df['max'])
             low_idx = list(np.where(corr_df['max'] < threshold)[0])
-            print('Indices to delete:', low_idx)
             to_delete.update(low_idx) #mark all motifs with low correlation
 
     return to_delete
@@ -333,7 +365,7 @@ def multi_filter_motifs(base_tree, D1, D2):
     to_delete2 = get_motifs_to_delete(C_set, selective_files, D2)
     
     to_delete = set.union(to_delete1, to_delete2)
-    #print(to_delete1, to_delete2)
+    print(to_delete)
     for i, motif in enumerate(base_element.findall('motif')):
         if i in to_delete:
             base_element.remove(motif)
@@ -384,7 +416,8 @@ user_inp_raw = {
     }
 }
 
-input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
-create_files_for_meme(input_dict)
-run_streme()
-create_final_motif_xml(0.2, 0.2)
+#input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
+#create_files_for_meme(input_dict)
+#run_streme()
+#create_final_motif_xml(0.2, 0.2)
+
