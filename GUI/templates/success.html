@@ -1,10 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+/*custom font*/
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+
+/*basic reset*/
+* {margin: 0; padding: 0;}
+
+html {
+	height: 100%;
+	/*Image only BG fallback*/
+	background: url('http://thecodeplayer.com/uploads/media/gs.png');
+	/*background = gradient + image pattern combo*/
+	background:
+		linear-gradient(0.25turn, rgba(242, 242, 242, 1), rgba(155, 89, 182, 0.2)),
+		url('http://thecodeplayer.com/uploads/media/gs.png');
+}
+body {
+	font-family: montserrat, arial, verdana;
+	text-align: center;
+}
+table {
+    border: 1px solid black;
+    text-align: center;
+    padding: 5px;
+}
+th, td {
+    border-bottom: 1px solid #f07;
+    padding: 5px;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+tr:hover {background-color: #c6f0ff;}
+</style>
 <head>
     <meta charset="UTF-8">
-    <title>Success</title>
+    <title>Summary</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <h2>Thank you for using Communique's Optimizer, cya soon!</h2>
+    <h2>Thank you for using Communique's Optimizer!</h2><br>
+    <h2>Summary of Your Application:</h2><br>
+    <center>
+        <table>
+        {% for key, value in data.items() %}
+           <tr>
+                <th> {{ key }} </th>
+                <td> {{ value }} </td>
+           </tr>
+        {% endfor %}
+        </table>
+    </center>
 </body>
 </html>
