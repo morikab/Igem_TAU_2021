@@ -13,8 +13,8 @@ import numpy as np
 
 global dna, opt_path, deopt_path, end, organism_dict
 dna = "ACGT"
-opt_path = 'opt_files'
-deopt_path = 'deopt_files'
+opt_path = '../opt_files'
+deopt_path = '../deopt_files'
 end = '.fasta'
 organism_dict = {'opt': [], 'deopt': []}
 """
@@ -106,7 +106,7 @@ def one_streme(name1, start1, name2, start2, out_path=""):
     k = 3
     minw = 6
     maxw = 20
-    
+
     path1 = os.path.join(start1, name1 + end)
     path2 = os.path.join(start2, name2 + end)
     out_dir = '_'.join([name1, name2])
@@ -119,7 +119,7 @@ def one_streme(name1, start1, name2, start2, out_path=""):
 This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
 """
 def run_streme():
-    out_path = 'streme_outputs'
+    out_path = '../streme_outputs'
     os.mkdir(out_path)
     for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
 
@@ -149,8 +149,8 @@ Saves results in the same folder (doesn't create a new folder)
 def run_mast(motif_path, promoter_path):
     motif_name = motif_path.split(os.sep)[-1].split('.')[0] #modified motif file- not in original folder anymore (get only name of file without ext or path)
     promoter_name = promoter_path.split(os.sep)[-1].split('.')[0] #get only file name without ext or path
-    mast(motif_path, promoter_path, output_path='_'.join(['motif', motif_name, 'seq', promoter_name200]))
-    
+    mast(motif_path, promoter_path, output_path='_'.join(['motif', motif_name, 'seq', promoter_name]))
+
 
 """
 This method filters motifs outputted by STREME according to a given dictionary of motifs.
@@ -172,7 +172,7 @@ def filter_motifs(motif_d, streme_xml):
 
     tree.write(name + '_modified.xml')
     return name + '_modified.xml'
-    
+
 
 """
 This method modifies promoters to align better with motifs that match them.
@@ -218,7 +218,7 @@ def modify_promoter(p_file, mast_xml):
         new_promoters[p_name] = {'original_seq': org_promoter, 'evalue': evalue, 'modified_seq': promoter}
 
     return new_promoters
-                
+
 
 """
 This method finds the letter in the motif that will replace the current letter in the promoter, to match the motif better
@@ -255,7 +255,7 @@ def write_results(promoter_dict, p_num):
 
     with open('chosen_promoter.txt', 'w') as f:
         f.write(text)
-        
+
 ######################################################
 ###### Motif filtering for multi-organism model ######
 ######################################################
@@ -273,7 +273,7 @@ def is_optimized(fname):
     if org_name in organism_dict['opt']:
         return True
     return False
-    
+
 
 """
 This method gets all xml STREME output files from intergenic runs
@@ -310,7 +310,7 @@ def unionize_motifs():
     base_tree = et.parse(base_file)
     base_root = base_tree.getroot()
     base_element = base_root.find('.//motifs')
-    
+
     for xml_file in inter_files[1:]:
         tree = et.parse(xml_file)
         root = tree.getroot()
@@ -363,7 +363,7 @@ def multi_filter_motifs(base_tree, D1, D2):
 
     #second check: each set S_xy where x in A and y in B, has at least one motif with correlation > D2 to the C_set motif
     to_delete2 = get_motifs_to_delete(C_set, selective_files, D2)
-    
+
     to_delete = set.union(to_delete1, to_delete2)
     print(to_delete)
     for i, motif in enumerate(base_element.findall('motif')):
@@ -377,7 +377,7 @@ def multi_filter_motifs(base_tree, D1, D2):
 This method calls the xml pipeline to create final motif set
 @param D1: threshold for intergenic correlation calculation
 @param D2: threshold for selective correlation calculation
-""" 
+"""
 def create_final_motif_xml(D1: float, D2: float):
     tree = unionize_motifs()
     multi_filter_motifs(tree, D1, D2)
@@ -417,7 +417,5 @@ user_inp_raw = {
 }
 
 #input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
-#create_files_for_meme(input_dict)
-#run_streme()
-#create_final_motif_xml(0.2, 0.2)
+
 
