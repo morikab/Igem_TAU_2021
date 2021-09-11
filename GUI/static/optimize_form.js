@@ -89,9 +89,11 @@ function optimize_inputbox() {
     document.getElementById("optimized_inputboxes").appendChild(namebox);
     //Add file-boxes for organism sequence
     var inputbox = document.createElement("input");
+    let temp_id = "optimized_seq_file_#".concat((i+1).toString());
     inputbox.setAttribute("type", "file");
     inputbox.setAttribute("accept", ".gb");
-    inputbox.setAttribute("name","optimized_seq_file_#".concat((i+1).toString()))
+    inputbox.setAttribute("id",temp_id);
+    inputbox.setAttribute("name",temp_id);
     document.getElementById("optimized_inputboxes").appendChild(inputbox);
   }
 }
@@ -108,13 +110,38 @@ function deoptimize_inputbox() {
     document.getElementById("deoptimized_inputboxes").appendChild(namebox);
     //Add file-boxes for organism sequence
     var inputbox = document.createElement("input");
+    let temp_id = "deoptimized_seq_file_#".concat((i+1).toString());
     inputbox.setAttribute("type", "file");
     inputbox.setAttribute("accept", ".gb");
-    inputbox.setAttribute("name","deoptimized_seq_file_#".concat((i+1).toString()))
+    inputbox.setAttribute("id",temp_id);
+    inputbox.setAttribute("name", temp_id);
     document.getElementById("deoptimized_inputboxes").appendChild(inputbox);
   }
 }
 function empty_inputbox(id_box, id_num) {
     $(id_box).empty();
     $(id_num).val('');
+}
+function fileValidation(element_id, allowed_type) {
+    var fileInput = document.getElementById(element_id);
+    var filePath = fileInput.value;
+    // Allowing file type
+    switch (allowed_type){
+        case '.fa':
+            var allowedExtensions = /(.fa)$/i;
+            break;
+        case '.csv':
+            var allowedExtensions = /(.csv)$/i;
+            break;
+        case '.gb':
+            var allowedExtensions = /(.gb)$/i;
+            break;
+        default:
+            console.log('Please add allowed types');
+    }
+    if (!allowedExtensions.exec(filePath)) {
+        alert('Invalid file type');
+        fileInput.value = '';
+        return false;
+    }
 }
