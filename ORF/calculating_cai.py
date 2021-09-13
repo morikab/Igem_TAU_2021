@@ -45,10 +45,18 @@ def _synonymous_codons(genetic_code_dict = genetic_code_dict):
         for codon in genetic_code_dict.keys()
     }
 
+v = {'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L', 'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S', 'TAT': 'Y',
+     'TAC': 'Y', 'TGT': 'C', 'TGC': 'C', 'TGG': 'W', 'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L', 'CCT': 'P',
+     'CCC': 'P', 'CCA': 'P', 'CCG': 'P', 'CAT': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q', 'CGT': 'R', 'CGC': 'R',
+     'CGA': 'R', 'CGG': 'R', 'ATT': 'I', 'ATC': 'I', 'ATA': 'I', 'ATG': 'M', 'ACT': 'T', 'ACC': 'T', 'ACA': 'T',
+     'ACG': 'T', 'AAT': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K', 'AGT': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+     'GTT': 'V', 'GTC': 'V', 'GTA': 'V', 'GTG': 'V', 'GCT': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A', 'GAT': 'D',
+     'GAC': 'D', 'GAA': 'E', 'GAG': 'E', 'GGT': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G',
+     'TGA': '-', 'TAA': '-', 'TAG': '-'}
 
 _synonymous_codons = {
-    k: _synonymous_codons(v.forward_table) for k, v in ct.unambiguous_dna_by_id.items()
-}
+    'genetic_code': _synonymous_codons(v)}
+
 _non_synonymous_codons = {
     k: {codon for codon in v.keys() if len(v[codon]) == 1}
     for k, v in _synonymous_codons.items()
@@ -95,7 +103,7 @@ def RSCU(sequences, genetic_code=11):
 
     # "if a certain codon is never used in the reference set... assign [its
     # count] a value of 0.5" (page 1285)
-    for codon in ct.unambiguous_dna_by_id[genetic_code].forward_table:
+    for codon in v:
         if counts[codon] == 0:
             counts[codon] = 0.5
 
@@ -106,7 +114,7 @@ def RSCU(sequences, genetic_code=11):
     result = {}
 
     # calculate RSCU values
-    for codon in ct.unambiguous_dna_by_id[genetic_code].forward_table:
+    for codon in v:
         result[codon] = counts[codon] / (
             (len(synonymous_codons[codon]) ** -1)
             * (sum((counts[_codon] for _codon in synonymous_codons[codon])))
@@ -159,7 +167,7 @@ def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code=11):
     return weights
 
 
-def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code=11):
+def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code='genetic_code'):
     r"""Calculates the codon adaptation index (CAI) of a DNA sequence.
     CAI is "the geometric mean of the RSCU values... corresponding to each of the
     codons used in that gene, divided by the maximum possible CAI for a gene of
