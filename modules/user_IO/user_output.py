@@ -1,4 +1,4 @@
-from logger_factory import LoggerFactory
+from modules.logger_factory import LoggerFactory
 import os
 from zipfile import ZipFile
 

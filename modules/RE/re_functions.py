@@ -1,10 +1,8 @@
 import re
-from collections import defaultdict
 from dnachisel import DnaOptimizationProblem, AvoidPattern, EnforceTranslation
-import time
 import itertools
 import os
-from shared_functions_and_vars import *
+from modules.shared_functions_and_vars import *
 
 
 ##open REbase from website : http://rebase.neb.com/rebase/rebase.f12.html

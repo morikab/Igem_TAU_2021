@@ -1,11 +1,7 @@
-from logger_factory import LoggerFactory
-import ORF
-import RE
-import Zscore_calculation
-import user_IO
+from modules.logger_factory import LoggerFactory
+from modules import Zscore_calculation, user_IO, RE, ORF
 import os
 import time
-import promoters
 
 tic = time.time()
 logger = LoggerFactory.create_logger("main")

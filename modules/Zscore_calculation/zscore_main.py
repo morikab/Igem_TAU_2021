@@ -1,4 +1,4 @@
-from ORF.calculating_cai import CAI
+from modules.ORF.calculating_cai import CAI
 import numpy as np
 import pandas as pd
 

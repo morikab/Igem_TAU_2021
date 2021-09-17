@@ -1,7 +1,6 @@
 from collections import Counter
-from Bio.Seq import Seq
 import numpy as np
-from shared_functions_and_vars import *
+from modules.shared_functions_and_vars import *
 
 
 from tqdm import tqdm

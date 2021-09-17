@@ -1,5 +1,5 @@
 from Bio import SeqIO
-from ORF.calculating_cai import CAI
+from modules.ORF import CAI
 import os
 
 

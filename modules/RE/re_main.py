@@ -1,4 +1,5 @@
-from RE.multi_org_functions import *
+from modules.logger_factory import LoggerFactory
+
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("RE")

@@ -1,7 +1,7 @@
-from ORF.calculating_cai import CAI
-from shared_functions_and_vars import *
+from modules.ORF.calculating_cai import CAI
+from modules.shared_functions_and_vars import *
 import pandas as pd
-from logger_factory import LoggerFactory
+from modules.logger_factory import LoggerFactory
 import operator
 
 logger = LoggerFactory.create_logger("user_input")

@@ -1,5 +1,4 @@
-from logger_factory import LoggerFactory
-from RE.re_functions import *
+from modules.logger_factory import LoggerFactory
 import time
 from Bio import SeqIO
 import os

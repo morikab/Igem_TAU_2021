@@ -1,12 +1,8 @@
-import os
 import glob
 import xml.etree.ElementTree as et
 from Bio import SeqIO
-import re
-from shared_functions_and_vars import write_fasta
-import user_IO
-from promoters.intersect_motifs_2_org_final import *
-import pandas as pd
+from modules.shared_functions_and_vars import write_fasta
+from modules.promoters.intersect_motifs_2_org_final import *
 import numpy as np
 #from mast_analysis import extract_motifs_from_xml
 

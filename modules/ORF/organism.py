@@ -2,8 +2,6 @@ from collections import namedtuple
 
 from Bio.Seq import Seq
 
-from ORF.TAI import TAI
-
 ############################
 #
 #

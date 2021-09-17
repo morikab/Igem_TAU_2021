@@ -1,5 +1,6 @@
-from ORF.optimization import optimize_sequence
-from ORF.organism import Organism, Gene
+from modules.ORF.optimization import optimize_sequence
+from modules.ORF.organism import Organism
+
 
 #todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
 #and are they close

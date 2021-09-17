@@ -1,5 +1,4 @@
-from Bio.Seq import Seq
-from shared_functions_and_vars import translate, synonymous_codons
+from modules.shared_functions_and_vars import translate, synonymous_codons
 
 # --------------------------------------------------------------
 

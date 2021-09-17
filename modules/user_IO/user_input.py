@@ -1,9 +1,8 @@
-import os
 import typing
-from user_IO.input_functions import *
-from ORF.TAI import TAI
+from modules.user_IO.input_functions import *
+from modules.ORF.TAI import TAI
 
-from logger_factory import LoggerFactory
+from modules.logger_factory import LoggerFactory
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("user_input")
