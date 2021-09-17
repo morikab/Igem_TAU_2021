@@ -13,8 +13,8 @@ import numpy as np
 
 global dna, opt_path, deopt_path, end, organism_dict
 dna = "ACGT"
-opt_path = '../opt_files'
-deopt_path = '../deopt_files'
+opt_path = 'promoters_not_for_user/opt_files'
+deopt_path = 'promoters_not_for_user/deopt_files'
 end = '.fasta'
 organism_dict = {'opt': [], 'deopt': []}
 """
@@ -119,7 +119,7 @@ def one_streme(name1, start1, name2, start2, out_path=""):
 This method runs STREME several times to create all necessary files for subsequent motif ranking and filtering
 """
 def run_streme():
-    out_path = '../streme_outputs'
+    out_path = 'promoters_not_for_user/streme_outputs'
     os.mkdir(out_path)
     for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
 
