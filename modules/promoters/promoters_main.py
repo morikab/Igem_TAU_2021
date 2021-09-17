@@ -1,3 +1,5 @@
+from .cmd_commands import *
+
 #todo:
 # run_mast should return the f_name as an output
 # as to all IO: write everything into a directory called "promoters_not_for_user", except the mast html file which
@@ -5,7 +7,6 @@
 # divide code into different sub-modules
 # make run_module return the best sequence and it's e value.
 # re-rank promoters
-
 
 
 class promoterModule(object):

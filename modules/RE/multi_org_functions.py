@@ -1,5 +1,7 @@
 from modules.logger_factory import LoggerFactory
 
+from .re_functions import REbase_org, insert_site_CDS, sites_in_cds
+
 logger = LoggerFactory.create_logger("RE")
 
 
