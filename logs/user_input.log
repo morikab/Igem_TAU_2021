@@ -1,0 +1,49 @@
+2021-09-17 19:58:33,312 - user_input - INFO - ##########################
+2021-09-17 19:58:33,328 - user_input - INFO - # USER INPUT INFORMATION #
+2021-09-17 19:58:33,342 - user_input - INFO - ##########################
+2021-09-17 19:58:34,466 - user_input - INFO - 
+Information about Escherichia coli:
+2021-09-17 19:58:34,486 - user_input - INFO - Organism is optimized
+2021-09-17 19:58:35,427 - user_input - INFO - Number of tRNA genes found: 86, for 40 anticodons out of 61
+2021-09-17 20:00:05,336 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:00:05,453 - user_input - INFO - Number of genes: 4310, number of intregenic regions: 608
+2021-09-17 20:00:06,931 - user_input - INFO - 
+Information about Bacillus subtilis:
+2021-09-17 20:00:06,981 - user_input - INFO - Organism is deoptimized
+2021-09-17 20:00:08,740 - user_input - INFO - Number of tRNA genes found: 56, for 32 anticodons out of 61
+2021-09-17 20:00:48,243 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:00:48,281 - user_input - INFO - Number of genes: 4311, number of intregenic regions: 455
+2021-09-17 20:00:48,818 - user_input - INFO - 
+Information about Sulfolobus acidocaldarius:
+2021-09-17 20:00:48,829 - user_input - INFO - Organism is deoptimized
+2021-09-17 20:00:49,224 - user_input - INFO - Number of tRNA genes found: 46, for 44 anticodons out of 61
+2021-09-17 20:01:05,461 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:01:05,540 - user_input - INFO - Number of genes: 2271, number of intregenic regions: 302
+2021-09-17 20:01:06,403 - user_input - INFO - 
+Information about Mycobacterium tuberculosis:
+2021-09-17 20:01:06,441 - user_input - INFO - Organism is optimized
+2021-09-17 20:01:07,363 - user_input - INFO - Number of tRNA genes found: 52, for 44 anticodons out of 61
+2021-09-17 20:02:03,309 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:02:03,329 - user_input - INFO - Number of genes: 4064, number of intregenic regions: 419
+2021-09-17 20:02:04,190 - user_input - INFO - 
+Information about Pantoea ananatis:
+2021-09-17 20:02:04,225 - user_input - INFO - Organism is optimized
+2021-09-17 20:02:05,071 - user_input - INFO - Number of tRNA genes found: 78, for 35 anticodons out of 61
+2021-09-17 20:02:56,534 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:02:56,553 - user_input - INFO - Number of genes: 3933, number of intregenic regions: 686
+2021-09-17 20:02:57,015 - user_input - INFO - 
+Information about Azospirillum brasilense:
+2021-09-17 20:02:57,068 - user_input - INFO - Organism is optimized
+2021-09-17 20:02:57,264 - user_input - INFO - Number of tRNA genes found: 9, for 8 anticodons out of 61
+2021-09-17 20:02:59,855 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-17 20:02:59,882 - user_input - INFO - Number of genes: 1045, number of intregenic regions: 140
+2021-09-17 20:02:59,907 - user_input - INFO - 
+
+Sequence to be optimized given in the following file C:\wsl_files\iGEM\final\example_data\mCherry_original.fasta
+2021-09-17 20:02:59,917 - user_input - INFO - containing this sequence: ATGGTTTCCAAGGGCGAGGAGGATAACATGGCTATCATTAAAGAGTTCATGCGCTTCAAAGTTCACATGGAGGGTTCTGTTAACGGTCACGAGTTCGAGATCGAAGGCGAAGGCGAGGGCCGTCCGTATGAAGGCACCCAGACCGCCAAACTGAAAGTGACTAAAGGCGGCCCGCTGCCTTTTGCGTGGGACATCCTGAGCCCGCAATTTATGTACGGTTCTAAAGCGTATGTTAAACACCCAGCGGATATCCCGGACTATCTGAAGCTGTCTTTTCCGGAAGGTTTCAAGTGGGAACGCGTAATGAATTTTGAAGATGGTGGTGTCGTGACCGTCACTCAGGACTCCTCCCTGCAGGATGGCGAGTTCATCTATAAAGTTAAACTGCGTGGTACTAATTTTCCATCTGATGGCCCGGTGATGCAGAAAAAGACGATGGGTTGGGAGGCGTCTAGCGAACGCATGTATCCGGAAGATGGTGCGCTGAAAGGCGAAATTAAACAGCGCCTGAAACTGAAAGATGGCGGCCATTATGACGCTGAAGTGAAAACCACGTACAAAGCCAAGAAACCTGTGCAGCTGCCTGGCGCGTACAATGTGAATATTAAACTGGACATCACCTCTCATAATGAAGATTATACGATCGTAGAGCAATATGAGCGCGCGGAGGGTCGTCATTCTACCGGTGGCATGGATGAGCTGTACAAATAA
+2021-09-17 20:02:59,933 - user_input - INFO - External promoter options were not supplied. endogenous promoters will be used for optimization.promoters from the 1/3 most highly expressed genes of all organisms are used- 
+2021-09-17 20:02:59,946 - user_input - INFO - 1435 promoters are selected from Escherichia coli
+2021-09-17 20:02:59,956 - user_input - INFO - 1355 promoters are selected from Mycobacterium tuberculosis
+2021-09-17 20:02:59,964 - user_input - INFO - 1310 promoters are selected from Pantoea ananatis
+2021-09-17 20:02:59,975 - user_input - INFO - 347 promoters are selected from Azospirillum brasilense
+2021-09-17 20:02:59,981 - user_input - INFO - Resulting in a total of 4447 used for promoter selection and optimization
