@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class LoggerFactory(object):
-    LOG_DIRECTORY = "logs"
+    LOG_DIRECTORY = str(os.path.join(Path(__file__).parent.resolve(), "logs"))
     _LOG_SUFFIX = "log"
 
     @classmethod

@@ -57,7 +57,7 @@ def run_modules(user_inp_raw):
 
     final_output = user_IO.UserOutputModule.run_module(cds_nt_final_cai, mean_Zscore)
     logger.info("Final output: %s", final_output)
-
+    return final_output
 
 
 if __name__ == "__main__":
