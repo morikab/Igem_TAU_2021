@@ -106,7 +106,7 @@ def run_mast(motif_path, promoter_path):
     mast(motif_path, promoter_path, output_path=out_path)
 
     source_path = os.path.join(out_path, 'mast.html')
-    base_path = os.path.dirname(os.path.dirname(__file__))
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     target_path = os.path.join(base_path, 'logs', 'mast_results.html')
     shutil.copyfile(source_path, target_path)
                                 
