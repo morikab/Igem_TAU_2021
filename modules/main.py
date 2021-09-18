@@ -6,8 +6,7 @@ import time
 tic = time.time()
 logger = LoggerFactory.create_logger("main")
 
-
-base_path = os.path.join(os.path.dirname(__file__), 'example_data')
+base_path = os.path.join(os.path.dirname(__file__), '..\example_data')
 user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
@@ -16,17 +15,17 @@ user_inp_raw = {
 #                             'optimized': True,
 #                             'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
 
-                    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                               'optimized': False,
-                               'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
-
-                    'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                              'optimized': False,
-                              'expression_csv': None},
-
-                    'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
+                    # 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                    #            'optimized': False,
+                    #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
+                    #
+                    # 'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+                    #           'optimized': False,
+                    #           'expression_csv': None},
+                    #
+                    # 'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
+                    #          'optimized': True,
+                    #          'expression_csv': None},
 
                     'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
                              'optimized': True,
