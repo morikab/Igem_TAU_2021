@@ -75,6 +75,7 @@ class UserInputModule(object):
 
         full_inp_dict['selected_prom'] = selected_prom
         full_inp_dict['sequence'] = orf_seq
+        full_inp_dict['tuning_param'] = usr_inp['tuning_param']
         return full_inp_dict
 
     @staticmethod
@@ -126,6 +127,7 @@ class UserInputModule(object):
             'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
             'tai_profile': TAI(tgcn_dict).index,  # {dna_codon:tai_score}
-            'optimized': val['optimized']}
+            'optimized': val['optimized']
+            }
 
         return org_name, org_dict
