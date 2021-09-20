@@ -1,7 +1,9 @@
-from modules.logger_factory import LoggerFactory
-from modules import Zscore_calculation, user_IO, RE, ORF
 import os
 import time
+from pathlib import Path
+
+from modules.logger_factory import LoggerFactory
+from modules import Zscore_calculation, user_IO, RE, ORF
 
 tic = time.time()
 logger = LoggerFactory.create_logger("main")
@@ -54,7 +56,12 @@ def run_modules(user_inp_raw):
     # best_seq, best_seq_name, evalue, synthetic_option = promoters.promoterModule.run_module(input_dict, D1 = 0.2, D2=0.2)
     # #######################################################
 
-    final_output = user_IO.UserOutputModule.run_module(cds_nt_final_cai, mean_Zscore)
+    # TODO - get zip_directory from the user
+    zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
+    Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
+    final_output = user_IO.UserOutputModule.run_module(cds_sequence=cds_nt_final_cai,
+                                                       zscore=mean_Zscore,
+                                                       zip_directory=zip_directory_path)
     logger.info("Final output: %s", final_output)
     return final_output
 

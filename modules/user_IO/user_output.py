@@ -8,6 +8,7 @@ logger = LoggerFactory.create_logger("user_output")
 
 class UserOutputModule(object):
     _ZIP_FILE_NAME = "results.zip"
+    _LOGS_SUBDIRECTORY = "logs"
     _FINAL_OPTIMIZED_SEQUENCE_FILE_NAME = "optimized_sequence.fasta"
 
     @staticmethod
@@ -20,16 +21,17 @@ class UserOutputModule(object):
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
 
-        # TODO - get zip_directory from the user
+        logger.info("Output zip file directory path: %s", zip_directory)
+
         cls._create_final_zip(zip_directory, cds_sequence)
 
         # TODO - fix the dict according to spec
         return {
-            'final sequence: ': cds_sequence,  # str
+            'final_sequence: ': cds_sequence,  # str
             'Zscore': zscore,  # int
-            'final promoter': None,  # str
-            'promoter score': None,  # int
-            'promoter fasta': None,  # fasta file
+            'final_promoter': None,  # str
+            'promoter_score': None,  # int
+            'promoter_fasta': None,  # fasta file
         }
 
     @classmethod
@@ -41,9 +43,14 @@ class UserOutputModule(object):
             # Add multiple files to the zip
 
             # Add log files to Zip
-            zip_object.write(os.path.join(LoggerFactory.LOG_DIRECTORY, "user_input.log"))
-            zip_object.write(os.path.join(LoggerFactory.LOG_DIRECTORY, "RE.log"))
-            zip_object.write(os.path.join(LoggerFactory.LOG_DIRECTORY, "user_output.log"))
+            cls._write_log_file(zip_object=zip_object, log_file_name="user_input.log")
+            cls._write_log_file(zip_object=zip_object, log_file_name="RE.log")
+            cls._write_log_file(zip_object=zip_object, log_file_name="user_output.log")
 
             # Add Fasta files to zip
             zip_object.writestr(cls._FINAL_OPTIMIZED_SEQUENCE_FILE_NAME, cds_sequence)
+
+    @classmethod
+    def _write_log_file(cls, zip_object, log_file_name):
+        zip_object.write(filename=os.path.join(LoggerFactory.LOG_DIRECTORY, log_file_name),
+                         arcname=os.path.join(cls._LOGS_SUBDIRECTORY, log_file_name))
