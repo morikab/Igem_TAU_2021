@@ -14,12 +14,11 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, user_inp_raw, input: typing.Optional[typing.Dict] = None) -> typing.Dict:
+    def run_module(cls, user_inp_raw: typing.Dict) -> typing.Dict:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
-        #
-        # # TODO - use input var from yarin
+
         return cls._parse_input(user_inp_raw)
 
     @classmethod
