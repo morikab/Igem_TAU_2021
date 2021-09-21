@@ -43,6 +43,7 @@ class ORFModule(object):
 
         optimized_sequence = optimize_sequence(target_gene=target_gene,
                                                high_expression_organisms=high_expression_organisms,
-                                               low_expression_organisms=low_expression_organisms)
+                                               low_expression_organisms=low_expression_organisms,
+                                               tuning_param=full_input_dict['tuning_param'])
 
         return optimized_sequence
