@@ -164,8 +164,31 @@ def extract_gene_data(genbank_path):
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
     intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=400, genome=genome, len_th=30)
 
+
     cai_reference_set = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
     cai_scores, cai_weights = CAI(cds_seqs, reference=cai_reference_set)
+
+    ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
+    if len(estimated_expression) <len(ribosomal_proteins): #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+        cai_scores, cai_weights = CAI(cds_seqs, reference=ribosomal_proteins)
+        cai_weights = CAI()
+
+        estimated_expression = cai_scores
+        if expression_csv_fid is not None:
+            logger.info(
+                f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
+        else:
+            logger.info('CAI will be used as an estimated expression measurement')
+
+    else:
+        sorted_estimated_expression = dict(
+            sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
+        highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
+        highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
+        cai_scores, cai_weights = CAI(cds_seqs, reference=highly_expressed_cds_seqs)
+        logger.info(f'Expression levels were found for {len(estimated_expression)}')
+
+
     cai_dict = {name_and_function[i]: cai_scores[i] for i in range(entry_num)}
     return prom200_dict, prom400_dict, cds_dict, intergenic_dict, cai_dict, cai_weights
 
