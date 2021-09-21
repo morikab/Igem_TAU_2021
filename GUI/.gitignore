@@ -1,0 +1,4 @@
+/dist
+/venv
+/templates/login.html
+/templates/signup.html
