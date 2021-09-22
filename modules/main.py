@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 from modules.logger_factory import LoggerFactory
-from modules import Zscore_calculation, user_IO, RE, ORF
+from modules import Zscore_calculation, user_IO, RE, ORF, promoters
 
 tic = time.time()
 logger = LoggerFactory.create_logger("main")
@@ -51,10 +51,11 @@ def run_modules(user_inp_raw):
     cds_nt_final_cai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
     # cds_nt_final_tai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt)
     mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict)#todo: update szcore to work on tai as well    print(mean_Zscore)
+
     #######################################################
 
     # ### unit 2 ############################################
-    # best_seq, best_seq_name, evalue, synthetic_option = promoters.promoterModule.run_module(input_dict, D1 = 0.2, D2=0.2)
+    p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
     # #######################################################
 
     # TODO - get zip_directory from the user

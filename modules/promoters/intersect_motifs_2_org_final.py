@@ -3,48 +3,27 @@ from scipy.stats import stats
 import re
 import pandas as pd
 import os
+import xml.etree.ElementTree as et
 
-#TODO: make multi organism version
 
-def extract_pssm_from_xml(f_name):
-    """
-    Extracts pssms of motifs from STREME output
-    @param f_name: output of STREME as an XML file
-    @return: dictionary where keys are motif sequences and items are corresponding pssms
-    """
-    try:
-        with open(f_name, 'r') as f:
-            data = f.read()
-        pattern = '<motifs>.*?</motifs>'
-        motifs = re.search(pattern, data, re.DOTALL)
-        f.close()
-        pssms = dict()
-        sep_pat = '(?<=<motif ).*?</motif>'
-        name_pat = '(?<=id=\").*?(?=\" alt)'
-        width_pat = '(?<=width=\").*?(?=\" initial)'
-        pos_pat = '(?<=<pos ).*?(?=/>)'
-        freq_pat = '(?<=[ACGT]=\")[0-9.e-]*?(?=\")'
+def extract_pssm_from_xml(fname):
+    pssms = dict()
+    tree = et.parse(fname)
+    root = tree.getroot()
+    for m in root.findall('.//motif'):
+        full_name = m.get('id')
+        n = full_name.index('-')
+        index = int(full_name[:n])
+        id_num = full_name[n + 1:]
+        width = m.get('width')
+        df = pd.DataFrame(index=['A', 'C', 'G', 'T'])
+        for i, pos in enumerate(m.findall('pos')):
+            freqs = [pos.get('A'), pos.get('C'), pos.get('G'), pos.get('T')]
+            df[i + 1] = np.array(freqs, dtype=float)
+        pssms[id_num] = df
 
-        if motifs != None:
-            motifs = motifs.group(0)
-            sep_motifs = re.findall(sep_pat, motifs, re.DOTALL)
-            for m in sep_motifs:
-                full_name = re.search(name_pat, m, re.DOTALL).group(0)
-                n = full_name.index('-')
-                index = int(full_name[:n])
-                id_num = full_name[n + 1:]
-                width = int(re.search(width_pat, m, re.DOTALL).group(0))
-                all_pos = re.findall(pos_pat, m, re.DOTALL)
-                df = pd.DataFrame(index=['A', 'C', 'G', 'T'])
-                for i, pos in enumerate(all_pos):
-                    freqs = re.findall(freq_pat, pos)
-                    df[i + 1] = np.array(freqs, dtype=float)
-                pssms[id_num] = df
+    return pssms
 
-        return pssms
-
-    except IOError as e:
-        print(e)
 
 
 def padding_opt(v1, v2):
