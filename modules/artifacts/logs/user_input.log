@@ -1,0 +1,22 @@
+2021-09-22 18:46:47,061 - user_input - INFO - ##########################
+2021-09-22 18:46:47,061 - user_input - INFO - # USER INPUT INFORMATION #
+2021-09-22 18:46:47,061 - user_input - INFO - ##########################
+2021-09-22 18:46:47,502 - user_input - INFO - 
+Information about Sulfolobus acidocaldarius:
+2021-09-22 18:46:47,502 - user_input - INFO - Organism is deoptimized
+2021-09-22 18:46:47,932 - user_input - INFO - Number of tRNA genes found: 46, for 44 anticodons out of 61
+2021-09-22 18:47:11,641 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-22 18:47:11,648 - user_input - INFO - Number of genes: 2271, number of intregenic regions: 302
+2021-09-22 18:47:12,136 - user_input - INFO - 
+Information about Azospirillum brasilense:
+2021-09-22 18:47:12,137 - user_input - INFO - Organism is optimized
+2021-09-22 18:47:12,750 - user_input - INFO - Number of tRNA genes found: 9, for 8 anticodons out of 61
+2021-09-22 18:47:15,681 - user_input - INFO - CAI will be used as an estimated expression measurement
+2021-09-22 18:47:15,685 - user_input - INFO - Number of genes: 1045, number of intregenic regions: 140
+2021-09-22 18:47:15,698 - user_input - INFO - 
+
+Sequence to be optimized given in the following file C:/Users/7328046/Documents/university files/second semester 2020-2021/IGEM contest/Model/modules\..\example_data\mCherry_original.fasta
+2021-09-22 18:47:15,699 - user_input - INFO - containing this sequence: ATGGTTTCCAAGGGCGAGGAGGATAACATGGCTATCATTAAAGAGTTCATGCGCTTCAAAGTTCACATGGAGGGTTCTGTTAACGGTCACGAGTTCGAGATCGAAGGCGAAGGCGAGGGCCGTCCGTATGAAGGCACCCAGACCGCCAAACTGAAAGTGACTAAAGGCGGCCCGCTGCCTTTTGCGTGGGACATCCTGAGCCCGCAATTTATGTACGGTTCTAAAGCGTATGTTAAACACCCAGCGGATATCCCGGACTATCTGAAGCTGTCTTTTCCGGAAGGTTTCAAGTGGGAACGCGTAATGAATTTTGAAGATGGTGGTGTCGTGACCGTCACTCAGGACTCCTCCCTGCAGGATGGCGAGTTCATCTATAAAGTTAAACTGCGTGGTACTAATTTTCCATCTGATGGCCCGGTGATGCAGAAAAAGACGATGGGTTGGGAGGCGTCTAGCGAACGCATGTATCCGGAAGATGGTGCGCTGAAAGGCGAAATTAAACAGCGCCTGAAACTGAAAGATGGCGGCCATTATGACGCTGAAGTGAAAACCACGTACAAAGCCAAGAAACCTGTGCAGCTGCCTGGCGCGTACAATGTGAATATTAAACTGGACATCACCTCTCATAATGAAGATTATACGATCGTAGAGCAATATGAGCGCGCGGAGGGTCGTCATTCTACCGGTGGCATGGATGAGCTGTACAAATAA
+2021-09-22 18:47:15,699 - user_input - INFO - External promoter options were not supplied. endogenous promoters will be used for optimization.promoters from the 1/3 most highly expressed genes of all organisms are used- 
+2021-09-22 18:47:15,699 - user_input - INFO - 347 promoters are selected from Azospirillum brasilense
+2021-09-22 18:47:15,699 - user_input - INFO - Resulting in a total of 347 used for promoter selection and optimization
