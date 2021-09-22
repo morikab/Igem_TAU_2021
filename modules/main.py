@@ -12,6 +12,7 @@ base_path = os.path.join(os.path.dirname(__file__), '..\example_data')
 user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
+    'tuning_param':0.75,
     'organisms': {
 #                    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
 #                             'optimized': True,
@@ -21,17 +22,17 @@ user_inp_raw = {
                     #            'optimized': False,
                     #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
                     #
-                    # 'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                    #           'optimized': False,
-                    #           'expression_csv': None},
+                    'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+                              'optimized': False,
+                              'expression_csv': None},
                     #
                     # 'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
                     #          'optimized': True,
                     #          'expression_csv': None},
-
-                    'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
+                    #
+                    # 'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
+                    #          'optimized': True,
+                    #          'expression_csv': None},
 
                     'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
                              'optimized': True,
