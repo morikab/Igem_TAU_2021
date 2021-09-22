@@ -55,7 +55,7 @@ def run_modules(user_inp_raw):
     #######################################################
 
     # ### unit 2 ############################################
-    p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
+    # p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
     # #######################################################
 
     # TODO - get zip_directory from the user
