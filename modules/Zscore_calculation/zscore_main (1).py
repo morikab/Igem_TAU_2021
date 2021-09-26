@@ -48,7 +48,7 @@ class ZscoreModule(object):
         for key, val in inp_dict['organisms'].items():
             miu = np.mean(np.array(list(val[scores].values())))
             sigma = np.std(np.array(list(val[scores].values())))
-            index= general_geomean([inp_dict['sequence'], final_seq], weights=val[weights])
+            index, _ = general_geomean([inp_dict['sequence'], final_seq], weights=val[weights])
             Zscores_original = (index[0] - miu) / sigma
             Zscores_eng = (index[1] - miu) / sigma
             index_org = (index[1] - index[0]) / sigma
