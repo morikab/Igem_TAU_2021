@@ -141,7 +141,7 @@ class UserInputModule(object):
                 extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used =1/3)
         else:
             highly_exp_promoters = \
-                extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1 / 3)
+                extract_highly_expressed_promoters(cai_scores, prom200_dict, percent_used=1/3)
 
         tai_weights = tai_from_tgcnDB(org_name)
         try:
