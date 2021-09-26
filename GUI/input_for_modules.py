@@ -29,6 +29,7 @@ def process_input_for_modules(data: typing.Dict) -> typing.Dict:
 
     user_input["sequence"] = uploaded_data.get("protein_seq", None)
     user_input["selected_promoters"] = uploaded_data.get("promoter_seq", None)
+    user_input["tuning_param"] = uploaded_data.get("tuning_param", 0.75)
     input_organisms = {}
     for organism_key, organism_file_name in uploaded_data.items():
         optimized_organism_entry = _create_organism_entry_if_possible(

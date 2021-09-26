@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 from modules.promoters.globals_and_shared_methods import *
-from shared_functions_and_vars import write_fasta
+from modules.shared_functions_and_vars import write_fasta
 
 """
 Creates fasta files from input dictionary

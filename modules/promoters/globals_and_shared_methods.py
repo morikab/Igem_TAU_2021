@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import shutil
 
 
@@ -22,6 +23,6 @@ If this folder already exists - overwrites it.
 def create_folder(dname):
     if os.path.exists(dname):
         shutil.rmtree(dname)
-    os.mkdir(dname)
-    
+    Path(dname).mkdir(parents=True)
+
 

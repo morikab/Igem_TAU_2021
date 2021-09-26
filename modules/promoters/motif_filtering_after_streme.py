@@ -1,6 +1,7 @@
 import glob
 from modules.promoters.globals_and_shared_methods import *
 from modules.promoters.intersect_motifs_2_org_final import *
+from pathlib import Path
 
 ######################################################
 ###### Motif filtering for multi-organism model ######
@@ -27,8 +28,9 @@ Finds all xml STREME output files from intergenic runs
 @return: a list of file names
 """
 def find_all_inter_files():
-    all_files = glob.glob(os.path.join(start, 'streme_outputs', "**", "*.xml"), recursive=True)
-    inter_files = [f for f in all_files if 'inter' in f]
+    base_directory = Path(os.path.join(os.path.dirname(os.path.abspath(__file__)), start, "streme_outputs"))
+    all_files = base_directory.glob(os.path.join("**", "*.xml"))
+    inter_files = [str(f) for f in all_files if 'inter' in str(f)]
     return inter_files
 
 
