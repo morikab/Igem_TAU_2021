@@ -87,14 +87,11 @@ def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent
     exp_list = list(expression_estimation.values())
     exp_list.sort(reverse=True)
     exp_th = exp_list[round(percent_used*len(exp_list))]
-    print(len(prom_dict))
-    print(len(expression_estimation))
-    # print(prom_dict['B6A19_RS00005|AAA family ATPase'])
-    print(expression_estimation['B6A19_RS00005|AAA family ATPase'])
     highly_exp_prom = {gene_name:prom_dict[gene_name]
                        for gene_name in expression_estimation.keys()
                        if expression_estimation[gene_name]>exp_th
                        }
+
 
     return highly_exp_prom
 
