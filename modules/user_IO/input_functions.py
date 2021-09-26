@@ -90,7 +90,7 @@ def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent
     highly_exp_prom = {gene_name:prom_dict[gene_name]
                        for gene_name in expression_estimation.keys()
                        if expression_estimation[gene_name]>exp_th
-                       }
+                       and gene_name in prom_dict.keys()} #todo: this last line in the conditions shouldn't be here!
     return highly_exp_prom
 
 
