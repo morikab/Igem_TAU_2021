@@ -1,4 +1,4 @@
-from modules.ORF.calculating_cai import CAI
+from modules.ORF.calculating_cai import general_geomean
 import numpy as np
 import pandas as pd
 
@@ -6,7 +6,7 @@ import pandas as pd
 class ZscoreModule(object):
 
     @staticmethod
-    def run_module(final_seq, inp_dict):
+    def run_module(final_seq, inp_dict, optimization_type = 'cai'):
         '''
             This function is aimed to calculate an optimization index
             :param final_seq - the optimized sequence of the gene according to ORF and RE model (str)
@@ -33,6 +33,9 @@ class ZscoreModule(object):
                      mean_Zscore - the mean Zscore ratio (float)
             '''
 
+        scores = optimization_type + '_scores'
+        weights = optimization_type + '_profile'
+
         opt_organisms = []
         deopt_organisms = []
         opt_Zscores_original = []
@@ -40,9 +43,9 @@ class ZscoreModule(object):
         deopt_Zscores_original = []
         deopt_Zscores_eng = []
         for key, val in inp_dict['organisms'].items():
-            miu = np.mean(np.array(list(val['CAI_score_of_all_genes'].values())))
-            sigma = np.std(np.array(list(val['CAI_score_of_all_genes'].values())))
-            CAI_scores, _ = CAI([inp_dict['sequence'], final_seq], weights=val['cai_profile'])
+            miu = np.mean(np.array(list(val[scores].values())))
+            sigma = np.std(np.array(list(val[scores].values())))
+            CAI_scores, _ = general_geomean([inp_dict['sequence'], final_seq], weights=weights)
             Zscores_original = (CAI_scores[0] - miu) / sigma
             Zscores_eng = (CAI_scores[1] - miu) / sigma
             if val['optimized']:

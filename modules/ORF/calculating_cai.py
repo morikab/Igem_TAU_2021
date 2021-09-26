@@ -63,7 +63,7 @@ _non_synonymous_codons = {
 }
 
 
-def RSCU(sequences, genetic_code=11):
+def RSCU(sequences, genetic_code='genetic_code'):
     r"""Calculates the relative synonymous codon usage (RSCU) for a set of sequences.
     RSCU is 'the observed frequency of [a] codon divided by the frequency
     expected under the assumption of equal usage of the synonymous codons for an
@@ -123,7 +123,7 @@ def RSCU(sequences, genetic_code=11):
     return result
 
 
-def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code=11):
+def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code='genetic_code'):
     r"""Calculates the relative adaptiveness/weight of codons.
     The relative adaptiveness is "the frequency of use of that codon compared to
     the frequency of the optimal codon for that amino acid" (page 1283).
@@ -167,41 +167,7 @@ def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code=11):
     return weights
 
 
-def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code='genetic_code'):
-    r"""Calculates the codon adaptation index (CAI) of a DNA sequence.
-    CAI is "the geometric mean of the RSCU values... corresponding to each of the
-    codons used in that gene, divided by the maximum possible CAI for a gene of
-    the same amino acid composition" (page 1285).
-    In math terms, it is
-    .. math::
-        \left(\prod_{k=1}^Lw_k\right)^{\frac{1}{L}}
-    where :math:`w_k` is the relative adaptiveness of the :math:`k` th codon in
-    the gene (page 1286).
-    Args:
-        sequence_lst (list): list of  DNA sequences to calculate the CAI for.
-        weights (dict, optional): The relative adaptiveness of the codons in the reference set.
-        RSCUs (dict, optional): The RSCU of the reference set.
-        reference (list): The reference set of sequences.
-    Note:
-        One of ``weights``, ``reference`` or ``RSCUs`` is required.
-    Returns:
-        cai_scores: list of floats of The CAI of the sequence.
-        weights: the weights dictionary used to calculate the CAI scores.
-    Raises:
-        TypeError: When anything other than one of either reference sequences, or RSCU dictionary, or weights is provided.
-        ValueError: See :func:`RSCU` for details.
-        KeyError: When there is a missing weight for a codon.
-    Warning:
-        Will return nan if the sequence only has codons without synonyms.
-    """
-
-    # make sure input sequence can be divided into codons. If so, split into list of codons
-
-    # generate weights if not given
-    if reference:
-        weights = relative_adaptiveness(sequences=reference, genetic_code=genetic_code)
-    elif RSCUs:
-        weights = relative_adaptiveness(RSCUs=RSCUs, genetic_code=genetic_code)
+def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
 
     cai_scores = []
     for sequence in sequence_lst:
@@ -211,10 +177,14 @@ def CAI(sequence_lst, weights=None, RSCUs=None, reference=None, genetic_code='ge
         for codon in sequence:
             if codon not in _non_synonymous_codons[genetic_code]:
                 try:
-                    sequence_weights.append(weights[codon])
+                    if weights[codon] != 0:
+                        sequence_weights.append(weights[codon])
+                    else:
+                        ValueError()
                 except:
                     sequence_weights.append(sum(weights.values()) / len(weights.values()))    #if codon not in table (like if it conatians N or other ambigous chars- it will be ignored (not counted in the seq length)
         cai_scores.append(float(gmean(sequence_weights)))
-    # return the geometric mean of the weights raised to one over the length of the sequence
-    return cai_scores, weights
-
+        if float(gmean(sequence_weights)) ==0:
+            print(''.join(sequence))
+            print(sequence_weights)
+    return cai_scores

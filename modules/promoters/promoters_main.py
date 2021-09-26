@@ -21,8 +21,9 @@ class promoterModule(object):
         run_streme()
         tuning_param = full_input_dict['tuning_param']
         #D1 is optimization, D2 is selectivity
-        D1 = tuning_param*0.5
-        D2 = (1-tuning_param)*0.5
+        # todo: make sure tamir agrees with this....
+        D1 = 0.05 + tuning_param*0.3
+        D2 = 0.05 + (1-tuning_param)*0.3
         motif_file_path = create_final_motif_xml(D1, D2)
         mast_output_folder = run_mast(motif_file_path, promoter_file_path)
         return modify_promoter(promoter_file_path, mast_output_folder)

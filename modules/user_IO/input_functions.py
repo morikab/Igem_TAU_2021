@@ -1,8 +1,10 @@
-from modules.ORF.calculating_cai import CAI
+from modules.ORF.calculating_cai import relative_adaptiveness, general_geomean
+from modules.ORF.TAI import TAI
 from modules.shared_functions_and_vars import *
 import pandas as pd
 from modules.logger_factory import LoggerFactory
 import operator
+import os
 
 logger = LoggerFactory.create_logger("user_input")
 
@@ -12,29 +14,19 @@ def find_org_name(gb_file):
     return ' '.join(org_name.split()[:2])
 
 
+def tai_from_tgcnDB(org_name):
+    base_path = os.path.join(os.path.dirname(__file__))
+    tgcn_df = pd.read_csv(os.path.join(base_path, 'filtered_tgcn.csv'), index_col=0)
+    all_org_tgcn_dict = tgcn_df.T.to_dict('list')
 
-
-# ORI model
-def find_tgcn(gb_path):
-    tgcn_dict = {}
-    for record in SeqIO.parse(gb_path, "genbank"):
-        for feature in record.features:
-            if str(feature.type).lower() == "trna":
-                if 'anticodon' in feature.qualifiers.keys():
-                    anticodon = feature.qualifiers['anticodon'][0].split(':')[-1][:3]
-                elif 'note' in feature.qualifiers.keys():
-                    note = ' '.join(feature.qualifiers['note'])
-                    anticodon = note[note.find("(") + 1:note.find(")")]
-                else:
-                    continue
-                if len(anticodon) == 3:
-                    anticodon = anticodon.upper()
-                    anticodon = anticodon.replace('U', 'T')
-                    if anticodon in tgcn_dict.keys():
-                        tgcn_dict[anticodon] += 1
-                    else:
-                        tgcn_dict[anticodon] = 1
-    return tgcn_dict
+    if org_name in all_org_tgcn_dict.keys():
+        tgcn_dict = dict(zip(tgcn_df.columns, all_org_tgcn_dict[org_name] ))
+        tai_weights = TAI(tgcn_dict).index
+        logger.info(f'tGCN values were found, tAI profile was calculated')
+    else:
+        tai_weights = {}
+        logger.info(f'tGCN values were not found, tAI profile was not calculated')
+    return tai_weights
 
 
 # promoter model
@@ -91,14 +83,16 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
 
 
 
-def extract_highly_expressed_gene_names(expression_estimation, percent_used =1/3):
-    #todo: there is a bug with the csv
-
+def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent_used =1/3):
     exp_list = list(expression_estimation.values())
     exp_list.sort(reverse=True)
     exp_th = exp_list[round(percent_used*len(exp_list))]
-    list_of_highly_exp_genes = [gene_name for gene_name in expression_estimation.keys() if expression_estimation[gene_name]>exp_th]
-    return list_of_highly_exp_genes
+
+    highly_exp_prom = {gene_name:prom_dict[gene_name]
+                       for gene_name in expression_estimation.keys()
+                       if expression_estimation[gene_name]>exp_th}
+
+    return highly_exp_prom
 
 
 def extract_gene_data(genbank_path, expression_csv_fid=None):
@@ -109,9 +103,7 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
     # prom_dic: gene name to prom
     # cds_dict: gene name to cds
     # intergenic_dict: idx is a placing along the genome, and the value is the intergenic sequence
-    # cai_dict: cai score for each cds
         """
-
 
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
     cds_seqs = []
@@ -184,28 +176,33 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
     prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
-    intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=400, genome=genome, len_th=30)
+    intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=2000, genome=genome, len_th=30)
 
+    return prom200_dict, cds_dict, intergenic_dict, estimated_expression
+
+
+
+def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_csv_fid):
+    """
+    calculates the cai weights- if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
+    30% most highly expressed genes will be used as reference set.
+    in any other case, ribosomal genes will be used
+    """
     ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
-    if len(estimated_expression) <len(ribosomal_proteins): #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
-        cai_scores, cai_weights = CAI(cds_seqs, reference=ribosomal_proteins)
-        estimated_expression = cai_scores
+    if len(estimated_expression) <len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+        cai_weights = relative_adaptiveness(ribosomal_proteins)
         if expression_csv_fid is not None:
             logger.info(
                 f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
-        else:
-            logger.info('CAI will be used as an estimated expression measurement')
+        logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
 
     else:
         sorted_estimated_expression = dict(
             sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
         highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
         highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
-        cai_scores, cai_weights = CAI(cds_seqs, reference=highly_expressed_cds_seqs)
+        cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
         logger.info(f'Expression levels were found for {len(estimated_expression)}')
-
-    cai_dict = {name_and_function[i]: cai_scores[i] for i in range(entry_num)}
-
-    return prom200_dict, cds_dict, intergenic_dict, cai_dict, cai_weights, estimated_expression
+    return  cai_weights
 
 

@@ -14,26 +14,26 @@ user_inp_raw = {
     'selected_promoters': None,
     'tuning_param':0.75,
     'organisms': {
-#                    'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-#                             'optimized': True,
-#                             'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
+                   # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+                   #          'optimized': True,
+                   #          'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
 
-                    # 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                    #            'optimized': False,
-                    #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
-                    #
-                    'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                              'optimized': False,
-                              'expression_csv': None},
+                    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                               'optimized': False,
+                               'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
+
+                    # 'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+                    #           'optimized': False,
+                    #           'expression_csv': None},
                     #
                     # 'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
                     #          'optimized': True,
                     #          'expression_csv': None},
-                    #
+
                     # 'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
                     #          'optimized': True,
                     #          'expression_csv': None},
-
+                    #
                     'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
                              'optimized': True,
                              'expression_csv': None}
@@ -44,10 +44,13 @@ user_inp_raw = {
 def run_modules(user_inp_raw):
     input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
 
-
     ### unit 1 ############################################
+    #orf optimization
     orf_optimized_cds_nt_cai = ORF.ORFModule.run_module(input_dict, 'cai')
-    # orf_optimized_cds_nt_tai = ORF.ORFModule.run_module(input_dict, 'tai')
+    orf_optimized_cds_nt_tai = ORF.ORFModule.run_module(input_dict, 'tai')
+    print(orf_optimized_cds_nt_tai)
+
+    #re optimization
     cds_nt_final_cai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
     # cds_nt_final_tai = RE.REModule.run_module(input_dict, orf_optimized_cds_nt)
     mean_Zscore, all_Zscores = Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict)#todo: update szcore to work on tai as well    print(mean_Zscore)
