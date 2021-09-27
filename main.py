@@ -1,14 +1,20 @@
 import os
 import sys
+if sys.executable.endswith('pythonw.exe'):
+    sys.stdout = open(os.devnull, 'w')
+    sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-{}'.format(os.path.basename(sys.argv[0]))), "w")
+    
+import os
+import sys
 from pathlib import Path
     
 from flask import Flask, redirect, request, render_template
 from flaskwebgui import FlaskUI
 from werkzeug.utils import secure_filename
 
+from GUI import input_for_modules
 from modules.main import run_modules
 
-import input_for_modules
 
 if sys.executable.endswith('pythonw.exe'):
     sys.stdout = open(os.devnull, 'w')
@@ -63,6 +69,6 @@ def communique():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
     # Run in order to make a standalone windows application and comment app.run
-    # ui.run()
+    ui.run()
