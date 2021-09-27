@@ -1,8 +1,9 @@
 import typing
 from modules.user_IO.input_functions import *
 from modules.ORF.TAI import TAI
-
+from modules.ORF.calculating_cai import general_geomean
 from modules.logger_factory import LoggerFactory
+import os
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("user_input")
@@ -13,13 +14,18 @@ class UserInputModule(object):
     def get_name() -> str:
         return "User Input"
 
+
+
+
     @classmethod
     def run_module(cls, user_inp_raw: typing.Dict) -> typing.Dict:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
-
         return cls._parse_input(user_inp_raw)
+
+
+
 
     @classmethod
     def _parse_input(cls, usr_inp):
@@ -41,13 +47,24 @@ class UserInputModule(object):
         @organism: contains the org names as keys, and for each organism- the key is the scientific organism name, and the value is _parse_single_input for the organism's
         input
         '''
+
+
         full_inp_dict = {}
         full_inp_dict['organisms'] = {}
         for key, val in usr_inp['organisms'].items():
-#            if key in ['sequence', 'selected_promoters']:
-#                continue
             org_name, org_dict = cls._parse_single_input(val)
             full_inp_dict['organisms'][org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
+
+        # #plots for intergenic sequence analysis: change pron length to 0 and th to 0 as well in the intergenic seuqence code before applying
+        #     plt.hist([len(int_seq) for int_seq in list(org_dict['intergenic'].values())],
+        #              label=org_name, bins=1000, alpha=0.3, density=True)
+        # print(sum([len(int_seq) for int_seq in list(org_dict['intergenic'].values())])/len([len(int_seq) for int_seq in list(org_dict['intergenic'].values())]))
+        # plt.title('Intergenic sequence length histogram for promoter analysis')
+        # plt.xlabel("Intergenic sequence length")
+        # plt.xlim(0,1500)
+        # plt.legend()
+        # plt.show()
+
 
         # add non org specific keys to dict
         orf_fasta_fid = usr_inp['sequence']
@@ -77,6 +94,9 @@ class UserInputModule(object):
         full_inp_dict['tuning_param'] = usr_inp['tuning_param']
         return full_inp_dict
 
+
+
+
     @staticmethod
     def _parse_single_input(val):
         '''
@@ -94,39 +114,53 @@ class UserInputModule(object):
             'gene_cds':  {gene name and function : cds}, for ORF model
             'intergenic':{position along the genome: intergenic sequence}, promoter model
             'expression_estimation_of_all_genes': {'gene name and function: estimated expression }when the expression csv is not given- the CAI is used as expression levels
-            'CAI_score_of_all_genes': {'gene_name': cai} ORF and promoter
+            'cai_scores': {'gene_name': cai} ORF and promoter
             'cai_profile': {codon:cai score},  # ORF model
+            'tai_scores': {'gene_name': tai} ORF and promoter
+            'tai_profile': {codon:cai score},  # ORF model
             'optimized': bool- True if organism is optimized}
         '''
         gb_path = val['genome_path']
         exp_csv_fid = val['expression_csv']
         gb_file = SeqIO.read(gb_path, format='gb')
+
+
         org_name = find_org_name(gb_file)
         logger.info(f'\nInformation about {org_name}:')
         if val['optimized']:
             logger.info('Organism is optimized')
         else:
             logger.info('Organism is deoptimized')
-        tgcn_dict = find_tgcn(gb_path)
-        logger.info(f'Number of tRNA genes found: {sum(tgcn_dict.values())}, for {len(tgcn_dict)} anticodons out of 61')
-
-        prom200_dict, cds_dict, intergenic_dict, cai_dict, cai_weights, estimated_expression = \
-            extract_gene_data(gb_path, exp_csv_fid)
-
+        prom200_dict, cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
-        highly_expressed_gene_name_list = extract_highly_expressed_gene_names(cai_dict)
+        cai_weights = calculate_cai_weights_for_input (cds_dict, estimated_expression, exp_csv_fid)
+        cai_scores = general_geomean(sequence_lst= cds_dict.values(), weights= cai_weights)
+
+        if len(estimated_expression):
+            highly_exp_promoters = \
+                extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used =1/3)
+        else:
+            highly_exp_promoters = \
+                extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1 / 3)
+
+        tai_weights = tai_from_tgcnDB(org_name)
+        try:
+            tai_scores=general_geomean(sequence_lst= cds_dict.values(), weights= tai_weights)
+        except:
+            tai_scores = {}
+
 
         org_dict = {
             '200bp_promoters': prom200_dict,
-            'third_most_HE': {name: seq for name, seq in prom200_dict.items()
-                              if name in highly_expressed_gene_name_list},
-            'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
+            'third_most_HE': highly_exp_promoters,
             'intergenic': intergenic_dict,
-            'expression_estimation_of_all_genes': estimated_expression, # when the expression csv is not given- the CAI is used as expression levels
-            'CAI_score_of_all_genes': cai_dict,  # {'gene_name': expression} ORF and promoter
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
-            'tai_profile': TAI(tgcn_dict).index,  # {dna_codon:tai_score}
+            'tai_profile': tai_weights,  # {dna_codon:tai_score}, if not found in tgcnDB it will be an empty dict.
+            'cai_scores': cai_scores,  # {'gene_name': score}
+            'tai_scores': tai_scores,  # {'gene_name': score}, if not found in tgcnDB it will be an empty dict.
             'optimized': val['optimized']
-            }
+            # 'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
+            # 'expression_estimation_of_all_genes': estimated_expression, # when the expression csv is not given- the CAI is used as expression levels
+        }
 
         return org_name, org_dict

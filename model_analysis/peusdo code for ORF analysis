@@ -1,0 +1,54 @@
+for all species of the microbiome-
+analyse the data using user_input
+
+
+### how to divide subgroup?
+    make conservation splitting function that accepts:
+        1. list of organisms in microbiome
+        2. taxonomic conservation level (genus, family, phylum, random)
+    the function returns the microbiome split into 2 nearly even, groups.
+    however, the specified evolutionary conservation level must remain
+    i.e. if genus is selected, bacteria from the same genus must remain together
+
+    lastly, the subgroup should be selected and split 5 times, and the subgroup in which the ratio between
+    optimized and deoptimized organisms is closest to 1 is selected.
+
+
+for x in range(2,20,2):
+    select a subgroup of the microbiome of size x
+    divide it (in the specified way) to 2- assign which group is optimized and which is deoptimized randomly
+    apply model to lux gene (fins flu lux/lax gene)
+    calculate Z-score (need to add from noy's model)
+    store result
+
+optimally, we would like to repeat this process 5 times for each degree of conservation,
+in order to produce the following df:
+    columns: run (1 to 5)
+    rows: zscore for every x
+
+
+
+
+
+missions:
+1. calculate and store org_dict for all organisms
+2. find taxonimic lineage for all organisms from the article csv -DONE
+3. create splitting function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
