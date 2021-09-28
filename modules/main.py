@@ -17,10 +17,10 @@ user_inp_raw = {
                     # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
                     #          'optimized': True,
                     #          'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
-
-                    'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                               'optimized': False,
-                               'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
+                    #
+                    # 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                    #            'optimized': False,
+                    #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
 
                     'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
                               'optimized': False,
@@ -29,14 +29,14 @@ user_inp_raw = {
                     'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
                              'optimized': True,
                              'expression_csv': None},
-
-                    'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
-
-                    'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
-                             'optimized': True,
-                             'expression_csv': None}
+                    #
+                    # 'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
+                    #          'optimized': True,
+                    #          'expression_csv': None},
+                    #
+                    # 'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
+                    #          'optimized': True,
+                    #          'expression_csv': None}
             }
     }
 

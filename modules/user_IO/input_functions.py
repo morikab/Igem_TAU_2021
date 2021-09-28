@@ -180,7 +180,7 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
     return prom200_dict, cds_dict, intergenic_dict, estimated_expression
 
 
-
+#todo: fix cai weigths according to the model_analysis update
 def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_csv_fid):
     """
     calculates the cai weights- if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
