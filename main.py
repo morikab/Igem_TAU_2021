@@ -26,7 +26,8 @@ UPLOAD_FOLDER = os.path.join("static", "uploads")
 Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ui = FlaskUI(app, width=500, height=500, idle_interval=100)
+IDLE_INTERVAL_SEC = 3 * 60 * 60
+ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC)
 
 
 @app.route('/')
