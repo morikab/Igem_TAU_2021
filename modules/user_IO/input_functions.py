@@ -180,7 +180,7 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
     return prom200_dict, cds_dict, intergenic_dict, estimated_expression
 
 
-#todo: fix cai weigths according to the model_analysis update
+
 def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_csv_fid):
     """
     calculates the cai weights- if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
@@ -188,20 +188,29 @@ def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_
     in any other case, ribosomal genes will be used
     """
     ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
-    if len(estimated_expression) <len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
-        cai_weights = relative_adaptiveness(ribosomal_proteins)
-        if expression_csv_fid is not None:
-            logger.info(
-                f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
-        logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
 
+    if len(ribosomal_proteins) < 10:
+        logger.info('WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.\n'
+                    'All genes will be used as a reference set for CAI calculation, results may be less accurate.')
+        cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
     else:
-        sorted_estimated_expression = dict(
-            sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
-        highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
-        highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
-        cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
-        logger.info(f'Expression levels were found for {len(estimated_expression)}')
+        if len(estimated_expression) <len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+            cai_weights = relative_adaptiveness(ribosomal_proteins)
+            if expression_csv_fid is not None:
+                logger.info(
+                    f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
+            logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
+
+        else:
+            sorted_estimated_expression = dict(
+                sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
+            highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
+            highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
+            cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
+            logger.info(f'Expression levels were found for {len(estimated_expression)}')
     return  cai_weights
+
+
+
 
 
