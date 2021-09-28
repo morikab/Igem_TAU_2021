@@ -86,13 +86,11 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
 def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent_used =1/3):
     exp_list = list(expression_estimation.values())
     exp_list.sort(reverse=True)
-    exp_th = exp_list[round(percent_used*len(exp_list))]
+    exp_th = exp_list[round(len(exp_list)*percent_used)]
     highly_exp_prom = {gene_name:prom_dict[gene_name]
                        for gene_name in expression_estimation.keys()
                        if expression_estimation[gene_name]>exp_th
-                       }
-
-
+                       and gene_name in prom_dict.keys()} #todo: this last line in the conditions shouldn't be here!
     return highly_exp_prom
 
 

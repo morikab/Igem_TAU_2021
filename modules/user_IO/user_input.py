@@ -131,23 +131,26 @@ class UserInputModule(object):
             logger.info('Organism is optimized')
         else:
             logger.info('Organism is deoptimized')
+
         prom200_dict, cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
+        gene_names = list(cds_dict.keys())
         cai_weights = calculate_cai_weights_for_input (cds_dict, estimated_expression, exp_csv_fid)
         cai_scores = general_geomean(sequence_lst= cds_dict.values(), weights= cai_weights)
+        cai_scores_dict = {gene_names[i]:cai_scores[i] for i in range(len(gene_names))}
+
+        tai_weights = tai_from_tgcnDB(org_name)
+        try:
+            tai_scores=general_geomean(sequence_lst= cds_dict.values(), weights= tai_weights)
+            tai_scores_dict = {gene_names[i]:tai_scores[i] for i in range(len(gene_names))}
+        except:
+            tai_scores_dict = {}
 
         if len(estimated_expression):
             highly_exp_promoters = \
                 extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used =1/3)
         else:
-            highly_exp_promoters = \
-                extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1 / 3)
-
-        tai_weights = tai_from_tgcnDB(org_name)
-        try:
-            tai_scores=general_geomean(sequence_lst= cds_dict.values(), weights= tai_weights)
-        except:
-            tai_scores = {}
+            highly_exp_promoters =  extract_highly_expressed_promoters(cai_scores_dict, prom200_dict, percent_used=1/3)
 
 
         org_dict = {
@@ -156,8 +159,8 @@ class UserInputModule(object):
             'intergenic': intergenic_dict,
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
             'tai_profile': tai_weights,  # {dna_codon:tai_score}, if not found in tgcnDB it will be an empty dict.
-            'cai_scores': cai_scores,  # {'gene_name': score}
-            'tai_scores': tai_scores,  # {'gene_name': score}, if not found in tgcnDB it will be an empty dict.
+            'cai_scores': cai_scores_dict,  # {'gene_name': score}
+            'tai_scores': tai_scores_dict,  # {'gene_name': score}, if not found in tgcnDB it will be an empty dict.
             'optimized': val['optimized']
             # 'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
             # 'expression_estimation_of_all_genes': estimated_expression, # when the expression csv is not given- the CAI is used as expression levels
