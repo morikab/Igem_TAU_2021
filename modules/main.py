@@ -98,7 +98,7 @@ def unit1(input_dict):
 
     except:
         logger.info('\nCAI information:')
-        orf_optimized_cds_nt_cai = ORF.ORFModule.run_module(input_dict, 'cai')
+        orf_optimized_cds_nt_cai = ORF.ORFModule.run_module(input_dict, 'cai', local_maximum=False)
         final_cds = RE.REModule.run_module(input_dict, orf_optimized_cds_nt_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
         mean_Zscore, all_Zscores, mean_opt_index, mean_deopt_index, optimization_index =\
             Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, optimization_type='cai')
