@@ -9,7 +9,7 @@ from modules.ORF.organism import Organism
 class ORFModule(object):
 
     @staticmethod
-    def run_module(full_input_dict, feature):
+    def run_module(full_input_dict, feature, local_maximum):
         """
         :param full_input_dict: input from GUI parser (dict). Format:
         full_inp_dict[org_name] = {
@@ -44,6 +44,8 @@ class ORFModule(object):
         optimized_sequence = optimize_sequence(target_gene=target_gene,
                                                high_expression_organisms=high_expression_organisms,
                                                low_expression_organisms=low_expression_organisms,
-                                               tuning_param=full_input_dict['tuning_param'])
+                                               tuning_param=full_input_dict['tuning_param'],
+                                               local_maximum = local_maximum
+                                               )
 
         return optimized_sequence

@@ -2,7 +2,7 @@ from modules.shared_functions_and_vars import translate, synonymous_codons
 
 # --------------------------------------------------------------
 
-def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, tuning_param=0.5, n_initiation_codons=12):
+def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, local_maximum, tuning_param=0.5, n_initiation_codons=12):
     """
 
     :param target_gene: Gene object, which is to be optimized
@@ -19,7 +19,7 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
 
     optimized_sequence = ''
 
-    optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param) # optimal codons->dict(AA:codon)
+    optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum) # optimal codons->dict(AA:codon)
 
     target_protein = translate(target_gene)
 
@@ -83,7 +83,7 @@ def loss_function(high_expression_organisms, low_expression_organisms, codons, t
     """
 
     loss = {}
-    if local_maximum:
+    if local_maximum: #high_expression is optimized, low expression is deoptimized
         for high_expression_organism in high_expression_organisms:
             loss = iterate_through_feature([high_expression_organism], codons, loss, tuning_param, high_expression=True)
 
@@ -91,7 +91,7 @@ def loss_function(high_expression_organisms, low_expression_organisms, codons, t
             loss = iterate_through_feature([low_expression_organism], codons, loss, tuning_param, high_expression=False)
     else:
         loss = iterate_through_feature(high_expression_organisms, codons, loss, tuning_param, high_expression=True)
-        loss = iterate_through_feature(low_expression_organisms, codons, loss, tuning_param, high_expression=True)
+        loss = iterate_through_feature(low_expression_organisms, codons, loss, tuning_param, high_expression=False)
 
     return loss
 
@@ -124,6 +124,7 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
             for codon in codons:
                 loss[codon] = 0
                 try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
+                    # optimized organisms should have small loss
                     if high_expression:
                         loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
                     else:
@@ -151,7 +152,7 @@ def find_max_value_per_feature(organisms, feature_name, codons):
 
     return max_value
 # --------------------------------------------------------------
-def find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, evaluation_function=loss_function):
+def find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum, evaluation_function=loss_function):
     """
 
     :param high_expression_organisms: list of Organism objects. The organisms where we want to express the target gene in
@@ -166,7 +167,7 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, tun
     optimal_codons = {}
 
     for aa, codons in synonymous_codons.items():
-        loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum=True)
+        loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum=local_maximum)
         optimal_codons[aa] = min(loss, key=loss.get)
 
     return optimal_codons

@@ -1,0 +1,80 @@
+for all species of the microbiome-
+analyse the data using user_input
+
+
+### how to divide subgroup?
+    make conservation splitting function that accepts:
+        1. list of organisms in microbiome
+        2. taxonomic conservation level (genus, family, phylum, random)
+    the function returns the microbiome split into 2 nearly even, groups.
+    however, the specified evolutionary conservation level must remain
+    i.e. if genus is selected, bacteria from the same genus must remain together
+
+    lastly, the subgroup should be selected and split 5 times, and the subgroup in which the ratio between
+    optimized and deoptimized organisms is closest to 1 is selected.
+
+
+for x in range(2,20,2):
+    select a subgroup of the microbiome of size x
+    divide it (in the specified way) to 2- assign which group is optimized and which is deoptimized randomly
+    apply model to lux gene (fins flu lux/lax gene)
+    calculate Z-score (need to add from noy's model)
+    store result
+
+optimally, we would like to repeat this process 5 times for each degree of conservation,
+in order to produce the following df:
+    columns: run (1 to 5)
+    rows: zscore for every x
+
+
+
+
+
+missions:
+1. calculate and store org_dict for all organisms - NOY
+2. find taxonimic lineage for all organisms from the article csv -DONE
+3. create splitting function
+4. once split, we must have a method to run the ORF model and calculate the Z score -LIYAM
+
+find lineage (org name, tax_con)
+    for taxonomic conservation- a dictionary should be calulated from the excel and saved into json format
+    key: org name (same as names in org dict)
+    value: dict of {'phylum':phylum, ''family':family, ...}
+    return tax_name (name of taxonimic group)
+
+
+splitting function (org dict (after opening from json), tax_con, x)
+    1. randomly choose x org
+    2. find tax_name for all org, for the given tax_con level
+    3. split org into groups, so org with the same tax_name are together
+    4. split the groups into 2 main group, so that the ratio between number of org in each subgroup is as close as possible to 1
+    5. for all org in subrgoup 1, add to optimized dict- and org in subgroup 2 to deoptimized dict
+    *** format of dict: {
+    org_name: org_dict[org_name]
+    }
+    return optimized_dict, deoptimized_dict
+
+
+choose best split(org dict (after opening from json), tax_con, x, run_times=50):
+    1. calculate optimized dict, seoptimized dict = splitting function (org dict (after opening from json), tax_con, x)
+       do so run_times times (in our case,50 times)
+    2. out of those 50 times, which run has the closest ratio to 1
+
+    return optimized_dict, deoptimied_dict (from best run)
+
+
+external_run_function(org_dict, cds_seq, tax_con):
+    for x in range:
+        optimized_dict, deoptimied_dict = choose best split(org dict (after opening from json), tax_con, x, run_times=50)
+        optimization_index = run_modules(optimized_dict, deoptimied_dict, cds)
+
+
+
+
+
+
+
+
+
+
+

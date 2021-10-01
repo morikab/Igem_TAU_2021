@@ -1,22 +1,22 @@
-2021-09-27 02:14:06,410 - user_input - INFO - ##########################
-2021-09-27 02:14:06,410 - user_input - INFO - # USER INPUT INFORMATION #
-2021-09-27 02:14:06,410 - user_input - INFO - ##########################
-2021-09-27 02:14:07,586 - user_input - INFO - 
-Information about Bacillus subtilis:
-2021-09-27 02:14:07,586 - user_input - INFO - Organism is deoptimized
-2021-09-27 02:16:09,679 - user_input - INFO - Number of genes: 4311, number of intregenic regions: 106
-2021-09-27 02:16:09,697 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2021-09-27 02:16:10,831 - user_input - INFO - tGCN values were found, tAI profile was calculated
-2021-09-27 02:16:12,825 - user_input - INFO - 
-Information about Pantoea ananatis:
-2021-09-27 02:16:12,825 - user_input - INFO - Organism is optimized
-2021-09-27 02:18:23,975 - user_input - INFO - Number of genes: 3933, number of intregenic regions: 207
-2021-09-27 02:18:23,980 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2021-09-27 02:18:24,920 - user_input - INFO - tGCN values were found, tAI profile was calculated
-2021-09-27 02:18:25,802 - user_input - INFO - 
+2021-09-30 10:41:40,798 - user_input - INFO - ##########################
+2021-09-30 10:41:40,798 - user_input - INFO - # USER INPUT INFORMATION #
+2021-09-30 10:41:40,798 - user_input - INFO - ##########################
+2021-09-30 10:41:41,240 - user_input - INFO - 
+Information about Sulfolobus acidocaldarius:
+2021-09-30 10:41:41,240 - user_input - INFO - Organism is deoptimized
+2021-09-30 10:42:39,072 - user_input - INFO - Number of genes: 2271, number of intregenic regions: 74
+2021-09-30 10:42:39,077 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2021-09-30 10:42:39,723 - user_input - INFO - tGCN values were not found, tAI profile was not calculated
+2021-09-30 10:42:40,521 - user_input - INFO - 
+Information about Mycobacterium tuberculosis:
+2021-09-30 10:42:40,522 - user_input - INFO - Organism is optimized
+2021-09-30 10:44:37,947 - user_input - INFO - Number of genes: 4064, number of intregenic regions: 110
+2021-09-30 10:44:37,955 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2021-09-30 10:44:39,280 - user_input - INFO - tGCN values were found, tAI profile was calculated
+2021-09-30 10:44:40,333 - user_input - INFO - 
 
 Sequence to be optimized given in the following file C:/Users/7328046/Documents/university files/second semester 2020-2021/IGEM contest/Model/modules\..\example_data\mCherry_original.fasta
-2021-09-27 02:18:25,802 - user_input - INFO - containing this sequence: ATGGTTTCCAAGGGCGAGGAGGATAACATGGCTATCATTAAAGAGTTCATGCGCTTCAAAGTTCACATGGAGGGTTCTGTTAACGGTCACGAGTTCGAGATCGAAGGCGAAGGCGAGGGCCGTCCGTATGAAGGCACCCAGACCGCCAAACTGAAAGTGACTAAAGGCGGCCCGCTGCCTTTTGCGTGGGACATCCTGAGCCCGCAATTTATGTACGGTTCTAAAGCGTATGTTAAACACCCAGCGGATATCCCGGACTATCTGAAGCTGTCTTTTCCGGAAGGTTTCAAGTGGGAACGCGTAATGAATTTTGAAGATGGTGGTGTCGTGACCGTCACTCAGGACTCCTCCCTGCAGGATGGCGAGTTCATCTATAAAGTTAAACTGCGTGGTACTAATTTTCCATCTGATGGCCCGGTGATGCAGAAAAAGACGATGGGTTGGGAGGCGTCTAGCGAACGCATGTATCCGGAAGATGGTGCGCTGAAAGGCGAAATTAAACAGCGCCTGAAACTGAAAGATGGCGGCCATTATGACGCTGAAGTGAAAACCACGTACAAAGCCAAGAAACCTGTGCAGCTGCCTGGCGCGTACAATGTGAATATTAAACTGGACATCACCTCTCATAATGAAGATTATACGATCGTAGAGCAATATGAGCGCGCGGAGGGTCGTCATTCTACCGGTGGCATGGATGAGCTGTACAAATAA
-2021-09-27 02:18:25,802 - user_input - INFO - External promoter options were not supplied. endogenous promoters will be used for optimization.promoters from the 1/3 most highly expressed genes of all organisms are used- 
-2021-09-27 02:18:25,803 - user_input - INFO - 1310 promoters are selected from Pantoea ananatis
-2021-09-27 02:18:25,803 - user_input - INFO - Resulting in a total of 1310 used for promoter selection and optimization
+2021-09-30 10:44:40,333 - user_input - INFO - containing this sequence: ATGGTTTCCAAGGGCGAGGAGGATAACATGGCTATCATTAAAGAGTTCATGCGCTTCAAAGTTCACATGGAGGGTTCTGTTAACGGTCACGAGTTCGAGATCGAAGGCGAAGGCGAGGGCCGTCCGTATGAAGGCACCCAGACCGCCAAACTGAAAGTGACTAAAGGCGGCCCGCTGCCTTTTGCGTGGGACATCCTGAGCCCGCAATTTATGTACGGTTCTAAAGCGTATGTTAAACACCCAGCGGATATCCCGGACTATCTGAAGCTGTCTTTTCCGGAAGGTTTCAAGTGGGAACGCGTAATGAATTTTGAAGATGGTGGTGTCGTGACCGTCACTCAGGACTCCTCCCTGCAGGATGGCGAGTTCATCTATAAAGTTAAACTGCGTGGTACTAATTTTCCATCTGATGGCCCGGTGATGCAGAAAAAGACGATGGGTTGGGAGGCGTCTAGCGAACGCATGTATCCGGAAGATGGTGCGCTGAAAGGCGAAATTAAACAGCGCCTGAAACTGAAAGATGGCGGCCATTATGACGCTGAAGTGAAAACCACGTACAAAGCCAAGAAACCTGTGCAGCTGCCTGGCGCGTACAATGTGAATATTAAACTGGACATCACCTCTCATAATGAAGATTATACGATCGTAGAGCAATATGAGCGCGCGGAGGGTCGTCATTCTACCGGTGGCATGGATGAGCTGTACAAATAA
+2021-09-30 10:44:40,333 - user_input - INFO - External promoter options were not supplied. endogenous promoters will be used for optimization.promoters from the 1/3 most highly expressed genes of all organisms are used- 
+2021-09-30 10:44:40,335 - user_input - INFO - 1355 promoters are selected from Mycobacterium tuberculosis
+2021-09-30 10:44:40,335 - user_input - INFO - Resulting in a total of 1355 used for promoter selection and optimization
