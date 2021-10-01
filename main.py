@@ -3,9 +3,7 @@ import sys
 if sys.executable.endswith('pythonw.exe'):
     sys.stdout = open(os.devnull, 'w')
     sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-{}'.format(os.path.basename(sys.argv[0]))), "w")
-    
-import os
-import sys
+
 from pathlib import Path
     
 from flask import Flask, redirect, request, render_template
@@ -16,11 +14,8 @@ from GUI import input_for_modules
 from modules.main import run_modules
 
 
-if sys.executable.endswith('pythonw.exe'):
-    sys.stdout = open(os.devnull, 'w')
-    sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-{}'.format(os.path.basename(sys.argv[0]))), "w")
-
 app = Flask(__name__)
+
 # Define the path to the upload folder
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
