@@ -32,20 +32,20 @@ class ORFModule(object):
         input_organisms = full_input_dict['organisms']
 
         high_expression_organisms = [
-            Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'],
-                     feature_to_generate=feature)
-            for org_name, dict in input_organisms.items() if dict['optimized']]
+            Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
+                     feature_to_generate=feature, cai_std=org_dict['cai_std'],  tai_std=org_dict['tai_std'])
+            for org_name, org_dict in input_organisms.items() if org_dict['optimized']]
 
         low_expression_organisms = [
-            Organism(name=org_name, tai_weights=dict['tai_profile'], cai_weights=dict['cai_profile'],
-                     feature_to_generate=feature)
-            for org_name, dict in input_organisms.items() if not dict['optimized']]
+            Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
+                     feature_to_generate=feature, cai_std=org_dict['cai_std'],  tai_std=org_dict['tai_std'])
+            for org_name, org_dict in input_organisms.items() if not org_dict['optimized']]
 
         optimized_sequence = optimize_sequence(target_gene=target_gene,
                                                high_expression_organisms=high_expression_organisms,
                                                low_expression_organisms=low_expression_organisms,
                                                tuning_param=full_input_dict['tuning_param'],
-                                               local_maximum = local_maximum
+                                               local_maximum = local_maximum,
                                                )
 
         return optimized_sequence

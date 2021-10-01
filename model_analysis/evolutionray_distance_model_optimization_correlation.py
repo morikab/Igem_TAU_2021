@@ -42,10 +42,34 @@ aln_scores = []
 opt_scores = []
 msa_scores= []
 
+not_really_small_genome = ['Agromyces allii', 'Arthrobacter crystallopoietes', 'Arthrobacter luteolus', 'Arthrobacter pascens',
+              'Arthrobacter subterraneus', 'Arthrobacter tumbae', 'Brevibacterium frigoritolerans', 'Janibacter limosus',
+              'Knoellia subterranea', 'Mycolicibacterium smegmatis', 'Nocardioides daejeonensis',
+              'Nocardioides oleivorans', 'Nocardioides sediminis', 'Nocardioides terrigena',
+              'Paenarthrobacter nitroguajacolicus', 'Paenibacillus aceris',
+              'Paenibacillus oryzisoli', 'Paenibacillus prosopidis', 'Paenibacillus qinlingensis', 'Pedococcus badiiscoriae',
+              'Pedococcus bigeumensis', 'Pedococcus dokdonensis', 'Peribacillus muralis', 'Peribacillus simplex',
+              'Phycicoccus duodecadis', 'Priestia flexa', 'Pseudarthrobacter phenanthrenivorans',
+              'Rhodanobacter denitrificans', 'Terrabacter aerolatus', 'Terrabacter tumescens',
+              'Yonghaparkia alkaliphila'] #deleted all 3 genomes that are smaller than 1kb
 
+
+
+contain_more_than_10_ribosomal_genes = ['Arthrobacter crystallopoietes', 'Arthrobacter luteolus',
+              'Arthrobacter subterraneus', 'Arthrobacter tumbae', 'Brevibacterium frigoritolerans', 'Janibacter limosus',
+              'Knoellia subterranea', 'Mycolicibacterium smegmatis', 'Nocardioides daejeonensis',
+              'Nocardioides oleivorans', 'Nocardioides sediminis',
+              'Paenarthrobacter nitroguajacolicus', 'Paenibacillus aceris',
+              'Paenibacillus qinlingensis', 'Pedococcus badiiscoriae',
+              'Pedococcus bigeumensis', 'Peribacillus muralis', 'Peribacillus simplex',
+              'Phycicoccus duodecadis', 'Priestia flexa',
+              'Rhodanobacter denitrificans', 'Terrabacter tumescens']
+
+
+final_tested_org = not_really_small_genome
 tic = time.time()
-for org1 in list(org_dict.keys()):
-    for org2 in list(org_dict.keys()):
+for org1 in final_tested_org:
+    for org2 in final_tested_org:
         # if org1.split(' ')[0] == org2.split(' ')[0]:
         #     continue
         if org1 == org2:
@@ -91,7 +115,18 @@ nonoptimized = plt.scatter(negative_msa, negative_opt, edgecolors='red' ,s=0.7)
 plt.xlabel('#Different chars for couple after multiple sequence alignment')
 plt.ylabel('Optimization score')
 plt.legend((optimized, nonoptimized), ('Optimized pairs', 'Non-optimized pairs'))
-# plt.ylim(-20, 20)
+plt.ylim(-20, 20)
 plt.show()
 
 print(spearmanr(positive_opt+[0]*len(negative_opt), positive_msa+negative_msa))
+
+print(len(positive_msa))
+print(len(negative_opt))
+optimized = plt.scatter(positive_msa, positive_opt, edgecolors='green' ,s=0.7)
+nonoptimized = plt.scatter(negative_msa, [0]*len(negative_opt), edgecolors='green' ,s=0.7)
+plt.xlabel('#Different chars for couple after multiple sequence alignment')
+plt.ylabel('Optimization score')
+# plt.legend((optimized, nonoptimized), ('Optimized pairs', 'Non-optimized pairs'))
+plt.show()
+
+print(len(not_really_small_genome))

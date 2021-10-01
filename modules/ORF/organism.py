@@ -1,5 +1,5 @@
 from collections import namedtuple
-
+import numpy as np
 from Bio.Seq import Seq
 
 ############################
@@ -14,7 +14,7 @@ Feature = namedtuple(typename='Feature', field_names='index_name weights ratio')
 
 class Organism(object):
 
-    def __init__(self, name, tai_weights, cai_weights, feature_to_generate):
+    def __init__(self, name, tai_weights, cai_weights, feature_to_generate, cai_std, tai_std):
 
         """
 
@@ -25,8 +25,6 @@ class Organism(object):
         """
 
         self.name = name
-        print('=========== Defining ' + self.name + ' ===============')
-
 
         self.tai_weights = tai_weights
         self.cai_weights = cai_weights
@@ -34,8 +32,11 @@ class Organism(object):
         # leave the ratio key cause we might want to combine optimizations later
         if feature_to_generate == 'tai':
             self.features.append(Feature(index_name='TAI', weights=self.tai_weights, ratio=1))
+            self.std = cai_std
         elif feature_to_generate == 'cai':
             self.features.append(Feature(index_name='CAI', weights=self.cai_weights, ratio=1))
+            self.std = tai_std
+
 
 
 

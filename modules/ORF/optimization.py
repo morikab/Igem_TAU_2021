@@ -126,7 +126,9 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
                 try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
                     # optimized organisms should have small loss
                     if high_expression:
-                        loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
+                        loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
+                        # print(organism.name)
+                        # print(organism.std)
                     else:
                         loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
                 except:
