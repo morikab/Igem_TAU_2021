@@ -125,20 +125,61 @@ def REbase_org(org, cds_aa):  # DONE
 
 
 
-def insert_site_CDS(enzyme_dict, cds_nt):
-    """this function insert req.site to cds according to ntaa_dict but it can insert more than site in same index
-    and insert over what have been done before"""
-    cds_aa = translate(cds_nt)
-    # start_end_idex_dict = {}
+def insert_site_CDS(RE_dict, NTseq):
+    """inpout: -  RE_dict=dict. of all {organism:{siteName:{'ambiguous_site':NTsite,'nt_to_aa':{}}}}.
+               -  NTseq= string of the sequence to insert in it. e.g. fullPlasmid,Promoter,CDS...
+       output: """
+    NTseq = translate(AAseq)
+    busy=[]
+    NTsite_org_inSeq={}
+    overlappedSitesNT=[]
+    for orgName,orginfo in RE_dict.items():
+        for siteName,siteseq in orginfo.items():
+            NT2AA=siteseq['nt_to_aa']
+            for NTsite,AAsite in NT2AA.items():
+                for sup in list(re.finditer(,NTseq)):
+                    findedindx=[*range(sup.start(),sup.end())]
+                    for indx in findedindex:
+                        if indx not in busy:
+                            busy.append(indx)
+                        else:
+                            if indx not in overlapped_indx:
+                                overlapped_indx[indx]={}
+                            overlapped_indx[indx][siteName]+=[AAsite]
+                            overlappedSitesNT+=[NTsite]
+                    NTsite_org_inSeq[NTsite][orgName]+=[NTsite_org_inSeq[NTsite][orgName],[sup.start(),sup.end()]]
+
+        NTsite_org_inSeq[NTsite][orgName]=
+
+    for NTsite,siteOrgInfo in NTsite_org_inSeq.items():
+        if NTsite not in overlappedSitesNT:
+            stratindx=siteOrgInfo
+            cds_nt = list(cds_nt)
+            cds_nt[3 * stratindx:3 * endindx] = list(ntsites[0])
+            cds_nt = ''.join(cds_nt)
+            
+                            
+                                
+
+
+        site_org_inSeq[NTsite][
+                    
+
+    
+    startEnd_sitesinSeq={} # {Organism[start end start end ....... ] 
+    
+    
     for sub_dict in enzyme_dict.values():
         ntaa_dict = sub_dict['nt_to_aa']
         for aasite, ntsites in ntaa_dict.items():
             if aasite in cds_aa:
                 stratindx = cds_aa.find(aasite)
                 endindx = stratindx + len(aasite)
-                cds_nt = list(cds_nt)
-                cds_nt[3 * stratindx:3 * endindx] = list(ntsites[0])
-                cds_nt = ''.join(cds_nt)
+
+                ##INSERT
+##                cds_nt = list(cds_nt)
+##                cds_nt[3 * stratindx:3 * endindx] = list(ntsites[0])
+##                cds_nt = ''.join(cds_nt)
     return cds_nt
 
 
