@@ -17,6 +17,7 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
     The function calculates the difference between the features of each codon. Each feature has its own weight (ratio)
     """
 
+
     optimized_sequence = ''
 
     optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum) # optimal codons->dict(AA:codon)

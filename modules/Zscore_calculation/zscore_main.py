@@ -16,7 +16,7 @@ class ZscoreModule(object):
 
         opt_index_org = []
         deopt_index_org = []
-        for key, val in inp_dict['organisms'].items():
+        for key, val in inp_dict['organisms'].items(): #todo: add something related to the ratio between the two worst organisms
             sigma = val[std]
             index= general_geomean([inp_dict['sequence'], final_seq], weights=val[weights])
             initial_score = index[0]
@@ -29,9 +29,9 @@ class ZscoreModule(object):
 
         mean_opt_index = mean(opt_index_org)
         mean_deopt_index =mean(deopt_index_org)
-        # norm_factor = max(mean_opt_index, mean_deopt_index)
+        # norm_factor = max(mean_opt_index, -mean_deopt_index)
         alfa = inp_dict['tuning_param']
-        optimization_index = (alfa * mean_opt_index  - (1-alfa) * (mean_deopt_index ))#/ norm_factor
+        optimization_index = (alfa * mean_opt_index  - (1-alfa) * (mean_deopt_index ))#/norm_factor
         return mean_opt_index, mean_deopt_index, optimization_index
 
 

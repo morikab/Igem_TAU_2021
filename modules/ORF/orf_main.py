@@ -1,5 +1,6 @@
 from modules.ORF.optimization import optimize_sequence
 from modules.ORF.organism import Organism
+from modules.ORF.Liyam_new_optimization_function import hill_climbing_optimize_by_zscore
 
 
 #todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
@@ -9,7 +10,7 @@ from modules.ORF.organism import Organism
 class ORFModule(object):
 
     @staticmethod
-    def run_module(full_input_dict, feature, local_maximum):
+    def run_module(full_input_dict, cai_or_tai, optimization_type='zscore_hill_climbing'):
         """
         :param full_input_dict: input from GUI parser (dict). Format:
         full_inp_dict[org_name] = {
@@ -28,24 +29,39 @@ class ORFModule(object):
         :return: optimized sequence (Biopython Seq)
         """
 
+
         target_gene = full_input_dict['sequence']
-        input_organisms = full_input_dict['organisms']
 
-        high_expression_organisms = [
-            Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
-                     feature_to_generate=feature, cai_std=org_dict['cai_std'],  tai_std=org_dict['tai_std'])
-            for org_name, org_dict in input_organisms.items() if org_dict['optimized']]
+        if optimization_type == 'zscore_hill_climbing':
+            optimized_sequence = hill_climbing_optimize_by_zscore(target_gene, full_input_dict, cai_or_tai, max_iter=50)
+            print(target_gene)
+            print(optimized_sequence)
+        else:
+            input_organisms = full_input_dict['organisms']
+            high_expression_organisms = [
+                Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
+                         feature_to_generate=cai_or_tai, cai_std=org_dict['cai_std'], tai_std=org_dict['tai_std'])
+                for org_name, org_dict in input_organisms.items() if org_dict['optimized']]
 
-        low_expression_organisms = [
-            Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
-                     feature_to_generate=feature, cai_std=org_dict['cai_std'],  tai_std=org_dict['tai_std'])
-            for org_name, org_dict in input_organisms.items() if not org_dict['optimized']]
-
-        optimized_sequence = optimize_sequence(target_gene=target_gene,
-                                               high_expression_organisms=high_expression_organisms,
-                                               low_expression_organisms=low_expression_organisms,
-                                               tuning_param=full_input_dict['tuning_param'],
-                                               local_maximum = local_maximum,
-                                               )
+            low_expression_organisms = [
+                Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
+                         feature_to_generate=cai_or_tai, cai_std=org_dict['cai_std'], tai_std=org_dict['tai_std'])
+                for org_name, org_dict in input_organisms.items() if not org_dict['optimized']]
+            if optimization_type == 'single_codon_global':
+                optimized_sequence = optimize_sequence(target_gene=target_gene,
+                                                       high_expression_organisms=high_expression_organisms,
+                                                       low_expression_organisms=low_expression_organisms,
+                                                       tuning_param=full_input_dict['tuning_param'],
+                                                       local_maximum = False
+                                                   )
+            elif optimization_type == 'single_codon_local':
+                optimized_sequence = optimize_sequence(target_gene=target_gene,
+                                                       high_expression_organisms=high_expression_organisms,
+                                                       low_expression_organisms=low_expression_organisms,
+                                                       tuning_param=full_input_dict['tuning_param'],
+                                                       local_maximum = True
+                                                   )
+            else:
+                ValueError('optimization type invalid')
 
         return optimized_sequence

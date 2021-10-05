@@ -55,9 +55,9 @@ def run_zscore_module(final_seq, initial_seq, optimized_org_dict, deoptimized_or
 
     mean_opt_index = mean(opt_index_org)
     mean_deopt_index = mean(deopt_index_org)
-    # norm_factor = max(mean_opt_index, mean_deopt_index)
+    norm_factor = max(mean_opt_index, mean_deopt_index)
     alfa = 0.5
-    optimization_index = (alfa * mean_opt_index - (1 - alfa) * (mean_deopt_index))  # / norm_factor
+    optimization_index = (alfa * mean_opt_index - (1 - alfa) * (mean_deopt_index)) /norm_factor
     return mean_opt_index, mean_deopt_index, optimization_index
 
 
