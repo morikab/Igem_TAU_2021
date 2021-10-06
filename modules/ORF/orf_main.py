@@ -10,7 +10,7 @@ from modules.ORF.Liyam_new_optimization_function import hill_climbing_optimize_b
 class ORFModule(object):
 
     @staticmethod
-    def run_module(full_input_dict, cai_or_tai, optimization_type='zscore_hill_climbing'):
+    def run_module(full_input_dict, cai_or_tai, optimization_type='zscore_hill_climbing_average'):
         """
         :param full_input_dict: input from GUI parser (dict). Format:
         full_inp_dict[org_name] = {
@@ -31,9 +31,11 @@ class ORFModule(object):
 
 
         target_gene = full_input_dict['sequence']
+        print(optimization_type)
 
-        if optimization_type == 'zscore_hill_climbing':
-            optimized_sequence = hill_climbing_optimize_by_zscore(target_gene, full_input_dict, cai_or_tai, max_iter=50)
+        if 'zscore_hill_climbing' in optimization_type:
+            optimized_sequence = \
+                hill_climbing_optimize_by_zscore(target_gene, full_input_dict, cai_or_tai, max_iter=50,optimization_type = optimization_type)
             print(target_gene)
             print(optimized_sequence)
         else:

@@ -32,7 +32,8 @@ class ZscoreModule(object):
         # norm_factor = max(mean_opt_index, -mean_deopt_index)
         alfa = inp_dict['tuning_param']
         optimization_index = (alfa * mean_opt_index  - (1-alfa) * (mean_deopt_index ))#/norm_factor
-        return mean_opt_index, mean_deopt_index, optimization_index
+        weakest_score = min(opt_index_org)*max(deopt_index_org)*np.sign(max(deopt_index_org))
+        return mean_opt_index, mean_deopt_index, optimization_index, weakest_score
 
 
     # def run_module_prev(final_seq, inp_dict, optimization_type = 'cai'):
