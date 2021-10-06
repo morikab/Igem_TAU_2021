@@ -28,7 +28,7 @@ class REModule(object):
         optimized_org_names, deoptimized_org_names = parse_inp1(input_dict)
         logger.info('Optimized organisms:')
         optimized_RE_dict = multi_organism_RE_dict(optimized_org_names, cds_aa)
-        logger.info('Deptimized organisms:')
+        logger.info('Deoptimized organisms:')
         deoptimized_RE_dict = multi_organism_RE_dict(deoptimized_org_names, cds_aa)
 
         add_cds_nt = multi_org_insert_site(deoptimized_RE_dict, cds_nt)

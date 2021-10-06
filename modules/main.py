@@ -14,13 +14,13 @@ user_inp_raw = {
     'selected_promoters': None,
     'tuning_param':0.75,
     'organisms': {
-#                     'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-#                              'optimized': True,
-#                              'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
-
-#                     'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-#                                'optimized': False,
-#                                'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
+                    # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
+                    #          'optimized': True,
+                    #          'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
+                    #
+                    # 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
+                    #            'optimized': False,
+                    #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
 
                     'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
                               'optimized': False,
@@ -40,7 +40,7 @@ user_inp_raw = {
             }
     }
 
-model_preferences = {'RE': True,
+model_preferences = {'RE': True, #todo: test restcition enzymes
                      'translation': True,
                      'transcription': False,
                      'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
@@ -149,4 +149,3 @@ toc = time.time()
 print('time: ', toc-tic)
 
 
-#todo: test second optimization function before commit
