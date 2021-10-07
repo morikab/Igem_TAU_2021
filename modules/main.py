@@ -75,11 +75,11 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
         Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
         final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                            zscore=optimization_index,
-                                                           weakest_score = weakest_score,
+                                                           weakest_score=weakest_score,
                                                            p_name=p_name,
-                                                           native_prom = native_prom,
-                                                           synth_promoter = synth_promoter,
-                                                           evalue = evalue,
+                                                           native_prom=native_prom,
+                                                           synth_promoter=synth_promoter,
+                                                           evalue=evalue,
                                                            zip_directory=zip_directory_path)
         logger.info("Final output: %s", final_output)
     except Exception as e:
