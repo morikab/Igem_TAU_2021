@@ -59,8 +59,8 @@ def input_json_for_all_org(gb_files, json_file_name):
         print(f'takes {time.time()-inner_tic}')
     toc = time.time()
     print(f'create dict {toc-tic}')
-    with open(json_file_name, 'w') as fp:
-        json.dump(total_dict, fp)
+    # with open(json_file_name, 'w') as fp:
+    #     json.dump(total_dict, fp)
     tic = time.time()
     print(f'write json {tic-toc}')
 

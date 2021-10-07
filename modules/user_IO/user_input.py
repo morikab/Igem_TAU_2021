@@ -4,7 +4,7 @@ from modules.ORF.TAI import TAI
 from modules.ORF.calculating_cai import general_geomean
 from modules.logger_factory import LoggerFactory
 import os
-
+from statistics import mean, stdev
 # initialize the logger object
 logger = LoggerFactory.create_logger("user_input")
 
@@ -139,11 +139,16 @@ class UserInputModule(object):
         cai_scores = general_geomean(sequence_lst= cds_dict.values(), weights= cai_weights)
         cai_scores_dict = {gene_names[i]:cai_scores[i] for i in range(len(gene_names))}
 
-        tai_weights = tai_from_tgcnDB(org_name)
         try:
+            tai_weights = TAI(tai_from_tgcnDB(org_name)).index
             tai_scores=general_geomean(sequence_lst= cds_dict.values(), weights= tai_weights)
             tai_scores_dict = {gene_names[i]:tai_scores[i] for i in range(len(gene_names))}
+            tai_mean = mean(tai_scores)
+            std_tai = stdev(tai_scores)
         except:
+            tai_weights = None
+            tai_mean = None
+            std_tai = None
             tai_scores_dict = {}
 
         if len(estimated_expression):
@@ -161,7 +166,11 @@ class UserInputModule(object):
             'tai_profile': tai_weights,  # {dna_codon:tai_score}, if not found in tgcnDB it will be an empty dict.
             'cai_scores': cai_scores_dict,  # {'gene_name': score}
             'tai_scores': tai_scores_dict,  # {'gene_name': score}, if not found in tgcnDB it will be an empty dict.
-            'optimized': val['optimized']
+            'optimized': val['optimized'],
+            'cai_avg': mean(cai_scores),
+            'tai_avg':tai_mean,
+            'cai_std':stdev(cai_scores),
+            'tai_std': std_tai
             # 'gene_cds': cds_dict,  # cds dict {gene name and function : cds}, for ORF model
             # 'expression_estimation_of_all_genes': estimated_expression, # when the expression csv is not given- the CAI is used as expression levels
         }

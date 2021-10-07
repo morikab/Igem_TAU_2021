@@ -16,7 +16,7 @@ class UserOutputModule(object):
         return "User Output"
 
     @classmethod
-    def run_module(cls, cds_sequence, zscore, zip_directory=None):
+    def run_module(cls, cds_sequence, zscore, weakest_score, p_name, native_prom, synth_promoter, evalue, zip_directory=None):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
@@ -28,10 +28,13 @@ class UserOutputModule(object):
         # TODO - fix the dict according to spec
         return {
             'final_sequence: ': cds_sequence,  # str
-            'Zscore': zscore,  # int
-            'final_promoter': None,  # str
-            'promoter_score': None,  # int
-            'promoter_fasta': None,  # fasta file
+            'optimization_score': zscore,  # int
+            'score_for_weakest_pair': weakest_score, #int
+            'promoter_name_and_description': p_name, #str
+            'final_promoter': native_prom,  # str
+            'promoter_synthetic_version': synth_promoter,
+            'promoter_score': evalue,  # int
+            'promoter_fasta': None,  # fasta file, should include synthetic and regular options ranked (or just the mast file? might take less time)
         }
 
     @classmethod

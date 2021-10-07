@@ -17,6 +17,7 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
     The function calculates the difference between the features of each codon. Each feature has its own weight (ratio)
     """
 
+
     optimized_sequence = ''
 
     optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum) # optimal codons->dict(AA:codon)
@@ -126,7 +127,9 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
                 try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
                     # optimized organisms should have small loss
                     if high_expression:
-                        loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
+                        loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
+                        # print(organism.name)
+                        # print(organism.std)
                     else:
                         loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
                 except:
