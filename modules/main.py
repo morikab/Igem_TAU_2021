@@ -8,7 +8,8 @@ from modules import Zscore_calculation, user_IO, RE, ORF, promoters
 tic = time.time()
 logger = LoggerFactory.create_logger("main")
 
-base_path = os.path.join(os.path.dirname(__file__), '..\example_data')
+current_directory = Path(__file__).parent.resolve()
+base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
