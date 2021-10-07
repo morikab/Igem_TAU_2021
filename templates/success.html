@@ -48,6 +48,12 @@ tr:hover {background-color: #c6f0ff;}
                 <td> {{ value }} </td>
            </tr>
         {% endfor %}
+        {% for key, value in user_output.items() %}
+           <tr>
+                <th> {{ key }} </th>
+                <td> {{ value }} </td>
+           </tr>
+        {% endfor %}
         </table>
     </center>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>

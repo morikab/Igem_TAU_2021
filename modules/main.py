@@ -48,39 +48,45 @@ model_preferences = {'RE': True, #todo: test restcition enzymes
 }
 
 def run_modules(user_inp_raw, model_preferences = model_preferences):
-    input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
+    try:
+        input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
 
-    ### unit 1 ############################################
-    if model_preferences['RE'] or model_preferences['translation']:
-        final_cds, optimization_index, weakest_score= unit1(input_dict, model_preferences)
-    else:
-        final_cds= None
-        optimization_index= None
-        weakest_score= None
-    #########################################################
+        ### unit 1 ############################################
+        if model_preferences['RE'] or model_preferences['translation']:
+            final_cds, optimization_index, weakest_score= unit1(input_dict, model_preferences)
+        else:
+            final_cds= None
+            optimization_index= None
+            weakest_score= None
+        #########################################################
 
-    # ### unit 2 ############################################
-    if model_preferences['transcription']:
-         p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
-    else:
-        p_name = None
-        native_prom = None
-        synth_promoter = None
-        evalue = None
-    # #######################################################
+        # ### unit 2 ############################################
+        if model_preferences['transcription']:
+             p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
+        else:
+            p_name = None
+            native_prom = None
+            synth_promoter = None
+            evalue = None
+        # #######################################################
 
-    # TODO - get zip_directory from the user
-    zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
-    Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
-    final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                       zscore=optimization_index,
-                                                       weakest_score = weakest_score,
-                                                       p_name=p_name,
-                                                       native_prom = native_prom,
-                                                       synth_promoter = synth_promoter,
-                                                       evalue = evalue,
-                                                       zip_directory=zip_directory_path)
-    logger.info("Final output: %s", final_output)
+        # TODO - get zip_directory from the user
+        zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
+        Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
+        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
+                                                           zscore=optimization_index,
+                                                           weakest_score = weakest_score,
+                                                           p_name=p_name,
+                                                           native_prom = native_prom,
+                                                           synth_promoter = synth_promoter,
+                                                           evalue = evalue,
+                                                           zip_directory=zip_directory_path)
+        logger.info("Final output: %s", final_output)
+    except Exception as e:
+        final_output = {
+            'error_message': str(e),
+        }
+
     return final_output
 
 

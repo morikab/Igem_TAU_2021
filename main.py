@@ -55,7 +55,7 @@ def success():
         # TODO - need to create another screen with summarized info, and only then run the analysis
         processed_user_input = input_for_modules.process_input_for_modules(data)
         user_output = run_modules(processed_user_input)
-        return render_template("success.html", data=data)
+        return render_template("success.html", data=data, user_output=user_output)
     return redirect("/")
 
 
