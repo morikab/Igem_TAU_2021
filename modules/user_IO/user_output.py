@@ -1,5 +1,6 @@
 from modules.logger_factory import LoggerFactory
 import os
+from pathlib import Path
 from zipfile import ZipFile
 
 # initialize the logger object
@@ -10,6 +11,7 @@ class UserOutputModule(object):
     _ZIP_FILE_NAME = "results.zip"
     _LOGS_SUBDIRECTORY = "logs"
     _FINAL_OPTIMIZED_SEQUENCE_FILE_NAME = "optimized_sequence.fasta"
+    _MAST_RESULT_FILE_NAME = "mast_results.html"
 
     @staticmethod
     def get_name() -> str:
@@ -49,9 +51,13 @@ class UserOutputModule(object):
             cls._write_log_file(zip_object=zip_object, log_file_name="user_input.log")
             cls._write_log_file(zip_object=zip_object, log_file_name="RE.log")
             cls._write_log_file(zip_object=zip_object, log_file_name="user_output.log")
+            cls._write_log_file(zip_object=zip_object, log_file_name="promoters.log")
 
             # Add Fasta files to zip
             zip_object.writestr(cls._FINAL_OPTIMIZED_SEQUENCE_FILE_NAME, cds_sequence)
+            zip_object.write(filename=os.path.join(str(Path(LoggerFactory.LOG_DIRECTORY).parent.resolve()),
+                                                   cls._MAST_RESULT_FILE_NAME),
+                             arcname=cls._MAST_RESULT_FILE_NAME)
 
     @classmethod
     def _write_log_file(cls, zip_object, log_file_name):

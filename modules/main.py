@@ -43,7 +43,7 @@ user_inp_raw = {
 
 model_preferences = {'RE': True, #todo: test restcition enzymes
                      'translation': True,
-                     'transcription': False,
+                     'transcription': True,
                      'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
 }
 
@@ -55,14 +55,14 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
         if model_preferences['RE'] or model_preferences['translation']:
             final_cds, optimization_index, weakest_score= unit1(input_dict, model_preferences)
         else:
-            final_cds= None
-            optimization_index= None
-            weakest_score= None
+            final_cds = None
+            optimization_index = None
+            weakest_score = None
         #########################################################
 
         # ### unit 2 ############################################
         if model_preferences['transcription']:
-             p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
+            p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
         else:
             p_name = None
             native_prom = None
@@ -86,6 +86,7 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
         final_output = {
             'error_message': str(e),
         }
+        logger.error("Encountered unknown error when running modules. Error message: %s", str(e))
 
     return final_output
 
@@ -155,5 +156,4 @@ if __name__ == "__main__":
 toc = time.time()
 
 print('time: ', toc-tic)
-
 

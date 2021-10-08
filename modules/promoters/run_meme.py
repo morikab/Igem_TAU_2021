@@ -1,5 +1,9 @@
 import glob
+from modules.logger_factory import LoggerFactory
 from modules.promoters.globals_and_shared_methods import *
+
+
+logger = LoggerFactory.create_logger("promoters")
 
 
 """
@@ -101,12 +105,14 @@ def run_mast(motif_path, promoter_path):
     promoter_name = promoter_path.split(os.sep)[-1].split('.')[0] #to get only file name without ext or path
     out_name = '_'.join(['motif', motif_name, 'seq', promoter_name])
     out_path = os.path.join(start, out_name)
+    logger.info("mast out path: %s", out_path)
     mast(motif_path, promoter_path, output_path=out_path)
 
     source_path = os.path.join(out_path, 'mast.html')
-    base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    target_path = os.path.join(base_path, 'logs', 'mast_results.html')
+    base_path = str(Path(__file__).parent.resolve())
+    artifacts_path = os.path.join(str(Path(base_path).parent.resolve()), "artifacts")
+    target_path = os.path.join(artifacts_path, 'mast_results.html')
     shutil.copyfile(source_path, target_path)
                                 
     return out_path
-    
+
