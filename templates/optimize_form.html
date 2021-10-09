@@ -34,8 +34,7 @@ body {
 	box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
 	padding: 20px 30px;
 	box-sizing: border-box;
-	width: 80%;
-	margin: 0 10%;
+	width: 100%;
 
 	/*stacking fieldsets above each other*/
 	position: absolute;
@@ -86,8 +85,9 @@ body {
 }
 /*progressbar*/
 #progressbar {
-    width:700px;
+    width:820px;
 	margin-bottom: 30px;
+	margin-left: 50px;
 	overflow: hidden;
 	/*CSS counters to number the steps*/
 	counter-reset: step;
@@ -95,7 +95,7 @@ body {
 #progressbar li {
 	list-style-type: none;
 	color: black;
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: bold;
     width: 10%;
 	float: left;
@@ -148,8 +148,6 @@ body {
     		<li class="active">Optimized Organisms</li>
     		<li>Deoptimized Organisms</li>
     		<li>Optimized Protein</li>
-            <li>Coding Sequence Optimization</li>
-            <li>External Information</li>
             <li>Transcription Optimization</li>
             <li>Review</li>
     	</ul>
@@ -157,27 +155,35 @@ body {
         <!-- step #1 -->
          <fieldset>
     		<h2 class="fs-title">Optimized Organisms</h2>
-    		<h3 class="fs-subtitle">#1: Upload optimized organisms sequences (as .gb files)</h3>
-            <h3 class="fs-subtitle">Please upload a genbank file containing the whole genome (with annotations) for each organism to optimize in your community.</h3>
+    		<h3 class="fs-subtitle">#1: Upload optimized organisms sequences </h3>
+            <h3 class="fs-subtitle">* <b>Mandatory:</b> Please upload a genbank file (.gb file) containing the whole genome (with annotations) for each organism to optimize in your community.<br><br>
+                                    * <b>Optional:</b> To perform the optimization based only on highly expressed genes,
+                        please upload a Microsoft Excel Comma Separated file (.csv file) containing the expression levels for each organism.</h3>
+            <p style="color:red;font-size:10px">Note: In case you will not upload the expression levels, the optimization will be performed based on gene annotations.</p>
+            <br>
              <div class="col-md-5">
                 <label> Number of organisms to optimize:</label>
-                <input type="number" name="" id="num1" class="form-control" min="0" max="10">
+                <input type="number" id="num1" class="form-control" min="1">
                 <input type="button" value="Submit" onclick="optimize_inputbox()" />
                 <input type="button" value="Reset Organisms Number" onclick="empty_inputbox(optimized_inputboxes, num1)" />
                 <br>
               <div id="optimized_inputboxes">
               </div>
             </div>
-            <input type="button" name="next" class="next action-button" value="Next" />
+            <input type="button" id="next_1" name="next" class="action-button" value="Next" />
     	</fieldset>
         <!-- step #2 -->
         <fieldset>
           <h2 class="fs-title">Deoptimized Organisms</h2>
-          <h3 class="fs-subtitle">#2: Upload deoptimized organisms sequences (as .gb files)</h3>
-          <h3 class="fs-subtitle">Please upload a genbank file containing the whole genome (with annotations) for each organism to deoptimize in your community.</h3>
+            <h3 class="fs-subtitle">#2: Upload deoptimized organisms sequences</h3>
+            <h3 class="fs-subtitle">* <b>Mandatory:</b> Please upload a genbank file (.gb file) containing the whole genome (with annotations) for each organism to deoptimize in your community.<br><br>
+                                    * <b>Optional:</b> To perform the optimization based only on highly expressed genes,
+                        please upload a Microsoft Excel Comma Separated file (.csv file) containing the expression levels for each organism.</h3>
+            <p style="color:red;font-size:10px">Note: In case you will not upload the expression levels, the optimization will be performed based on gene annotations.</p>
+            <br>
             <div class="col-md-5">
             <label> Number of organisms to deoptimize:</label>
-                <input type="number" name="" id="num2" class="form-control" min="0" max="10">
+                <input type="number" id="num2" class="form-control" min="1"/>
                 <input type="button" value="Submit" onclick="deoptimize_inputbox()" />
                 <input type="button" value="Reset Organisms Number" onclick="empty_inputbox(deoptimized_inputboxes, num2)" />
                 <br>
@@ -185,7 +191,7 @@ body {
               </div>
             </div>
             <input type="button" name="previous" class="previous action-button" value="Previous" />
-            <input type="button" name="next" class="next action-button" value="Next" />
+            <input type="button" id="next_2" name="next" class="action-button" value="Next" />
         </fieldset>
         <!-- step #3 -->
         <fieldset>
@@ -195,61 +201,25 @@ body {
             <input type="text" id="protein_seq_name" name="protein_seq_name" placeholder="Protein Name">
     		<input type="file" id="protein_seq" name="protein_seq" accept=".fa, .fasta" onchange="return fileValidation('protein_seq', '.fa, .fasta')"/>
             <p style="color:red;font-size:10px">Note: In case you don't want to optimize any coding sequence, please press 'Next'.</p>
+            <br>
+            <h2 class="fs-title">Restriction sites optimization</h2>
+            <div class="checkbox">
+              <label>Would you like to optimize restriction sites?</label>
+                <br>
+              <select name="restrict_enzyme_options" id="restrict_enzyme_options">
+                <option value="yes">Yes</option>
+                <option value="no" selected>No</option>
+              </select>
+                <br>
+            </div>
+
             <input type="button" name="previous" class="previous action-button" value="Previous" />
     		<input type="button" name="next" class="next action-button" value="Next" />
     	</fieldset>
         <!-- step #4 -->
         <fieldset>
-        <h2 class="fs-title">Coding Sequence Optimization</h2>
-        <h3 class="fs-subtitle">#4: Restriction sites optimization</h3>
-        <div class="checkbox">
-          <label>Would you like to optimize restriction sites?</label>
-            <br>
-          <select name="restrict_enzyme_options" id="restrict_enzyme_options">
-            <option value="yes">Yes</option>
-            <option value="no" selected>No</option>
-          </select>
-            <br>
-        </div>
-        <input type="button" name="previous" class="previous action-button" value="Previous" />
-        <input type="button" name="next" class="next action-button" value="Next" />
-      </fieldset>
-        <!-- step #5 -->
-        <fieldset>
-        <h2 class="fs-title">External Information</h2>
-        <h3 class="fs-subtitle">#5: Ribosomal density optimization</h3>
-        <div class="checkbox">
-          <label>Would you like to optimize ribosomal density?</label>
-            <br>
-          <select name="ribosomal_dens_options" id="ribosomal_dens_options">
-            <option value="yes" onchange="ribosomal_dens_inputbox()">Yes</option>
-            <option value="no" selected>No</option>
-          </select>
-            <br>
-        </div>
-        <div class="form-group" id="file-input2" style="display:none;">
-            <label for="promoter_optimization">To perform the optimization based only on highly expressed genes,<br>
-                please upload a csv file containing the expression levels for each organism.</label><br><br>
-            <input type="file" id="express_lvl" name="express_lvl" accept=".csv" onchange="return fileValidation('express_lvl', '.csv')">
-            <p style="color:red;font-size:10px">Note: In case you will not upload the expression levels, the optimization will be performed based on gene annotations.</p>
-        </div>
-        <script>
-        document.getElementById('ribosomal_dens_options').onchange = function(){
-           if(this.value == 'yes') {
-             document.getElementById('file-input2').style.display='block';
-           }
-           else {
-             document.getElementById('file-input2').style.display='none';
-           }
-        }
-        </script>
-        <input type="button" name="previous" class="previous action-button" value="Previous" />
-        <input type="button" name="next" class="next action-button" value="Next" />
-      </fieldset>
-        <!-- step #6 -->
-        <fieldset>
         <h2 class="fs-title">Transcription Optimization</h2>
-        <h3 class="fs-subtitle">#6: Promoter sequence optimization</h3>
+        <h3 class="fs-subtitle">#4: Promoter sequence optimization</h3>
         <label>Would you like to optimize promoters?</label>
         <div class="checkbox">
             <select name="promoter_optimization_options" id="promoter_optimization_options">
@@ -258,7 +228,7 @@ body {
             </select>
         </div>
         <div class="form-group" id="file-input" style="display:none;">
-            <label id="promoter_optimization">Please upload a fasta file of promoter options you would like to optimize.</label>
+            <label id="promoter_optimization">Please upload a fasta file (.fa file) of promoter options you would like to optimize.</label>
             <input type="file" id="promoter_seq" name="promoter_seq" placeholder="Promoter Sequence" accept=".fa, .fasta" onchange="return fileValidation('promoter_seq', '.fa')">
             <p style="color:red;font-size:10px">Note: In case you will not upload your own promoter options, the organisms’ endogenous promoters will be optimized.</p>
         </div>
@@ -275,15 +245,14 @@ body {
         <input type="button" name="previous" class="previous action-button" value="Previous" />
         <input type="button" name="next" class="next action-button" value="Next" />
         </fieldset>
-
-        <!-- step #7 -->
+        <!-- step #5 -->
         <fieldset>
             <h2 class="fs-title">Review</h2>
-            <h3 class="fs-subtitle">#7: Review your application.</h3>
+            <h3 class="fs-subtitle">#5: Review your application.</h3>
             <span>By clicking Submit the optimization will start.<br>
                 Please reassure your selections along the application.</span><br>
-            <input type="button" name="previous" class="previous action-button" value="Previous" />
-            <input type="submit" name="submit_optimization" class="submit action-button" value="Submit" />
+            <input type="button" name="previous" class="previous action-button" value="Previous" /></br>
+            <button type="submit" name="submit_optimization" class="submit action-button">Press to Express</button>
         </fieldset>
     </form>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>

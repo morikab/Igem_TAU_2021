@@ -3,6 +3,90 @@ var current_fs, next_fs, previous_fs; //fieldsets
 var left, opacity, scale; //fieldset properties which we will animate
 var animating; //flag to prevent quick multi-click glitches
 
+$("#next_1").click(function(){
+	// Check number of optimized organisms
+    let valid = $('#num1').val();
+    if(valid == '' || valid == 0){
+        alert("Please upload at least 1 organism to optimize!");
+        return false;
+    }
+
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	next_fs = $(this).parent().next();
+
+	//activate next step on progressbar using the index of next_fs
+	$("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+	//show the next fieldset
+	next_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale current_fs down to 80%
+			scale = 1 - (1 - now) * 0.2;
+			//2. bring next_fs from the right(50%)
+			left = (now * 50)+"%";
+			//3. increase opacity of next_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'transform': 'scale('+scale+')'});
+			next_fs.css({'left': left, 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+})
+
+$("#next_2").click(function(){
+	// Check number of deoptimized organisms
+    let valid = $('#num2').val();
+    if(valid == '' || valid == 0){
+        alert("Please upload at least 1 organism to optimize!");
+        return false;
+    }
+
+	if(animating) return false;
+	animating = true;
+
+	current_fs = $(this).parent();
+	next_fs = $(this).parent().next();
+
+	//activate next step on progressbar using the index of next_fs
+	$("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+	//show the next fieldset
+	next_fs.show();
+	//hide the current fieldset with style
+	current_fs.animate({opacity: 0}, {
+		step: function(now, mx) {
+			//as the opacity of current_fs reduces to 0 - stored in "now"
+			//1. scale current_fs down to 80%
+			scale = 1 - (1 - now) * 0.2;
+			//2. bring next_fs from the right(50%)
+			left = (now * 50)+"%";
+			//3. increase opacity of next_fs to 1 as it moves in
+			opacity = 1 - now;
+			current_fs.css({'transform': 'scale('+scale+')'});
+			next_fs.css({'left': left, 'opacity': opacity});
+		},
+		duration: 800,
+		complete: function(){
+			current_fs.hide();
+			animating = false;
+		},
+		//this comes from the custom easing plugin
+		easing: 'easeInOutBack'
+	});
+})
+
 $(".next").click(function(){
 	if(animating) return false;
 	animating = true;
@@ -83,17 +167,39 @@ function optimize_inputbox() {
   for (i = 0; i < num1; i++) {
     //Add text-boxes for organism names
     var namebox = document.createElement("input");
+    let label_name = document.createElement('h4');
+    label_name.textContent = "Optimized Organism #".concat((i+1).toString(),":");
     namebox.setAttribute("type", "text");
     namebox.setAttribute("name","optimized_name_#".concat((i+1).toString()))
     namebox.setAttribute("placeholder", "Enter Organism Name #".concat((i+1).toString()));
+    document.getElementById("optimized_inputboxes").appendChild(document.createElement('hr'));
+    document.getElementById("optimized_inputboxes").appendChild(document.createElement('br'));
+    document.getElementById("optimized_inputboxes").appendChild(label_name);
     document.getElementById("optimized_inputboxes").appendChild(namebox);
     //Add file-boxes for organism sequence
-    var inputbox = document.createElement("input");
+    let inputbox = document.createElement("input");
     let temp_id = "optimized_seq_file_#".concat((i+1).toString());
+    let label_sequence = document.createElement('h5');
+    let label_express_lvl = document.createElement('h5');
+    label_sequence.textContent = 'Upload Genebank File #'.concat((i+1).toString(),' (mandatory):');
+    label_express_lvl.textContent = 'Upload CSV File #'.concat((i+1).toString(),' (optional):');
+
     inputbox.setAttribute("type", "file");
     inputbox.setAttribute("accept", ".gb");
     inputbox.setAttribute("id",temp_id);
     inputbox.setAttribute("name",temp_id);
+    inputbox.setAttribute("onchange", `return fileValidation('${temp_id}', '.gb')`);
+    document.getElementById("optimized_inputboxes").appendChild(label_sequence);
+    document.getElementById("optimized_inputboxes").appendChild(inputbox);
+    // Add file-boxes for organism gene-expression
+    inputbox = document.createElement("input");
+    temp_id = "optimized_express_lvl_file_#".concat((i+1).toString());
+    inputbox.setAttribute("type", "file");
+    inputbox.setAttribute("accept", ".csv");
+    inputbox.setAttribute("id",temp_id);
+    inputbox.setAttribute("name",temp_id);
+    inputbox.setAttribute("onchange", `return fileValidation('${temp_id}', '.csv')`);
+    document.getElementById("optimized_inputboxes").appendChild(label_express_lvl);
     document.getElementById("optimized_inputboxes").appendChild(inputbox);
   }
 }
@@ -104,17 +210,38 @@ function deoptimize_inputbox() {
   for (i = 0; i < num2; i++) {
     //Add text-boxes for organism names
     var namebox = document.createElement("input");
+    let label_name = document.createElement('h4');
+    label_name.textContent = "Deoptimized Organism #".concat((i+1).toString(),":");
     namebox.setAttribute("type", "text");
     namebox.setAttribute("name","deoptimized_name_#".concat((i+1).toString()))
     namebox.setAttribute("placeholder", "Enter Organism Name #".concat((i+1).toString()));
+    document.getElementById("deoptimized_inputboxes").appendChild(document.createElement('hr'));
+    document.getElementById("deoptimized_inputboxes").appendChild(document.createElement('br'));
+    document.getElementById("deoptimized_inputboxes").appendChild(label_name);
     document.getElementById("deoptimized_inputboxes").appendChild(namebox);
     //Add file-boxes for organism sequence
     var inputbox = document.createElement("input");
     let temp_id = "deoptimized_seq_file_#".concat((i+1).toString());
+    let label_sequence = document.createElement('h5');
+    let label_express_lvl = document.createElement('h5');
+    label_sequence.textContent = 'Upload Genebank File #'.concat((i+1).toString(),' (mandatory):');
+    label_express_lvl.textContent = 'Upload CSV File #'.concat((i+1).toString(),' (optional):');
     inputbox.setAttribute("type", "file");
     inputbox.setAttribute("accept", ".gb");
     inputbox.setAttribute("id",temp_id);
     inputbox.setAttribute("name", temp_id);
+    inputbox.setAttribute("onchange", `return fileValidation('${temp_id}', '.gb')`);
+    document.getElementById("deoptimized_inputboxes").appendChild(label_sequence);
+    document.getElementById("deoptimized_inputboxes").appendChild(inputbox);
+    // Add file-boxes for organism gene-expression
+    inputbox = document.createElement("input");
+    temp_id = "deoptimized_express_lvl_file_#".concat((i+1).toString());
+    inputbox.setAttribute("type", "file");
+    inputbox.setAttribute("accept", ".csv");
+    inputbox.setAttribute("id",temp_id);
+    inputbox.setAttribute("name",temp_id);
+    inputbox.setAttribute("onchange", `return fileValidation('${temp_id}', '.csv')`);
+    document.getElementById("deoptimized_inputboxes").appendChild(label_express_lvl);
     document.getElementById("deoptimized_inputboxes").appendChild(inputbox);
   }
 }

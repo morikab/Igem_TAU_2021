@@ -84,7 +84,8 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
 
 
 def unit1(input_dict, model_preferences ):
-
+    mean_opt_index = None
+    mean_deopt_index = None
     if model_preferences['translation']:
         optimization_func = model_preferences['translation_function']
         try: #both CAI and tAI, select the one with the best optimization index

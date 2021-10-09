@@ -37,7 +37,7 @@ tr:hover {background-color: #c6f0ff;}
     <title>Summary</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
-<body>
+<body onload="coffee_break()">
     <h2>Thank you for using Communique's Optimizer!</h2><br>
     <h2>Summary of Your Application:</h2><br>
     <center>
@@ -51,5 +51,10 @@ tr:hover {background-color: #c6f0ff;}
         </table>
     </center>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>
+    <script>
+        function coffee_break() {
+            alert("This may take some time, go take a coffee :)");
+        };
+    </script>
 </body>
 </html>
