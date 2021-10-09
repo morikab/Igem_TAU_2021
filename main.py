@@ -3,9 +3,7 @@ import sys
 if sys.executable.endswith('pythonw.exe'):
     sys.stdout = open(os.devnull, 'w')
     sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-{}'.format(os.path.basename(sys.argv[0]))), "w")
-    
-import os
-import sys
+
 from pathlib import Path
     
 from flask import Flask, redirect, request, render_template
@@ -16,17 +14,17 @@ from GUI import input_for_modules
 from modules.main import run_modules
 
 
-if sys.executable.endswith('pythonw.exe'):
-    sys.stdout = open(os.devnull, 'w')
-    sys.stderr = open(os.path.join(os.getenv('TEMP'), 'stderr-{}'.format(os.path.basename(sys.argv[0]))), "w")
-
 app = Flask(__name__)
+
 # Define the path to the upload folder
 UPLOAD_FOLDER = os.path.join("static", "uploads")
 Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ui = FlaskUI(app, width=500, height=500, idle_interval=100)
+IDLE_INTERVAL_SEC = 3 * 60 * 60
+# TODO - use our own custom FlaskUI
+# ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
+ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC)
 
 
 @app.route('/')
@@ -59,7 +57,7 @@ def success():
         # TODO - need to create another screen with summarized info, and only then run the analysis
         processed_user_input = input_for_modules.process_input_for_modules(data)
         user_output = run_modules(processed_user_input)
-        return render_template("success.html", data=data)
+        return render_template("success.html", data=data, user_output=user_output)
     return redirect("/")
 
 
@@ -69,6 +67,6 @@ def communique():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
     # Run in order to make a standalone windows application and comment app.run
-    ui.run()
+    # ui.run()
