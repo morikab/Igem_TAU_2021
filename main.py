@@ -22,7 +22,8 @@ Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 IDLE_INTERVAL_SEC = 3 * 60 * 60
-ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC)
+# TODO - use our own custom FlaskUI
+ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
 
 
 @app.route('/')
@@ -65,6 +66,6 @@ def communique():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    # app.run(host="0.0.0.0", debug=True)
     # Run in order to make a standalone windows application and comment app.run
-    # ui.run()
+    ui.run()
