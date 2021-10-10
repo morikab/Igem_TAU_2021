@@ -43,7 +43,7 @@ user_inp_raw = {
 
 model_preferences = {'RE': True, #todo: test restcition enzymes
                      'translation': True,
-                     'transcription': False,
+                     'transcription': True,
                      'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
 }
 
