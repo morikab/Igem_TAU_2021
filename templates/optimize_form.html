@@ -147,6 +147,7 @@ body {
     	<ul id="progressbar">
     		<li class="active">Optimized Organisms</li>
     		<li>Deoptimized Organisms</li>
+            <li>Selective Optimization Tuning</li>
     		<li>Optimized Protein</li>
             <li>Transcription Optimization</li>
             <li>Review</li>
@@ -195,6 +196,18 @@ body {
         </fieldset>
         <!-- step #3 -->
         <fieldset>
+    		<h2 class="fs-title">Selective Optimization Tuning</h2>
+            <h3 class="fs-subtitle">The expression optimization for optimized organisms and deoptimization of expression for deoptimized organisms can be tuned according to your preference for all engineered aspects with the following parameter.</h3>
+            <h3 class="fs-subtitle">For values larger than 50% optimization will be prioritized.</h3>
+            <h3 class="fs-subtitle">For values smaller than 50% deoptimization will be prioritized.</h3>
+            <h3 class="fs-subtitle">If you do not prefer optimization over deoptimization, leave the bar in the middle 50%.</h3>
+            <input type="range" min="1" max="99" value="50" class="slider" id="TuningParam">
+            <p>Value: <span id="demo"></span></p>
+            <input type="button" name="previous" class="previous action-button" value="Previous" />
+    		<input type="button" name="next" class="next action-button" value="Next" />
+    	</fieldset>
+        <!-- step #4 -->
+        <fieldset>
     		<h2 class="fs-title">Optimized Protein</h2>
     		<h3 class="fs-subtitle">#3: Upload DNA sequence to optimize (as .fa file)</h3>
             <h3 class="fs-subtitle">Please upload a fasta file containing the DNA sequence of the gene you would like to express.</h3>
@@ -216,7 +229,7 @@ body {
             <input type="button" name="previous" class="previous action-button" value="Previous" />
     		<input type="button" name="next" class="next action-button" value="Next" />
     	</fieldset>
-        <!-- step #4 -->
+        <!-- step #5 -->
         <fieldset>
         <h2 class="fs-title">Transcription Optimization</h2>
         <h3 class="fs-subtitle">#4: Promoter sequence optimization</h3>
@@ -245,7 +258,7 @@ body {
         <input type="button" name="previous" class="previous action-button" value="Previous" />
         <input type="button" name="next" class="next action-button" value="Next" />
         </fieldset>
-        <!-- step #5 -->
+        <!-- step #6 -->
         <fieldset>
             <h2 class="fs-title">Review</h2>
             <h3 class="fs-subtitle">#5: Review your application.</h3>

@@ -72,7 +72,8 @@ Runs STREME several times to create all necessary files for subsequent motif ran
 """
 def run_streme():
     out_path = 'streme_outputs'
-    create_folder(os.path.join(start, out_path))
+    real_out_path = os.path.join(start, out_path)
+    create_folder(real_out_path)
     for opt_org in glob.glob(os.path.join(opt_path, "*", "")):
 
         #first run: opt organism vs. intergenic
@@ -80,7 +81,7 @@ def run_streme():
         dir_name = os.path.join(opt_path, org_name)
         name1 = '_'.join([org_name, '100', '200'])
         name2 = '_'.join([org_name, 'inter'])
-        one_streme(name1, dir_name, name2, dir_name, out_path)
+        one_streme(name1, dir_name, name2, dir_name, real_out_path)
 
         #second run: opt organism HE vs. all deopt organisms HE
         for deopt_org in glob.glob(os.path.join(deopt_path, "*", "")):
@@ -88,7 +89,7 @@ def run_streme():
              de_dir_name = os.path.join(deopt_path, de_org_name)
              name1 = '_'.join([org_name, '33', '200'])
              name2 = '_'.join([de_org_name, '33', '200'])
-             one_streme(name1, dir_name, name2, de_dir_name, out_path)
+             one_streme(name1, dir_name, name2, de_dir_name, real_out_path)
 
 
 """
