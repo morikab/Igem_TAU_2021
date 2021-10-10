@@ -103,7 +103,7 @@ def unit1(input_dict, model_preferences ):
             cds_nt_final_tai = ORF.ORFModule.run_module(input_dict, 'tai', optimization_func)
             if model_preferences['RE']:
                 cds_nt_final_tai = RE.REModule.run_module(input_dict, cds_nt_final_tai)
-            tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, weakest_score = \
+            tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
 
             logger.info(f'Sequence:\n{cds_nt_final_tai}')
@@ -115,7 +115,7 @@ def unit1(input_dict, model_preferences ):
             cds_nt_final_cai = ORF.ORFModule.run_module(input_dict, 'cai', optimization_func)
             if model_preferences['RE']:
                 cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
-            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , weakest_score=\
+            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , cai_weakest_score=\
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
 
             logger.info(f'Sequence:\n{cds_nt_final_cai}')
@@ -126,10 +126,16 @@ def unit1(input_dict, model_preferences ):
                 logger.info('CAI sequence was selected')
                 final_cds = cds_nt_final_cai
                 optimization_index = cai_optimization_index
+                mean_opt_index = cai_mean_opt_index
+                mean_deopt_index =  cai_mean_deopt_index
+                weakest_score = cai_weakest_score
             else:
                 logger.info('tAI sequence was selected')
                 final_cds = cds_nt_final_tai
                 optimization_index = tai_optimization_index
+                mean_opt_index = tai_mean_opt_index
+                mean_deopt_index = tai_mean_deopt_index
+                weakest_score = tai_weakest_score
 
 
         except:
