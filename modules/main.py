@@ -127,6 +127,7 @@ def unit1(input_dict, model_preferences ):
             final_cds = ORF.ORFModule.run_module(input_dict, 'cai', optimization_type=optimization_func)
             if model_preferences['RE']:
                 final_cds = RE.REModule.run_module(input_dict, final_cds)
+                print(final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
 

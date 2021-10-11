@@ -3,8 +3,6 @@ from modules.Zscore_calculation import ZscoreModule
 from modules.ORF.calculating_cai import *
 from statistics import mean
 
-import pandas as pd
-import numpy as np
 
 
 

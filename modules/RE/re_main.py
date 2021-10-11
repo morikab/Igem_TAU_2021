@@ -1,5 +1,6 @@
 from modules.shared_functions_and_vars import translate
 from .multi_org_functions import *
+from .re_functions import insert_site_CDS
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("RE")
@@ -31,7 +32,7 @@ class REModule(object):
         logger.info('Deoptimized organisms:')
         deoptimized_RE_dict = multi_organism_RE_dict(deoptimized_org_names, cds_aa)
 
-        add_cds_nt = multi_org_insert_site(deoptimized_RE_dict, cds_nt)
+        re_positions,  add_cds_nt= insert_site_CDS(deoptimized_RE_dict, cds_nt)
 
         final_cds_nt = multi_org_remove_site(optimized_RE_dict, add_cds_nt)
 

@@ -29,14 +29,6 @@ def multi_organism_RE_dict(org_list, cds_aa):
     return RE_dict
 
 
-def multi_org_insert_site(deoptimized_RE_dict, cds_nt):
-    # todo: make a better version. currently I am going over the options
-    # the sites matters, because insertion of one site can delete recognition of a different site.
-    cds_nt_added_sites = cds_nt
-    for org_RE_dict in deoptimized_RE_dict.values():
-        None
-    return cds_nt_added_sites
-
 
 def multi_org_remove_site(optimized_RE_dict, cds_nt):
     RE_dict = {}

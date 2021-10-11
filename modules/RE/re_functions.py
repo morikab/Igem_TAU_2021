@@ -149,11 +149,9 @@ def insert_site_CDS(RE_dict, inputSeqNT):
                         else: # inxd in busyNTseq
                             if indx not in overlapped_NTindx:
                                 overlapped_NTindx[indx]={}
-                            if siteName not in overlapped_NTindx[indx]:
-                                overlapped_NTindx[indx][siteName] = {}
-                            overlapped_NTindx[indx]['Organism'][siteName] = [orgName]
-                            overlapped_NTindx[indx][siteName] = []
-                            overlapped_NTindx[indx][siteName]+=[NTsite]
+                            if 'Organism' not in overlapped_NTindx[indx]:
+                                overlapped_NTindx[indx]['Organism'] = {}
+                            overlapped_NTindx[indx]['Organism'][siteName]= overlapped_NTindx[indx]['Organism'][siteName].append(NTsite)
                             overlappedSitesNT+=[NTsite]
                     if NTsite not in NTsite_org_inSeq:
                         NTsite_org_inSeq[NTsite]={}

@@ -1,11 +1,9 @@
-from  modules.user_IO.user_input import *
 from  modules.user_IO.input_functions import *
 from os import listdir
 from os.path import isfile, join
 import time
-from running_modules_functions import *
+from not_used_code.running_modules_functions import *
 from Bio.SeqIO import read
-import json
 
 
 def sample_run(gb_files):  # do not use!!
@@ -70,7 +68,7 @@ gene = read('../example_data/mcherry_original.fasta', 'fasta')
 cds = str(gene.seq)
 base_path = join(os.path.dirname(__file__), 'genomes')
 gb_files = [join('genomes', f) for f in listdir(base_path) if isfile(join(base_path, f))]
-input_json_for_all_org(gb_files, json_file_name ='data_for_analysis/org_name_to_dict.json')
+input_json_for_all_org(gb_files, json_file_name ='../data_for_analysis/org_name_to_dict.json')
 
 
 
