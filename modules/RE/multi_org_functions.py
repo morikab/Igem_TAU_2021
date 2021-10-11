@@ -1,6 +1,6 @@
 from modules.logger_factory import LoggerFactory
 
-from .re_functions import REbase_org, insert_site_CDS, sites_in_cds
+from .re_functions import REbase_org, insert_site_CDS, sites_in_cds, remove_site_from_plasmid
 
 logger = LoggerFactory.create_logger("RE")
 
@@ -36,7 +36,7 @@ def multi_org_remove_site(optimized_RE_dict, cds_nt):
         RE_dict = {**RE_dict, **org_RE_dict}
 
     try:
-        cds_nt = insert_site_CDS(RE_dict, cds_nt)
+        cds_nt = remove_site_from_plasmid(RE_dict, cds_nt)
     except:
         logger.info('Not all restriction requirements are applicable')
     return cds_nt

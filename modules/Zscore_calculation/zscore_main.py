@@ -35,6 +35,8 @@ class ZscoreModule(object):
         optimization_index = (alfa * mean_opt_index  - (1-alfa) * (mean_deopt_index ))#/norm_factor
         weakest_score = min(opt_index_org)*max(deopt_index_org)
         if min(opt_index_org)>0 and max(deopt_index_org)<0:
+            print(min(opt_index_org))
+            print(max(deopt_index_org))
             weakest_score = abs(weakest_score)
         else:
             weakest_score = -abs(weakest_score)
