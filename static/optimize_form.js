@@ -273,10 +273,11 @@ function fileValidation(element_id, allowed_type) {
     }
 }
 
-var slider = document.getElementById("TuningParam");
+var slider = document.getElementById("tuning_param");
 var output = document.getElementById("demo");
 output.innerHTML = slider.value;
 
 slider.oninput = function() {
   output.innerHTML = this.value;
+  $("#tuning_param_text").val(this.value)
 }

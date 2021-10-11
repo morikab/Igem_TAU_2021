@@ -10,10 +10,10 @@ logger = LoggerFactory.create_logger("main")
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
-user_inp_raw = {
+default_user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
-    'tuning_param':0.75,
+    'tuning_param': 0.75,
     'organisms': {
                     # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
                     #          'optimized': True,
@@ -41,13 +41,21 @@ user_inp_raw = {
             }
     }
 
-model_preferences = {'RE': True, #todo: test restcition enzymes
-                     'translation': True,
-                     'transcription': True,
-                     'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
-}
+default_model_preferences = {'RE': True,  # todo: test restcition enzymes
+                             'translation': True,
+                             'transcription': True,
+                             'translation_function': 'zscore_hill_climbing_average'
+                             # , 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
+                             }
 
-def run_modules(user_inp_raw, model_preferences = model_preferences):
+
+def run_modules(user_inp_raw=None, model_preferences=None):
+    if user_inp_raw is None:
+        user_inp_raw = default_user_inp_raw
+
+    if model_preferences is None:
+        model_preferences = default_model_preferences
+
     try:
         input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
 
@@ -91,7 +99,7 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
     return final_output
 
 
-def unit1(input_dict, model_preferences ):
+def unit1(input_dict, model_preferences):
     if model_preferences['translation']:
         optimization_func = model_preferences['translation_function']
         try: #both CAI and tAI, select the one with the best optimization index

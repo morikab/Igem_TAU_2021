@@ -55,8 +55,8 @@ def success():
         else:
             print('No files uploaded')
         # TODO - need to create another screen with summarized info, and only then run the analysis
-        processed_user_input = input_for_modules.process_input_for_modules(data)
-        user_output = run_modules(processed_user_input)
+        processed_user_input, model_preferences = input_for_modules.process_input_for_modules(data)
+        user_output = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
         return render_template("success.html", data=data, user_output=user_output)
     return redirect("/")
 
