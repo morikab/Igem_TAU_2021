@@ -41,7 +41,7 @@ user_inp_raw = {
     }
 
 model_preferences = {'RE': True, #todo: test restcition enzymes
-                     'translation': False,
+                     'translation': True,
                      'transcription': False,
                      'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
 }
@@ -93,7 +93,6 @@ def unit1(input_dict, model_preferences ):
             cds_nt_final_tai = ORF.ORFModule.run_module(input_dict, 'tai', optimization_func)
             if model_preferences['RE']:
                 cds_nt_final_tai = RE.REModule.run_module(input_dict, cds_nt_final_tai)
-                print(1, cds_nt_final_tai)
             tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, weakest_score = \
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
 
@@ -105,11 +104,9 @@ def unit1(input_dict, model_preferences ):
             logger.info('\nCAI information:')
             cds_nt_final_cai = ORF.ORFModule.run_module(input_dict, 'cai', optimization_func)
             if model_preferences['RE']:
-                cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)
-                print(1, cds_nt_final_cai)
-                cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , weakest_score=\
+                cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
+            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , weakest_score=\
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
-
 
             logger.info(f'Sequence:\n{cds_nt_final_cai}')
             logger.info(f'Optimized sequences score: {cai_mean_opt_index}, deoptimized sequence score: {cai_mean_deopt_index}')
@@ -130,7 +127,6 @@ def unit1(input_dict, model_preferences ):
             final_cds = ORF.ORFModule.run_module(input_dict, 'cai', optimization_type=optimization_func)
             if model_preferences['RE']:
                 final_cds = RE.REModule.run_module(input_dict, final_cds)
-                print(final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
 

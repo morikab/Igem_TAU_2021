@@ -12,7 +12,7 @@ def write_fasta(fid, list_seq, list_name):
     ofile.close()
 
 
-f = open(r'../REbase_16.8.txt')
+f = open(r'../REbase.txt')
 content = f.readlines()
 REbase = [x.strip() for x in content]
 
