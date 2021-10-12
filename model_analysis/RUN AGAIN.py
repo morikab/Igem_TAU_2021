@@ -12,11 +12,11 @@ with open('data_for_analysis/org_name_to_dict.json') as f:
 
 gene = read('zorA anti-phage defense.fasta', 'fasta')
 initial_seq = str(gene.seq)
-runtimes_for_tax = 1
-translation_function = 'single_codon_global'
+runtimes_for_tax = 10
+translation_function = 'zscore_hill_climbing_weakest_link'
 
 
-model_preferences = {'RE': True, #todo: test restcition enzymes
+model_preferences = {'RE': False, #todo: test restcition enzymes
                      'translation': True,
                      'transcription': False,
                      'translation_function': translation_function#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
