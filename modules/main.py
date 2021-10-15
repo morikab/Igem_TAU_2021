@@ -43,7 +43,7 @@ user_inp_raw = {
 
 model_preferences = {'RE': True, #todo: test restcition enzymes
                      'translation': True,
-                     'transcription': False,
+                     'transcription': True,
                      'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
 }
 
@@ -92,10 +92,8 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
 
 
 def unit1(input_dict, model_preferences ):
-    mean_opt_index = None
-    mean_deopt_index = None
+
     if model_preferences['translation']:
-        # TODO - missing definition for mean_opt_index, mean_deopt_index if no exception is thrown
         optimization_func = model_preferences['translation_function']
         try: #both CAI and tAI, select the one with the best optimization index
             #tai optimization
