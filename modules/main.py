@@ -165,7 +165,7 @@ def unit1(input_dict, model_preferences):
 
 
 if __name__ == "__main__":
-    run_modules(user_inp_raw)
+    run_modules()
 toc = time.time()
 
 print('time: ', toc-tic)
