@@ -35,6 +35,7 @@ def index():
 @app.route('/success', methods=['POST', 'GET'])
 def success():
     if request.method == "POST":
+        global data
         data = request.form.to_dict()
         print(data)
         if request.files:
@@ -52,12 +53,19 @@ def success():
             data["uploaded_data"] = uploaded_data
             print('files uploaded successfully: ', uploaded_files)
             print('Data uploaded organized: ', uploaded_data)
+            return render_template("success.html", data=data)
         else:
             print('No files uploaded')
         # TODO - need to create another screen with summarized info, and only then run the analysis
+    return redirect("/")
+
+
+@app.route('/output', methods=['POST', 'GET'])
+def output():
+    if request.method == "POST":
         processed_user_input, model_preferences = input_for_modules.process_input_for_modules(data)
         user_output = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
-        return render_template("success.html", data=data, user_output=user_output)
+        return render_template("user_output.html", user_output=user_output)
     return redirect("/")
 
 

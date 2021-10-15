@@ -87,7 +87,7 @@ body {
 #progressbar {
     width:820px;
 	margin-bottom: 30px;
-	margin-left: 50px;
+	margin-left: 15px;
 	overflow: hidden;
 	/*CSS counters to number the steps*/
 	counter-reset: step;
@@ -210,7 +210,7 @@ body {
         <!-- step #4 -->
         <fieldset>
     		<h2 class="fs-title">Optimized Protein</h2>
-    		<h3 class="fs-subtitle">#3: Upload DNA sequence to optimize (as .fa file)</h3>
+    		<h3 class="fs-subtitle">#4: Upload DNA sequence to optimize (as .fa file)</h3>
             <h3 class="fs-subtitle">Please upload a fasta file containing the DNA sequence of the gene you would like to express.</h3>
             <input type="text" id="protein_seq_name" name="protein_seq_name" placeholder="Protein Name">
     		<input type="file" id="protein_seq" name="protein_seq" accept=".fa, .fasta" onchange="return fileValidation('protein_seq', '.fa, .fasta')"/>
@@ -226,14 +226,14 @@ body {
               </select>
                 <br>
             </div>
-
+            <br>
             <input type="button" name="previous" class="previous action-button" value="Previous" />
     		<input type="button" name="next" class="next action-button" value="Next" />
     	</fieldset>
         <!-- step #5 -->
         <fieldset>
         <h2 class="fs-title">Transcription Optimization</h2>
-        <h3 class="fs-subtitle">#4: Promoter sequence optimization</h3>
+        <h3 class="fs-subtitle">#5: Promoter sequence optimization</h3>
         <label>Would you like to optimize promoters?</label>
         <div class="checkbox">
             <select name="promoter_optimization_options" id="promoter_optimization_options">
@@ -262,11 +262,11 @@ body {
         <!-- step #6 -->
         <fieldset>
             <h2 class="fs-title">Review</h2>
-            <h3 class="fs-subtitle">#5: Review your application.</h3>
+            <h3 class="fs-subtitle">#6: Review your application.</h3>
             <span>By clicking Submit the optimization will start.<br>
                 Please reassure your selections along the application.</span><br>
-            <input type="button" name="previous" class="previous action-button" value="Previous" /></br>
-            <button type="submit" name="submit_optimization" class="submit action-button">Press to Express</button>
+            <button type="submit" name="submit_optimization" class="submit action-button">Press to Express</button></br>
+            <input type="button" name="previous" class="previous action-button" value="Previous" />
         </fieldset>
     </form>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>

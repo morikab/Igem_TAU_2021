@@ -132,7 +132,7 @@ def unit1(input_dict, model_preferences):
                 final_cds = cds_nt_final_cai
                 optimization_index = cai_optimization_index
                 mean_opt_index = cai_mean_opt_index
-                mean_deopt_index =  cai_mean_deopt_index
+                mean_deopt_index = cai_mean_deopt_index
                 weakest_score = cai_weakest_score
             else:
                 logger.info('tAI sequence was selected')
