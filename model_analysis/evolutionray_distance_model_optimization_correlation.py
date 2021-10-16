@@ -1,12 +1,14 @@
-from running_modules_functions import *
+from not_used_code.running_modules_functions import *
 import json
-import random
-from Bio.SeqIO import read, parse
+from Bio.SeqIO import read
 from Bio import pairwise2
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 import time
-from modules.shared_functions_and_vars import *
+import numpy as np
+import pandas as pd
+from modules.main import unit1
+
 
 
 # ribosomal_msa_dict = {}
@@ -33,14 +35,7 @@ with open('data_for_analysis/org_name_to_16s_msa.json', 'r') as fp:
 with open('data_for_analysis/org_name_to_16s.json', 'r') as fp:
     ribosomal_dict = json.load(fp)
 
-# gene = read('../example_data/mcherry_original.fasta', 'fasta')
-gene  = read('gcd_phosphurous_uptake.fasta', 'fasta')
-gene = read('luciferase.fasta', 'fasta')
-cds = str(gene.seq)
-print(len(cds)/3)
-aln_scores = []
-opt_scores = []
-msa_scores= []
+
 
 not_really_small_genome = ['Agromyces allii', 'Arthrobacter crystallopoietes', 'Arthrobacter luteolus', 'Arthrobacter pascens',
               'Arthrobacter subterraneus', 'Arthrobacter tumbae', 'Brevibacterium frigoritolerans', 'Janibacter limosus',
@@ -66,67 +61,71 @@ contain_more_than_10_ribosomal_genes = ['Arthrobacter crystallopoietes', 'Arthro
               'Rhodanobacter denitrificans', 'Terrabacter tumescens']
 
 
+
+gene = read('zorA anti-phage defense.fasta', 'fasta')
+cds = str(gene.seq)
+print(len(cds)/3)
+# aln_scores = []
+
 final_tested_org = not_really_small_genome
-tic = time.time()
-for org1 in final_tested_org:
-    for org2 in final_tested_org:
-        # if org1.split(' ')[0] == org2.split(' ')[0]:
-        #     continue
-        if org1 == org2:
-            continue
-        optimized_dict = {org1: org_dict[org1]}
-        deoptimized_dict = {org2: org_dict[org2]}
-        optimization_index = final_run(cds, optimized_dict, deoptimized_dict)
-        alignment_score = pairwise2.align.globalxx(
-            ribosomal_dict[org1], ribosomal_dict[org2], score_only=True)
-        aln_scores.append(alignment_score)
-        msa_score = diff_letters(ribosomal_msa_dict[org1], ribosomal_msa_dict[org2])
-        msa_scores.append(msa_score)
-        opt_scores.append(optimization_index)
-        # print(org1, org2, msa_scores, optimization_index)
-toc = time.time()
-print(toc-tic)
+# func_options = ['single_codon_global', 'single_codon_local', 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link']
+func_options = ['single_codon_global', 'zscore_hill_climbing_average']
 
-colors = np.where(pd.DataFrame(opt_scores)<0, 'C0', 'C1')
-print(spearmanr(aln_scores, opt_scores, nan_policy='omit'))
-plt.scatter(aln_scores, opt_scores, s=0.1, c=colors.ravel())
-plt.title('comparison using pairwise alignment')
-plt.xlabel('alignment score')
-plt.ylabel('optimization index')
-plt.ylim(-20, 20)
+spearman_dict = {}
+for translation_function in func_options:
+    opt_scores = []
+    msa_scores = []
+    model_preferences = {'RE': False,  # todo: test restcition enzymes
+                         'translation': True,
+                         'transcription': False,
+                         'translation_function': translation_function
+                         # , 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
+                         }
+    tic = time.time()
+    for org1 in final_tested_org:
+        for org2 in final_tested_org:
+            # if org1.split(' ')[0] == org2.split(' ')[0]:
+            #     continue
+            if org1 == org2:
+                continue
+            org_dict[org1]['optimized'] = True
+            org_dict[org1]['tai_profile'] = {}
+            org_dict[org1]['tai_std'] = {}
+            org_dict[org1]['tai_avg'] = {}
+            org_dict[org2]['optimized'] = False
+            org_dict[org2]['tai_profile'] = {}
+            org_dict[org2]['tai_std'] = {}
+            org_dict[org2]['tai_avg'] = {}
+            software_dict = {
+                'sequence': cds,
+                'tuning_param': 0.5,
+                'organisms': {}
+                }
+            software_dict['organisms'][org1] = org_dict[org1]
+            software_dict['organisms'][org2] = org_dict[org2]
+            inner_tic = time.time()
+            final_cds, optimization_index, weakest_score = unit1(software_dict, model_preferences)
+            print('TIME: ', time.time()-inner_tic)
+            # alignment_score = pairwise2.align.globalxx(
+            #     ribosomal_dict[org1], ribosomal_dict[org2], score_only=True)
+            # aln_scores.append(alignment_score)
+            msa_score = diff_letters(ribosomal_msa_dict[org1], ribosomal_msa_dict[org2])
+            msa_scores.append(msa_score)
+            opt_scores.append(optimization_index)
+    spearman_dict[translation_function] = spearmanr(msa_scores, opt_scores, nan_policy='omit')
+    print(spearmanr(msa_scores, opt_scores, nan_policy='omit'))
+    trans_func_name = translation_function.replace('_', ' ')
+    plt.scatter(msa_scores, opt_scores, s=0.1)
+
+            # print(org1, org2, msa_scores, optimization_index)
+    toc = time.time()
+    print(toc-tic)
+
+print(spearman_dict)
+plt.legend(['single codon optimization', 'hill climbing optimization'], loc ="upper right")
+plt.title(f'Comparison using pairwise alignment')
+plt.xlabel('Difference in pairwise alignment')
+plt.ylabel('Optimization index')
 plt.show()
 
-colors = np.where(pd.DataFrame(opt_scores)<0, 'C0', 'C1')
 
-print(spearmanr(msa_scores, opt_scores, nan_policy='omit'))
-plt.scatter(msa_scores, opt_scores, s=0.1, c=colors.ravel())
-# plt.title('comparison using MSA')
-
-positive_msa = [msa_scores[i] for i in range(len(opt_scores)) if opt_scores[i]>0]
-negative_msa = [msa_scores[i] for i in range(len(opt_scores)) if opt_scores[i]<0]
-
-positive_opt = [i for i in opt_scores if i>0]
-negative_opt = [i for i in opt_scores if i<0]
-
-print(len(positive_msa))
-print(len(negative_opt))
-optimized = plt.scatter(positive_msa, positive_opt, edgecolors='green' ,s=0.7)
-nonoptimized = plt.scatter(negative_msa, negative_opt, edgecolors='red' ,s=0.7)
-plt.xlabel('#Different chars for couple after multiple sequence alignment')
-plt.ylabel('Optimization score')
-plt.legend((optimized, nonoptimized), ('Optimized pairs', 'Non-optimized pairs'))
-plt.ylim(-20, 20)
-plt.show()
-
-print(spearmanr(positive_opt+[0]*len(negative_opt), positive_msa+negative_msa))
-
-print(len(positive_msa))
-print(len(negative_opt))
-optimized = plt.scatter(positive_msa, positive_opt, edgecolors='green' ,s=0.7)
-nonoptimized = plt.scatter(negative_msa, [0]*len(negative_opt), edgecolors='green' ,s=0.7)
-plt.xlabel('#Different chars for couple after multiple sequence alignment')
-plt.ylabel('Optimization score')
-# plt.legend((optimized, nonoptimized), ('Optimized pairs', 'Non-optimized pairs'))
-plt.show()
-
-print(len(not_really_small_genome))

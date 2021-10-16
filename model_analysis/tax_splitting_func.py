@@ -13,6 +13,8 @@ import random
 # In[2]:
 
 
+
+
 # load xl file to dataframe
 data = pd.read_excel("rotem excel.xlsx", sheet_name='Sheet1')
 
@@ -94,4 +96,27 @@ def choose_best_split(org_dict, tax_con, x, run_times=50):
     else:
         return None
 
-optimized_dict, deoptimized_dict = choose_best_split(org_dict, 'Family', 8, run_times=50)
+def format_output(seq, org_dict, tax_con, x, run_times=50):
+    software_inp = {}
+    software_inp['tuning_param'] = 0.5
+    software_inp['sequence'] = seq
+
+    software_inp['organisms'] = {}
+    optimized_dict, deoptimized_dict = choose_best_split(org_dict, tax_con = tax_con, x=x , run_times=run_times)
+    for org_name, org_dict in optimized_dict.items():
+        org_dict['optimized'] = True
+        org_dict['tai_profile'] = {}
+        org_dict['tai_std'] = {}
+        org_dict['tai_avg'] = {}
+        software_inp['organisms'][org_name] = org_dict
+    for org_name, org_dict in deoptimized_dict.items():
+        org_dict['optimized'] = False
+        org_dict['tai_profile'] = {}
+        org_dict['tai_std'] = {}
+        org_dict['tai_avg'] = {}
+        software_inp['organisms'][org_name] = org_dict
+
+    return software_inp
+
+
+
