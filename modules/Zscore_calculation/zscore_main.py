@@ -31,9 +31,9 @@ class ZscoreModule(object):
         mean_opt_index = mean(opt_index_org)
         mean_deopt_index =mean(deopt_index_org)
         # norm_factor = max(mean_opt_index, -mean_deopt_index)
-        alfa = inp_dict['tuning_param']
-        optimization_index = (alfa * mean_opt_index  - (1-alfa) * (mean_deopt_index ))#/norm_factor
-        weakest_score = min(opt_index_org)-max(deopt_index_org)
+        alpha = inp_dict['tuning_param']
+        optimization_index = (alpha * mean_opt_index  - (1-alpha) * (mean_deopt_index ))#/norm_factor
+        weakest_score = alpha*min(opt_index_org)-(1-alpha)*max(deopt_index_org)
         # if min(opt_index_org)>0 and max(deopt_index_org)<0:
         #     weakest_score = abs(weakest_score)
         # else:

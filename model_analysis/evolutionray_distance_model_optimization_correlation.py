@@ -37,16 +37,16 @@ with open('data_for_analysis/org_name_to_16s.json', 'r') as fp:
 
 
 
-not_really_small_genome = ['Agromyces allii', 'Arthrobacter crystallopoietes', 'Arthrobacter luteolus', 'Arthrobacter pascens']
-              # 'Arthrobacter subterraneus', 'Arthrobacter tumbae', 'Brevibacterium frigoritolerans', 'Janibacter limosus',
-              # 'Knoellia subterranea', 'Mycolicibacterium smegmatis', 'Nocardioides daejeonensis',
-              # 'Nocardioides oleivorans', 'Nocardioides sediminis', 'Nocardioides terrigena',
-              # 'Paenarthrobacter nitroguajacolicus', 'Paenibacillus aceris',
-              # 'Paenibacillus oryzisoli', 'Paenibacillus prosopidis', 'Paenibacillus qinlingensis', 'Pedococcus badiiscoriae',
-              # 'Pedococcus bigeumensis', 'Pedococcus dokdonensis', 'Peribacillus muralis', 'Peribacillus simplex',
-              # 'Phycicoccus duodecadis', 'Priestia flexa', 'Pseudarthrobacter phenanthrenivorans',
-              # 'Rhodanobacter denitrificans', 'Terrabacter aerolatus', 'Terrabacter tumescens',
-              # 'Yonghaparkia alkaliphila'] #deleted all 3 genomes that are smaller than 1kb
+not_really_small_genome = ['Agromyces allii', 'Arthrobacter crystallopoietes', 'Arthrobacter luteolus', 'Arthrobacter pascens',
+              'Arthrobacter subterraneus', 'Arthrobacter tumbae', 'Brevibacterium frigoritolerans', 'Janibacter limosus',
+              'Knoellia subterranea', 'Mycolicibacterium smegmatis', 'Nocardioides daejeonensis',
+              'Nocardioides oleivorans', 'Nocardioides sediminis', 'Nocardioides terrigena',
+              'Paenarthrobacter nitroguajacolicus', 'Paenibacillus aceris',
+              'Paenibacillus oryzisoli', 'Paenibacillus prosopidis', 'Paenibacillus qinlingensis', 'Pedococcus badiiscoriae',
+              'Pedococcus bigeumensis', 'Pedococcus dokdonensis', 'Peribacillus muralis', 'Peribacillus simplex',
+              'Phycicoccus duodecadis', 'Priestia flexa', 'Pseudarthrobacter phenanthrenivorans',
+              'Rhodanobacter denitrificans', 'Terrabacter aerolatus', 'Terrabacter tumescens',
+              'Yonghaparkia alkaliphila'] #deleted all 3 genomes that are smaller than 1kb
 
 
 
@@ -66,12 +66,15 @@ gene = read('zorA anti-phage defense.fasta', 'fasta')
 cds = str(gene.seq)
 print(len(cds)/3)
 # aln_scores = []
-opt_scores = []
-msa_scores= []
+
 final_tested_org = not_really_small_genome
-func_options = ['single_codon_global', 'single_codon_local', 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link']
+# func_options = ['single_codon_global', 'single_codon_local', 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link']
+func_options = ['single_codon_global', 'zscore_hill_climbing_average']
+
 spearman_dict = {}
 for translation_function in func_options:
+    opt_scores = []
+    msa_scores = []
     model_preferences = {'RE': False,  # todo: test restcition enzymes
                          'translation': True,
                          'transcription': False,
@@ -111,18 +114,18 @@ for translation_function in func_options:
             opt_scores.append(optimization_index)
     spearman_dict[translation_function] = spearmanr(msa_scores, opt_scores, nan_policy='omit')
     print(spearmanr(msa_scores, opt_scores, nan_policy='omit'))
-    plt.scatter(msa_scores, opt_scores, s=0.5)
-    plt.show()
+    trans_func_name = translation_function.replace('_', ' ')
+    plt.scatter(msa_scores, opt_scores, s=0.1)
+
             # print(org1, org2, msa_scores, optimization_index)
     toc = time.time()
     print(toc-tic)
 
 print(spearman_dict)
-plt.legend(func_options, loc ="upper right")
-plt.title('comparison using pairwise alignment')
-plt.xlabel('alignment score')
-plt.ylabel('optimization index')
+plt.legend(['single codon optimization', 'hill climbing optimization'], loc ="upper right")
+plt.title(f'Comparison using pairwise alignment')
+plt.xlabel('Difference in pairwise alignment')
+plt.ylabel('Optimization index')
 plt.show()
-
 
 
