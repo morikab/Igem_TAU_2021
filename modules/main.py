@@ -1,5 +1,6 @@
 import os
 import time
+import traceback
 from pathlib import Path
 
 from modules.logger_factory import LoggerFactory
@@ -81,22 +82,24 @@ def run_modules(user_inp_raw=None, model_preferences=None):
         # TODO - get zip_directory from the user
         zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
         Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
-        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                           zscore=optimization_index,
-                                                           weakest_score=weakest_score,
-                                                           p_name=p_name,
-                                                           native_prom=native_prom,
-                                                           synth_promoter=synth_promoter,
-                                                           evalue=evalue,
-                                                           zip_directory=zip_directory_path)
-        logger.info("Final output: %s", final_output)
+        final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
+                                                                          zscore=optimization_index,
+                                                                          weakest_score=weakest_score,
+                                                                          p_name=p_name,
+                                                                          native_prom=native_prom,
+                                                                          synth_promoter=synth_promoter,
+                                                                          evalue=evalue,
+                                                                          zip_directory=zip_directory_path)
+        logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
     except Exception as e:
+        exception_str = traceback.format_exc()
         final_output = {
-            'error_message': str(e),
+            'error_message': exception_str,
         }
-        logger.error("Encountered unknown error when running modules. Error message: %s", str(e))
+        zip_file_path = None
+        logger.error("Encountered unknown error when running modules. Error message: %s", exception_str)
 
-    return final_output
+    return final_output, zip_file_path
 
 
 def unit1(input_dict, model_preferences):
@@ -150,7 +153,6 @@ def unit1(input_dict, model_preferences):
                 final_cds = RE.REModule.run_module(input_dict, final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
-
 
     else:
         final_cds = RE.REModule.run_module(input_dict, input_dict['sequence'])

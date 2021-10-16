@@ -22,7 +22,7 @@ body {
 }
 table {
     border: 1px solid black;
-    text-align: center;
+    text-align: left;
     padding: 5px;
 }
 th, td {
@@ -43,7 +43,7 @@ tr:hover {background-color: #c6f0ff;}
         <table>
             <tr>
                 <th>Path to files</th>
-                <td>******Add ME********</td>
+                <td>{{ zip_file_path }} </td>
             </tr>
         {% for key, value in user_output.items() %}
            <tr>

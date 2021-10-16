@@ -18,17 +18,25 @@ class UserOutputModule(object):
         return "User Output"
 
     @classmethod
-    def run_module(cls, cds_sequence, zscore, weakest_score, p_name, native_prom, synth_promoter, evalue, zip_directory=None):
+    def run_module(cls,
+                   cds_sequence,
+                   zscore,
+                   weakest_score,
+                   p_name,
+                   native_prom,
+                   synth_promoter,
+                   evalue,
+                   zip_directory=None):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
 
         logger.info("Output zip file directory path: %s", zip_directory)
 
-        cls._create_final_zip(zip_directory, cds_sequence)
+        zip_file_path = cls._create_final_zip(zip_directory, cds_sequence)
 
         # TODO - fix the dict according to spec
-        return {
+        user_output_dict = {
             'final_sequence: ': cds_sequence,  # str
             'optimization_score': zscore,  # int
             'score_for_weakest_pair': weakest_score, #int
@@ -39,8 +47,10 @@ class UserOutputModule(object):
             'promoter_fasta': None,  # fasta file, should include synthetic and regular options ranked (or just the mast file? might take less time)
         }
 
+        return user_output_dict, zip_file_path
+
     @classmethod
-    def _create_final_zip(cls, zip_directory, cds_sequence):
+    def _create_final_zip(cls, zip_directory, cds_sequence) -> str:
         zip_directory = zip_directory if zip_directory else "."
         # Create a ZipFile Object
         zip_file_path = os.path.join(zip_directory, cls._ZIP_FILE_NAME)
@@ -58,6 +68,7 @@ class UserOutputModule(object):
             zip_object.write(filename=os.path.join(str(Path(LoggerFactory.LOG_DIRECTORY).parent.resolve()),
                                                    cls._MAST_RESULT_FILE_NAME),
                              arcname=cls._MAST_RESULT_FILE_NAME)
+        return zip_file_path
 
     @classmethod
     def _write_log_file(cls, zip_object, log_file_name):

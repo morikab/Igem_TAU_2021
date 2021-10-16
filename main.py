@@ -53,19 +53,21 @@ def success():
             data["uploaded_data"] = uploaded_data
             print('files uploaded successfully: ', uploaded_files)
             print('Data uploaded organized: ', uploaded_data)
-            return render_template("success.html", data=data)
+
+            global processed_user_input, model_preferences
+            processed_user_input, model_preferences = input_for_modules.process_input_for_modules(data)
+            return render_template("success.html", data={**processed_user_input, **model_preferences})
         else:
             print('No files uploaded')
-        # TODO - need to create another screen with summarized info, and only then run the analysis
     return redirect("/")
 
 
 @app.route('/output', methods=['POST', 'GET'])
 def output():
     if request.method == "POST":
-        processed_user_input, model_preferences = input_for_modules.process_input_for_modules(data)
-        user_output = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
-        return render_template("user_output.html", user_output=user_output)
+        user_output, zip_file_path = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
+        print("zip file path: %s", zip_file_path)
+        return render_template("user_output.html", user_output=user_output, zip_file_path=zip_file_path)
     return redirect("/")
 
 
