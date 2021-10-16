@@ -1,6 +1,6 @@
 from modules.logger_factory import LoggerFactory
 
-from .re_functions import REbase_org, insert_site_CDS, sites_in_cds
+from .re_functions import REbase_org, insert_site_CDS, sites_in_cds, remove_site_from_plasmid
 
 logger = LoggerFactory.create_logger("RE")
 
@@ -29,14 +29,6 @@ def multi_organism_RE_dict(org_list, cds_aa):
     return RE_dict
 
 
-def multi_org_insert_site(deoptimized_RE_dict, cds_nt):
-    # todo: make a better version. currently I am going over the options
-    # the sites matters, because insertion of one site can delete recognition of a different site.
-    cds_nt_added_sites = cds_nt
-    for org_RE_dict in deoptimized_RE_dict.values():
-        None
-    return cds_nt_added_sites
-
 
 def multi_org_remove_site(optimized_RE_dict, cds_nt):
     RE_dict = {}
@@ -44,7 +36,7 @@ def multi_org_remove_site(optimized_RE_dict, cds_nt):
         RE_dict = {**RE_dict, **org_RE_dict}
 
     try:
-        cds_nt = insert_site_CDS(RE_dict, cds_nt)
+        cds_nt = remove_site_from_plasmid(RE_dict, cds_nt)
     except:
         logger.info('Not all restriction requirements are applicable')
     return cds_nt

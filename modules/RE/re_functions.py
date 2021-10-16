@@ -16,7 +16,7 @@ import numpy as np
 
 base_path = os.path.join(os.path.dirname(__file__))
 
-f = open(os.path.join(base_path, 'REbase_16.8.txt'))
+f = open(os.path.join(base_path, 'REbase.txt'))
 content = f.readlines()
 REbase = [x.strip() for x in content]
 
@@ -149,11 +149,9 @@ def insert_site_CDS(RE_dict, inputSeqNT):
                         else: # inxd in busyNTseq
                             if indx not in overlapped_NTindx:
                                 overlapped_NTindx[indx]={}
-                            if siteName not in overlapped_NTindx[indx]:
-                                overlapped_NTindx[indx][siteName] = {}
-                            overlapped_NTindx[indx]['Organism'][siteName] = [orgName]
-                            overlapped_NTindx[indx][siteName] = []
-                            overlapped_NTindx[indx][siteName]+=[NTsite]
+                            if orgName not in overlapped_NTindx[indx]:
+                                overlapped_NTindx[indx][orgName] = []
+                            overlapped_NTindx[indx][orgName]+=[NTsite]
                             overlappedSitesNT+=[NTsite]
                     if NTsite not in NTsite_org_inSeq:
                         NTsite_org_inSeq[NTsite]={}
@@ -185,15 +183,16 @@ def insert_site_CDS(RE_dict, inputSeqNT):
 
     for indx,sitesConflicts in overlapped_NTindx.items():
         if indx in busyNTseq:
-            indxOrganisms=sitesConflicts.keys()
+            indxOrganisms=[*sitesConflicts]
             indxNorg=[sitesConflicts[orgName] for orgName in sitesConflicts]
             maxiOrg=[i for i,x in enumerate(indxNorg) if x==max(indxNorg)]
-            maxOrg=indxOrganisms[maxiOrg]
-            firstmaxsite=list(sitesConflicts[maxOrg].items())[0]
+            maxOrg=indxOrganisms[maxiOrg[0]]
+            firstmaxsite=list(sitesConflicts[maxOrg])[0]
             maxNamesite=firstmaxsite[0]
-            maxNTsite=firstmaxsite[1]
-            positions= NTsite_org_inSeq[maxNTsite][maxOrg][maxNamesite]
-            for position in positions:
+            maxNTsite=firstmaxsite
+            valuess=NTsite_org_inSeq[maxNTsite][maxOrg].values()
+            positions= [v for v in valuess ]
+            for position in positions[0]:
                 findedindx = [*range(position[0], position[1])]
                 outputSeqNT[position[0]:position[1]] = list(maxNTsite)
                 for finded in findedindx:
