@@ -47,7 +47,7 @@ def success():
                 f.save(file_path)
                 uploaded_data[key] = file_path
                 uploaded_files.append(filename)
-            data['uploaded files'] = uploaded_files     # TODO - can we get rid of uploaded_files?
+            data['uploaded files'] = uploaded_files
             data["uploaded_data"] = uploaded_data
             print('files uploaded successfully: ', uploaded_files)
             print('Data uploaded organized: ', uploaded_data)
