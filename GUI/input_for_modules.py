@@ -68,11 +68,10 @@ def _create_model_preferences(data: typing.Dict) -> typing.Dict:
     model_preferences["RE"] = _convert_option_to_bool(data["restrict_enzyme_options"])
     model_preferences["transcription"] = _convert_option_to_bool(data["promoter_optimization_options"])
 
-    model_preferences["translation"] = True     # TODO - add that option to the UI?
+    model_preferences["translation"] = _convert_option_to_bool(data["sequence_optimization_options"])
     model_preferences["translation_function"] = None
     if model_preferences["translation"]:
-        model_preferences["translation_function"] = "zscore_hill_climbing_average"  # TODO - need to add option in the UI
-
+        model_preferences["translation_function"] = data["selected_translation_function"]
     return model_preferences
 
 
