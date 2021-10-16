@@ -53,7 +53,7 @@ tr:hover {background-color: #c6f0ff;}
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <h2>Summary of Your Application:</h2><br>
+    <h2>User Input Summary:</h2><br>
     <center>
         <form action="output" method="POST">
             <table>
@@ -65,14 +65,20 @@ tr:hover {background-color: #c6f0ff;}
                 {% endfor %}
             </table>
             <br>
-            <h4>If you want your desired data, click the following button</h4>
-            <button type="submit" name="get_user_output" class="submit action-button" onclick="coffee_break()">I Want My Data Now!</button></br>
+            <span>By clicking "I Want My Data Now!" the optimization will start.<br>
+                You can return to the previous menu in order to modify your selections.</span><br>
+            <button type="submit" name="get_user_output" class="submit action-button" onclick="coffee_break()">I Want My Data Now!</button><br>
+            <button type="button" name="previous" class="previous action-button" onclick="go_back()">Previous</button><br>
         </form>
     </center>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>
     <script>
         function coffee_break() {
             alert("This may take some time, go take a coffee :)");
+        };
+
+        function go_back(){
+          window.history.go(-1);
         };
     </script>
 </body>
