@@ -1,12 +1,12 @@
  
-REBASE version 108                                              orgref.108
+REBASE version 110                                              orgref.110
  
     =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     REBASE, The Restriction Enzyme Database   http://rebase.neb.com
     Copyright (c)  Dr. Richard J. Roberts, 2021.   All rights reserved.
     =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  
-Rich Roberts                                                    Jul 30 2021
+Rich Roberts                                                    Sep 28 2021
  
 
 <ENZYME NAME>   Restriction enzyme name.
@@ -86,20 +86,20 @@ Rich Roberts                                                    Jul 30 2021
 
 REBASE codes for commercial sources of enzymes
 
-                B        Life Technologies (7/21)
-                C        Minotech Biotechnology (7/21)
+                B        Thermo Fisher Scientific (9/21)
+                C        Minotech Biotechnology (9/21)
                 E        Agilent Technologies (8/20)
-                I        SibEnzyme Ltd. (7/21)
-                J        Nippon Gene Co., Ltd. (7/21)
+                I        SibEnzyme Ltd. (9/21)
+                J        Nippon Gene Co., Ltd. (9/21)
                 K        Takara Bio Inc. (6/18)
-                M        Roche Applied Science (4/18)
-                N        New England Biolabs (7/21)
+                M        Roche Applied Science (9/21)
+                N        New England Biolabs (9/21)
                 O        Toyobo Biochemicals (8/14)
-                Q        Molecular Biology Resources - CHIMERx (7/21)
+                Q        Molecular Biology Resources - CHIMERx (9/21)
                 R        Promega Corporation (11/20)
                 S        Sigma Chemical Corporation (5/21)
                 V        Vivantis Technologies (1/18)
-                X        EURx Ltd. (7/21)
+                X        EURx Ltd. (9/21)
                 Y        SinaClon BioScience Co. (1/18)
 
 
@@ -15481,6 +15481,24 @@ Molemans, F., van Emmelo, J., Fiers, W., (1982) Gene, vol. 18, pp. 93-96.
 <7>
 <8>Janulaitis, A., Bitinaite, J., Unpublished observations.
 
+<1>M.Cfa24236Dam
+<2>MboI
+<3>Citrobacter farmeri CCRI-24236
+<4>J.Y. Abed
+<5>GATC
+<6>2(6)
+<7>
+<8>Abed, J.Y., Deraspe, M., Berube, E., D'Iorio, M., Boissinot, M., Corbeil, J., Bergeron, M.G., Roy, P.H., Unpublished observations.
+
+<1>M.Cfa24236Dcm
+<2>EcoRII
+<3>Citrobacter farmeri CCRI-24236
+<4>J.Y. Abed
+<5>CCWGG
+<6>?(5)
+<7>
+<8>Abed, J.Y., Deraspe, M., Berube, E., D'Iorio, M., Boissinot, M., Corbeil, J., Bergeron, M.G., Roy, P.H., Unpublished observations.
+
 <1>Cfr9I
 <2>SmaI
 <3>Citrobacter freundii
@@ -23300,6 +23318,15 @@ Ueda, Y., Unpublished observations.
 <7>
 <8>Yang, K., Unpublished observations.
 
+<1>EfeV
+<2>
+<3>Escherichia fergusonii ATCC 35469
+<4>ATCC 35469
+<5>?
+<6>
+<7>
+<8>Genoscope, M., Unpublished observations.
+
 <1>EacI
 <2>BinI
 <3>Eubacterium acidaminophilum
@@ -25482,11 +25509,10 @@ Fomenkov, A., DasSarma, S., Roberts, R.J., Unpublished observations.
 <2>BccI
 <3>Helicobacter pylori
 <4>J.-T. Wang
-<5>CCATC(4/5)
-<6>3(6)
+<5>CCATC
+<6>
 <7>
-<8>Lin, T.L., Shun, C.T., Chang, K.C., Wang, J.T., (2004) J. Biol. Chem., vol. 279, pp. 11156-11162.
-Wang, J., Lin, T., Unpublished observations.
+<8>Wang, J., Lin, T., Unpublished observations.
 Wang, J.-T., Lin, T.-L., US Patent Office, 2007.
 
 <1>HpyAII
@@ -28479,6 +28505,33 @@ Kyrpides, N., Huntemann, M., Han, J., Chen, A., Mavromatis, K., Markowitz, V., P
 <7>
 <8>Janulaitis, A., Unpublished observations.
 
+<1>M.Kpn11311Dam
+<2>MboI
+<3>Klebsiella pneumoniae 11311
+<4>X. Jia
+<5>GATC
+<6>2(6)
+<7>
+<8>Zhou, D., Fu, J., Zhang, X., Chen, F., Unpublished observations.
+
+<1>Kpn12208I
+<2>Yru12986I
+<3>Klebsiella pneumoniae 12208
+<4>Q. Liang
+<5>AGGAAG
+<6>5(6)
+<7>
+<8>Liang, Q., Jiang, X., Zhou, D., Unpublished observations.
+
+<1>M.Kpn13190Dam
+<2>MboI
+<3>Klebsiella pneumoniae 13190
+<4>X. Jia
+<5>GATC
+<6>2(6)
+<7>
+<8>Jia, X., Ma, G., Zhan, Z., Zhou, D., Chen, F., Unpublished observations.
+
 <1>M.Kpn182374Dam
 <2>MboI
 <3>Klebsiella pneumoniae 18-2374
@@ -28635,6 +28688,15 @@ Mehling, J.S., Lavender, H., Clegg, S., (2007) FEMS Microbiol. Lett., vol. 268, 
 <8>Kasarjian, J., Valinluck, V., Ryu, J., (2002) Abstr. Gen. Meet. Am. Soc. Microbiol., vol. 102, pp. 236.
 Ryu, J.-I., Unpublished observations.
 Valinluck, B., Reyno, M., Ryu, J., (1989) Abstr. Gen. Meet. Am. Soc. Microbiol., vol. 89, pp. 180.
+
+<1>Kpn2044I
+<2>Kpn9644II
+<3>Klebsiella pneumoniae K2044
+<4>X. Jia
+<5>GRACRAC
+<6>6(6)
+<7>
+<8>Jia, X., Ma, G., Zhan, Z., Zhou, D., Chen, F., Unpublished observations.
 
 <1>M.Kpn154414Dam
 <2>MboI
@@ -30384,6 +30446,15 @@ Klaenhammer, T.R., Romero, D., Sing, W., Hill, C., (1991) Genetics and Molecular
 <7>
 <8>Miljkovic, M., Malesevic, M., Filipic, B., Vukotic, G., Kojic, M., (2018) Biomed. Res. Int., vol. 2018, pp. 5657085.
 
+<1>Lla021FI
+<2>
+<3>LActococcus lactis UL021
+<4>A. Fomenkov
+<5>GGAGA
+<6>
+<7>
+<8>Fomenkov, A., Unpublished observations.
+
 <1>LlaEI
 <2>
 <3>Lactococcus lactis W12
@@ -31497,9 +31568,10 @@ Puzio, P., Blau, A., Plesch, G., Kamlage, B., Looser, R., Schmitz, O., Wendel, B
 <3>Methanobacterium wolfei
 <4>DSM 2970
 <5>GCNNNNN^NNGC
-<6>?(4)
+<6>2(4)
 <7>N
 <8>Flodman, K., Xu, S.-Y., Unpublished observations.
+Fomenkov, A., Unpublished observations.
 Lunnen, K.D., Morgan, R.D., Timan, C.J., Krzycki, J.A., Reeve, J.N., Wilson, G.G., (1989) Gene, vol. 77, pp. 11-19.
 Lunnen, K.D., Wilson, G.G., Unpublished observations.
 Lunnen, K.D., Wilson, G.G., European Patent Office, 1995.
@@ -31577,7 +31649,9 @@ Morgan, R., Posfai, J., Patti, J., Roberts, R.J., Unpublished observations.
 <5>C^TAG
 <6>
 <7>M
-<8>Fomenkov, A., Zhu, Z., Unpublished observations.
+<8>Fomenkov, A., Unpublished observations.
+Fomenkov, A., Anton, B.P., Unpublished observations.
+Fomenkov, A., Zhu, Z., Unpublished observations.
 Schmid, K., Thomm, M., Laminet, A., Laue, F.G., Kessler, C., Stetter, K.O., Schmitt, R., (1984) Nucleic Acids Res., vol. 12, pp. 2619-2628.
 
 <1>MaeII
@@ -42677,7 +42751,8 @@ Nguyen, S.V., Harhay, D.M., Bono, J.L., Smith, T.P.L., Fields, P.I., Dinsmore, B
 <5>GATC
 <6>2(6)
 <7>
-<8>Hoffmann, M., Zheng, J., Strain, E.A., Allard, M.W., Sanchez, M., Timme, R., Brown, E.W., Unpublished observations.
+<8>Hoffmann, M., Balkey, M., Luo, Y., Unpublished observations.
+Hoffmann, M., Zheng, J., Strain, E.A., Allard, M.W., Sanchez, M., Timme, R., Brown, E.W., Unpublished observations.
 
 <1>M.Sen1285Dcm
 <2>EcoRII
@@ -46724,6 +46799,15 @@ Manso, A.S., Furi, L., Oggioni, M.R., Unpublished observations.
 <7>
 <8>Manso, A.S., Chai, M.H., Atack, J.M., Furi, L., De Ste, C.M., Haigh, R., Trappetti, C., Ogunniyi, A.D., Shewell, L.K., Boitano, M., Clark, T.A., Korlach, J., Blades, M., Mirkes, E., Gorban, A.N., Paton, J.C., Jennings, M.P., Oggioni, M.R., (2014) Nat. Commun., vol. 5, pp. 5055.
 Manso, A.S., Furi, L., Oggioni, M.R., Unpublished observations.
+
+<1>Spn7466IV
+<2>SpnRII
+<3>Streptococcus pneumoniae NCTC7466
+<4>S. Doyle
+<5>TCGAG
+<6>4(6)
+<7>
+<8>Informatics, P., Unpublished observations.
 
 <1>SpnRII
 <2>
