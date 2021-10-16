@@ -1,9 +1,17 @@
 import os
+import shutil
 import time
 import traceback
 from pathlib import Path
 
 from modules.logger_factory import LoggerFactory
+
+# Create clean artifacts directory
+artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
+if artifacts_directory.exists() and artifacts_directory.is_dir():
+    shutil.rmtree(artifacts_directory)
+artifacts_directory.mkdir(parents=True, exist_ok=True)
+
 from modules import Zscore_calculation, user_IO, RE, ORF, promoters
 
 tic = time.time()
@@ -80,8 +88,6 @@ def run_modules(user_inp_raw=None, model_preferences=None):
         # #######################################################
 
         # TODO - get zip_directory from the user
-        zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
-        Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
         final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                                           zscore=optimization_index,
                                                                           weakest_score=weakest_score,
@@ -89,7 +95,7 @@ def run_modules(user_inp_raw=None, model_preferences=None):
                                                                           native_prom=native_prom,
                                                                           synth_promoter=synth_promoter,
                                                                           evalue=evalue,
-                                                                          zip_directory=zip_directory_path)
+                                                                          zip_directory=str(artifacts_directory))
         logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
     except Exception as e:
         exception_str = traceback.format_exc()
