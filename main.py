@@ -7,12 +7,12 @@ if sys.executable.endswith('pythonw.exe'):
 from pathlib import Path
     
 from flask import Flask, redirect, request, render_template
-from flaskwebgui import FlaskUI
 from werkzeug.utils import secure_filename
 
 from GUI import input_for_modules
 from modules.main import run_modules
 
+from flaskgui import FlaskUI
 
 app = Flask(__name__)
 
@@ -22,9 +22,7 @@ Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 IDLE_INTERVAL_SEC = 3 * 60 * 60
-# TODO - use our own custom FlaskUI
-# ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
-ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC)
+ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
 
 
 @app.route('/')
@@ -77,6 +75,6 @@ def communique():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    # app.run(host="0.0.0.0", debug=True)
     # Run in order to make a standalone windows application and comment app.run
-    # ui.run()
+    ui.run()
