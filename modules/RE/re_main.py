@@ -2,7 +2,7 @@ from modules.shared_functions_and_vars import translate
 from .multi_org_functions import *
 
 # initialize the logger object
-logger = LoggerFactory.create_logger("RE")
+logger = LoggerFactory.create_logger("Coding Sequence")
 
 
 class REModule(object):

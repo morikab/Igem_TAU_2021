@@ -3,7 +3,7 @@ import time
 from Bio import SeqIO
 import os
 
-logger = LoggerFactory.create_logger("RE")
+logger = LoggerFactory.create_logger("Coding Sequence")
 
 org2 = 'Bacillus subtilis'
 
