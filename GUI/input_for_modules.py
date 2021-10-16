@@ -68,7 +68,7 @@ def _create_model_preferences(data: typing.Dict) -> typing.Dict:
     model_preferences["RE"] = _convert_option_to_bool(data["restrict_enzyme_options"])
     model_preferences["transcription"] = _convert_option_to_bool(data["promoter_optimization_options"])
 
-    model_preferences["translation"] = _convert_option_to_bool(data["sequence_optimization_options"])
+    model_preferences["translation"] = _convert_option_to_bool(data["translation_optimization_options"])
     model_preferences["translation_function"] = None
     if model_preferences["translation"]:
         model_preferences["translation_function"] = data["selected_translation_function"]
