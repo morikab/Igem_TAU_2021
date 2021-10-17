@@ -52,7 +52,12 @@ class UserInputModule(object):
         full_inp_dict = {}
         full_inp_dict['organisms'] = {}
         for key, val in usr_inp['organisms'].items():
-            org_name, org_dict = cls._parse_single_input(val)
+            try:
+                org_name, org_dict = cls._parse_single_input(val)
+            except:
+                raise ValueError(f'Error in input genome {key}, re-check your input')
+            if org_name in full_inp_dict.keys():
+                raise ValueError(f'{org_name} genome is inserted twice, re-check your input.')
             full_inp_dict['organisms'][org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
 
         # #plots for intergenic sequence analysis: change pron length to 0 and th to 0 as well in the intergenic seuqence code before applying
@@ -68,15 +73,23 @@ class UserInputModule(object):
 
         # add non org specific keys to dict
         orf_fasta_fid = usr_inp['sequence']
-        orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
+        try:
+            orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
+        except:
+            raise ValueError(
+                f'Error in protein .fasta file {orf_fasta_fid}, make sure you inserted an undamaged .fasta file')
         prom_fasta_fid = usr_inp['selected_promoters']
         selected_prom = {}
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
         logger.info(f'containing this sequence: {orf_seq}')
-        if prom_fasta_fid is not None:  #
-            selected_prom = fasta_to_dict(prom_fasta_fid)
-            logger.info(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
-                        f'which contains {len(selected_prom)} promoters')
+        if prom_fasta_fid is not None:
+            try:
+                selected_prom = fasta_to_dict(prom_fasta_fid)
+                logger.info(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
+                            f'which contains {len(selected_prom)} promoters')
+            except:
+                raise ValueError(
+                    f'Error in promoter fasta file {prom_fasta_fid}, make sure you inserted an undamaged .fasta file')
         else:
             logger.info(
                 f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
@@ -122,7 +135,11 @@ class UserInputModule(object):
         '''
         gb_path = val['genome_path']
         exp_csv_fid = val['expression_csv']
-        gb_file = SeqIO.read(gb_path, format='gb')
+        try:
+            gb_file = SeqIO.read(gb_path, format='gb')
+        except:
+            raise ValueError(
+                f'Error in genome GenBank file {gb_path}, make sure you inserted an undamaged .gb file containing the full genome sequence and annotations')
 
 
         org_name = find_org_name(gb_file)

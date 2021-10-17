@@ -123,9 +123,9 @@ for translation_function in func_options:
 
 print(spearman_dict)
 plt.legend(['single codon optimization', 'hill climbing optimization'], loc ="upper right")
-plt.title(f'Comparison using pairwise alignment')
-plt.xlabel('Difference in pairwise alignment')
-plt.ylabel('Optimization index')
+plt.title(f'Evolutionary distance and model performance')
+plt.xlabel('# Different aligned characters')
+plt.ylabel('Optimization score')
 plt.show()
 
 
