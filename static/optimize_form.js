@@ -10,6 +10,14 @@ $("#next_1").click(function(){
         alert("Please upload at least 1 organism to optimize!");
         return false;
     }
+    for (i = 0; i < valid; i++) {
+        let seq_file_id = "optimized_seq_file_#".concat((i+1).toString());
+        let seq_file = document.getElementById(seq_file_id).value;
+        if (seq_file == '') {
+            alert("Please upload .gb files for all organisms");
+            return false;
+        }
+    }
 
 	if(animating) return false;
 	animating = true;
@@ -51,6 +59,14 @@ $("#next_2").click(function(){
     if(valid == '' || valid == 0){
         alert("Please upload at least 1 organism to optimize!");
         return false;
+    }
+    for (i = 0; i < valid; i++) {
+        let seq_file_id = "deoptimized_seq_file_#".concat((i+1).toString());
+        let seq_file = document.getElementById(seq_file_id).value;
+        if (seq_file == '') {
+            alert("Please upload .gb files for all organisms");
+            return false;
+        }
     }
 
 	if(animating) return false;
