@@ -1,8 +1,17 @@
 import os
+import shutil
 import time
+import traceback
 from pathlib import Path
 
 from modules.logger_factory import LoggerFactory
+
+# Create clean artifacts directory
+artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
+if artifacts_directory.exists() and artifacts_directory.is_dir():
+    shutil.rmtree(artifacts_directory)
+artifacts_directory.mkdir(parents=True, exist_ok=True)
+
 from modules import Zscore_calculation, user_IO, RE, ORF, promoters
 
 tic = time.time()
@@ -10,10 +19,10 @@ logger = LoggerFactory.create_logger("main")
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
-user_inp_raw = {
+default_user_inp_raw = {
     'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
     'selected_promoters': None,
-    'tuning_param':0.75,
+    'tuning_param': 0.75,
     'organisms': {
                     # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
                     #          'optimized': True,
@@ -44,13 +53,21 @@ user_inp_raw = {
             }
     }
 
-model_preferences = {'RE': True, #todo: test restcition enzymes
-                     'translation': True,
-                     'transcription': True,
-                     'translation_function': 'zscore_hill_climbing_average'#, 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
-}
+default_model_preferences = {'RE': True,  # todo: test restcition enzymes
+                             'translation': True,
+                             'transcription': True,
+                             'translation_function': 'zscore_hill_climbing_average'
+                             # , 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
+                             }
 
-def run_modules(user_inp_raw, model_preferences = model_preferences):
+
+def run_modules(user_inp_raw=None, model_preferences=None):
+    if user_inp_raw is None:
+        user_inp_raw = default_user_inp_raw
+
+    if model_preferences is None:
+        model_preferences = default_model_preferences
+
     try:
         input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
 
@@ -74,27 +91,27 @@ def run_modules(user_inp_raw, model_preferences = model_preferences):
         # #######################################################
 
         # TODO - get zip_directory from the user
-        zip_directory_path = os.path.join(str(Path(__file__).parent.resolve()), "artifacts")
-        Path(zip_directory_path).mkdir(parents=True, exist_ok=True)
-        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                           zscore=optimization_index,
-                                                           weakest_score=weakest_score,
-                                                           p_name=p_name,
-                                                           native_prom=native_prom,
-                                                           synth_promoter=synth_promoter,
-                                                           evalue=evalue,
-                                                           zip_directory=zip_directory_path)
-        logger.info("Final output: %s", final_output)
+        final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
+                                                                          zscore=optimization_index,
+                                                                          weakest_score=weakest_score,
+                                                                          p_name=p_name,
+                                                                          native_prom=native_prom,
+                                                                          synth_promoter=synth_promoter,
+                                                                          evalue=evalue,
+                                                                          zip_directory=str(artifacts_directory))
+        logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
     except Exception as e:
+        exception_str = traceback.format_exc()
         final_output = {
-            'error_message': str(e),
+            'error_message': exception_str,
         }
-        logger.error("Encountered unknown error when running modules. Error message: %s", str(e))
+        zip_file_path = None
+        logger.error("Encountered unknown error when running modules. Error message: %s", exception_str)
 
-    return final_output
+    return final_output, zip_file_path
 
 
-def unit1(input_dict, model_preferences ):
+def unit1(input_dict, model_preferences):
     if model_preferences['translation']:
         optimization_func = model_preferences['translation_function']
         try: #both CAI and tAI, select the one with the best optimization index
@@ -127,7 +144,7 @@ def unit1(input_dict, model_preferences ):
                 final_cds = cds_nt_final_cai
                 optimization_index = cai_optimization_index
                 mean_opt_index = cai_mean_opt_index
-                mean_deopt_index =  cai_mean_deopt_index
+                mean_deopt_index = cai_mean_deopt_index
                 weakest_score = cai_weakest_score
             else:
                 logger.info('tAI sequence was selected')
@@ -146,7 +163,6 @@ def unit1(input_dict, model_preferences ):
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
 
-
     else:
         final_cds = RE.REModule.run_module(input_dict, input_dict['sequence'])
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score = \
@@ -160,7 +176,7 @@ def unit1(input_dict, model_preferences ):
 
 
 if __name__ == "__main__":
-    run_modules(user_inp_raw)
+    run_modules()
 toc = time.time()
 
 print('time: ', toc-tic)

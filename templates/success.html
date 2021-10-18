@@ -31,35 +31,54 @@ th, td {
 }
 tr:nth-child(even) {background-color: #f2f2f2;}
 tr:hover {background-color: #c6f0ff;}
+/*buttons*/
+.action-button {
+	width: 100px;
+	background: #27AE60;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 1px;
+	cursor: pointer;
+	padding: 10px 5px;
+	margin: 10px 5px;
+}
+.action-button:hover,.action-button:focus {
+	box-shadow: 0 0 0 2px white, 0 0 0 3px #27AE60;
+}
 </style>
 <head>
     <meta charset="UTF-8">
     <title>Summary</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
-<body onload="coffee_break()">
-    <h2>Thank you for using Communique's Optimizer!</h2><br>
-    <h2>Summary of Your Application:</h2><br>
+<body>
+    <h2>User Input Summary:</h2><br>
     <center>
-        <table>
-        {% for key, value in data.items() %}
-           <tr>
-                <th> {{ key }} </th>
-                <td> {{ value }} </td>
-           </tr>
-        {% endfor %}
-        {% for key, value in user_output.items() %}
-           <tr>
-                <th> {{ key }} </th>
-                <td> {{ value }} </td>
-           </tr>
-        {% endfor %}
-        </table>
+        <form action="output" method="POST">
+            <table>
+                {% for key, value in data.items() %}
+                   <tr>
+                        <th> {{ key }} </th>
+                        <td> {{ value }} </td>
+                   </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <span>By clicking "I Want My Data Now!" the optimization will start.<br>
+                You can return to the previous menu in order to modify your selections.</span><br>
+            <button type="submit" name="get_user_output" class="submit action-button" onclick="coffee_break()">I Want My Data Now!</button><br>
+            <button type="button" name="previous" class="previous action-button" onclick="go_back()">Previous</button><br>
+        </form>
     </center>
     <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>
     <script>
         function coffee_break() {
             alert("This may take some time, go take a coffee :)");
+        };
+
+        function go_back(){
+          window.history.go(-1);
         };
     </script>
 </body>

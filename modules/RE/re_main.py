@@ -3,7 +3,7 @@ from .multi_org_functions import *
 from .re_functions import insert_site_CDS
 
 # initialize the logger object
-logger = LoggerFactory.create_logger("RE")
+logger = LoggerFactory.create_logger("coding_sequence")
 
 
 class REModule(object):

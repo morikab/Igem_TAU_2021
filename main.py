@@ -7,12 +7,12 @@ if sys.executable.endswith('pythonw.exe'):
 from pathlib import Path
     
 from flask import Flask, redirect, request, render_template
-from flaskwebgui import FlaskUI
 from werkzeug.utils import secure_filename
 
 from GUI import input_for_modules
 from modules.main import run_modules
 
+from flaskgui import FlaskUI
 
 app = Flask(__name__)
 
@@ -22,9 +22,7 @@ Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 IDLE_INTERVAL_SEC = 3 * 60 * 60
-# TODO - use our own custom FlaskUI
-# ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
-ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC)
+ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="0.0.0.0", port="5000")
 
 
 @app.route('/')
@@ -35,6 +33,7 @@ def index():
 @app.route('/success', methods=['POST', 'GET'])
 def success():
     if request.method == "POST":
+        global data
         data = request.form.to_dict()
         print(data)
         if request.files:
@@ -48,16 +47,25 @@ def success():
                 f.save(file_path)
                 uploaded_data[key] = file_path
                 uploaded_files.append(filename)
-            data['uploaded files'] = uploaded_files     # TODO - can we get rid of uploaded_files?
+            data['uploaded files'] = uploaded_files
             data["uploaded_data"] = uploaded_data
             print('files uploaded successfully: ', uploaded_files)
             print('Data uploaded organized: ', uploaded_data)
+
+            global processed_user_input, model_preferences
+            processed_user_input, model_preferences = input_for_modules.process_input_for_modules(data)
+            return render_template("success.html", data={**processed_user_input, **model_preferences})
         else:
             print('No files uploaded')
-        # TODO - need to create another screen with summarized info, and only then run the analysis
-        processed_user_input = input_for_modules.process_input_for_modules(data)
-        user_output = run_modules(processed_user_input)
-        return render_template("success.html", data=data, user_output=user_output)
+    return redirect("/")
+
+
+@app.route('/output', methods=['POST', 'GET'])
+def output():
+    if request.method == "POST":
+        user_output, zip_file_path = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
+        print("zip file path: %s", zip_file_path)
+        return render_template("user_output.html", user_output=user_output, zip_file_path=zip_file_path)
     return redirect("/")
 
 
@@ -67,6 +75,6 @@ def communique():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(host="0.0.0.0", debug=True)
     # Run in order to make a standalone windows application and comment app.run
-    # ui.run()
+    ui.run()
