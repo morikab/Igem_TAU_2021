@@ -1,0 +1,21 @@
+2021-10-17 22:16:03,452 - user_input - INFO - ##########################
+2021-10-17 22:16:03,453 - user_input - INFO - # USER INPUT INFORMATION #
+2021-10-17 22:16:03,453 - user_input - INFO - ##########################
+2021-10-17 22:16:03,953 - user_input - INFO - 
+Information about Sulfolobus acidocaldarius:
+2021-10-17 22:16:03,953 - user_input - INFO - Organism is deoptimized
+2021-10-17 22:17:18,980 - user_input - INFO - Number of genes: 2271, number of intregenic regions: 74
+2021-10-17 22:17:18,995 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2021-10-17 22:17:20,005 - user_input - INFO - tGCN values were not found, tAI profile was not calculated
+2021-10-17 22:17:21,495 - user_input - INFO - 
+Information about Mycobacterium tuberculosis:
+2021-10-17 22:17:21,495 - user_input - INFO - Organism is optimized
+2021-10-17 22:19:43,860 - user_input - INFO - Number of genes: 4064, number of intregenic regions: 110
+2021-10-17 22:19:43,868 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2021-10-17 22:19:44,867 - user_input - INFO - tGCN values were found, tAI profile was calculated
+2021-10-17 22:19:46,799 - user_input - INFO - 
+Information about Mycobacterium tuberculosis:
+2021-10-17 22:19:46,799 - user_input - INFO - Organism is optimized
+2021-10-17 22:22:01,747 - user_input - INFO - Number of genes: 4064, number of intregenic regions: 110
+2021-10-17 22:22:01,755 - user_input - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2021-10-17 22:22:02,706 - user_input - INFO - tGCN values were found, tAI profile was calculated

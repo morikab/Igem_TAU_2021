@@ -26,6 +26,9 @@ user_inp_raw = {
                     'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
                               'optimized': False,
                               'expression_csv': None},
+                    'blabla': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
+                             'optimized': True,
+                             'expression_csv': None},
 
                     'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
                              'optimized': True,

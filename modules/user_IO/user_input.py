@@ -55,9 +55,9 @@ class UserInputModule(object):
             try:
                 org_name, org_dict = cls._parse_single_input(val)
             except:
-                raise ValueError(f'Error in input genome {key}, re-check your input')
-            if org_name in full_inp_dict.keys():
-                raise ValueError(f'{org_name} genome is inserted twice, re-check your input.')
+                raise ValueError(f'Error in input genome: {key}, re-check your input')
+            if org_name in full_inp_dict['organisms'].keys():
+                raise ValueError(f"Organism: {org_name}'s genome is inserted twice, re-check your input.")
             full_inp_dict['organisms'][org_name] = org_dict  # creating the sub dictionary for each organism- where the key is the scientific name and the value is the following dict:
 
         # #plots for intergenic sequence analysis: change pron length to 0 and th to 0 as well in the intergenic seuqence code before applying
@@ -77,7 +77,7 @@ class UserInputModule(object):
             orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
         except:
             raise ValueError(
-                f'Error in protein .fasta file {orf_fasta_fid}, make sure you inserted an undamaged .fasta file')
+                f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file containing a single recored')
         prom_fasta_fid = usr_inp['selected_promoters']
         selected_prom = {}
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
@@ -89,7 +89,7 @@ class UserInputModule(object):
                             f'which contains {len(selected_prom)} promoters')
             except:
                 raise ValueError(
-                    f'Error in promoter fasta file {prom_fasta_fid}, make sure you inserted an undamaged .fasta file')
+                    f'Error in promoter fasta file: {prom_fasta_fid}, make sure you inserted an undamaged .fasta file')
         else:
             logger.info(
                 f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
@@ -139,7 +139,7 @@ class UserInputModule(object):
             gb_file = SeqIO.read(gb_path, format='gb')
         except:
             raise ValueError(
-                f'Error in genome GenBank file {gb_path}, make sure you inserted an undamaged .gb file containing the full genome sequence and annotations')
+                f'Error in genome GenBank file: {gb_path}, make sure you inserted an undamaged .gb file containing the full genome sequence and annotations')
 
 
         org_name = find_org_name(gb_file)
