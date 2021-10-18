@@ -73,11 +73,12 @@ class UserInputModule(object):
 
         # add non org specific keys to dict
         orf_fasta_fid = usr_inp['sequence']
-        try:
-            orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
-        except:
-            raise ValueError(
-                f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file containing a single recored')
+        if orf_fasta_fid is not None:
+            try:
+                orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
+            except:
+                raise ValueError(
+                    f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file containing a single recored')
         prom_fasta_fid = usr_inp['selected_promoters']
         selected_prom = {}
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
