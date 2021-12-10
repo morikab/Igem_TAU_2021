@@ -71,6 +71,7 @@ def one_streme(name1, start1, name2, start2, out_path=""):
 Runs STREME several times to create all necessary files for subsequent motif ranking and filtering
 """
 def run_streme():
+    # Finds motifs
     out_path = 'streme_outputs'
     real_out_path = os.path.join(start, out_path)
     create_folder(real_out_path)

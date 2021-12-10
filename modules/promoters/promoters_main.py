@@ -29,8 +29,8 @@ class promoterModule(object):
         tuning_param = full_input_dict['tuning_param']
         #D1 is optimization, D2 is selectivity
         # todo: make sure tamir agrees with this....
-        D1 = 0.05 + tuning_param*0.3
-        D2 = 0.05 + (1-tuning_param)*0.3
+        D1 = 0.05 + tuning_param*0.3   # Threshold for finding transcription speecific promoters
+        D2 = 0.05 + (1-tuning_param)*0.3    # Threshold for finding optimized specific promoters
         motif_file_path = create_final_motif_xml(D1, D2)
         logger.info("motif file path: %s", motif_file_path)
         mast_output_folder = run_mast(motif_file_path, promoter_file_path)

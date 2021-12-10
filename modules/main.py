@@ -3,6 +3,7 @@ import shutil
 import time
 import traceback
 from pathlib import Path
+import typing
 
 from modules.logger_factory import LoggerFactory
 
@@ -13,8 +14,8 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
 from modules import Zscore_calculation, user_IO, RE, ORF, promoters
+from modules import models
 
-tic = time.time()
 logger = LoggerFactory.create_logger("main")
 
 current_directory = Path(__file__).parent.resolve()
@@ -53,26 +54,21 @@ default_user_inp_raw = {
             }
     }
 
-default_model_preferences = {'RE': True,  # todo: test restcition enzymes
-                             'translation': True,
-                             'transcription': True,
-                             'translation_function': 'zscore_hill_climbing_average'
-                             # , 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
-                             }
 
+def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,
+                model_preferences_dict: typing.Optional[typing.Dict[str, str]] = None):
+    user_inp_raw = user_input_dict or default_user_inp_raw
 
-def run_modules(user_inp_raw=None, model_preferences=None):
-    if user_inp_raw is None:
-        user_inp_raw = default_user_inp_raw
-
-    if model_preferences is None:
-        model_preferences = default_model_preferences
+    model_preferences = models.ModelPreferences.init_from_dictionary(
+        model_preferences_dict
+    ) if model_preferences_dict is not None else models.ModelPreferences.init_from_config()
 
     try:
-        input_dict = user_IO.UserInputModule.run_module(user_inp_raw) #keys: sequence, selected_prom, organisms
+        # TODO - convert the input dictionary to a model we can pass to the other models
+        input_dict = user_IO.UserInputModule.run_module(user_inp_raw)   # keys: sequence, selected_prom, organisms
 
         ### unit 1 ############################################
-        if model_preferences['RE'] or model_preferences['translation']:
+        if model_preferences.restriction_enzymes or model_preferences.translation:
             final_cds, optimization_index, weakest_score = unit1(input_dict, model_preferences)
         else:
             final_cds = None
@@ -81,7 +77,7 @@ def run_modules(user_inp_raw=None, model_preferences=None):
         #########################################################
 
         # ### unit 2 ############################################
-        if model_preferences['transcription']:
+        if model_preferences.transcription:
             p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
         else:
             p_name = None
@@ -111,14 +107,13 @@ def run_modules(user_inp_raw=None, model_preferences=None):
     return final_output, zip_file_path
 
 
-def unit1(input_dict, model_preferences):
-    if model_preferences['translation']:
-        optimization_func = model_preferences['translation_function']
-        try: #both CAI and tAI, select the one with the best optimization index
-            #tai optimization
+def unit1(input_dict, model_preferences: models.ModelPreferences):
+    if model_preferences.translation:
+        optimization_func = model_preferences.translation_function
+        try:    # both CAI and tAI, select the one with the best optimization index tai optimization
             logger.info('\ntAI information:')
             cds_nt_final_tai = ORF.ORFModule.run_module(input_dict, 'tai', optimization_func)
-            if model_preferences['RE']:
+            if model_preferences.restriction_enzymes:
                 cds_nt_final_tai = RE.REModule.run_module(input_dict, cds_nt_final_tai)
             tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
@@ -127,12 +122,12 @@ def unit1(input_dict, model_preferences):
             logger.info(f'Optimized sequences score: {tai_mean_opt_index}, deoptimized sequence score: {tai_mean_deopt_index}')
             logger.info(f'Final optimization score: {tai_optimization_index}')
 
-            #cai optimization
+            # cai optimization
             logger.info('\nCAI information:')
             cds_nt_final_cai = ORF.ORFModule.run_module(input_dict, 'cai', optimization_func)
-            if model_preferences['RE']:
+            if model_preferences.restriction_enzymes:
                 cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
-            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , cai_weakest_score=\
+            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , cai_weakest_score = \
                 Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
 
             logger.info(f'Sequence:\n{cds_nt_final_cai}')
@@ -154,11 +149,10 @@ def unit1(input_dict, model_preferences):
                 mean_deopt_index = tai_mean_deopt_index
                 weakest_score = tai_weakest_score
 
-
         except:
             logger.info('\nCAI information:')
             final_cds = ORF.ORFModule.run_module(input_dict, 'cai', optimization_type=optimization_func)
-            if model_preferences['RE']:
+            if model_preferences.restriction_enzymes:
                 final_cds = RE.REModule.run_module(input_dict, final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
@@ -176,8 +170,8 @@ def unit1(input_dict, model_preferences):
 
 
 if __name__ == "__main__":
+    tic = time.time()
     run_modules()
-toc = time.time()
-
-print('time: ', toc-tic)
-
+    toc = time.time()
+    modules_run_time = toc - tic
+    print('Total modules run time: ', modules_run_time)

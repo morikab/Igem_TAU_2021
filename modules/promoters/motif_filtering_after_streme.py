@@ -111,6 +111,7 @@ def multi_filter_motifs(base_tree, D1, D2):
     #first check: each set S_x where x in A, has at least one motif with correlation > D1 to the C_set motif
     to_delete1 = get_motifs_to_delete(C_set, inter_files, D1)
 
+    # We want to make sure that restrictive promoters are restrictive for the whole group.
     #second check: each set S_xy where x in A and y in B, has at least one motif with correlation > D2 to the C_set motif
     to_delete2 = get_motifs_to_delete(C_set, selective_files, D2)
     

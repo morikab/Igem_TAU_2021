@@ -1,0 +1,12 @@
+MODEL_PREFERENCES:
+  RESTRICTION_ENZYMES: True
+  TRANSLATION: True
+  TRANSCRIPTION: True
+  # Optional values:
+  #   * single_codon_global
+  #   * zscore_hill_climbing_average
+  #   * zscore_hill_climbing_weakest_link
+  TRANSLATION_FUNCTION: zscore_hill_climbing_average
+
+ORF:
+  HILL_CLIMBING_MAX_ITERATIONS: 50

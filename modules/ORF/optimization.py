@@ -16,8 +16,6 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
 
     The function calculates the difference between the features of each codon. Each feature has its own weight (ratio)
     """
-
-
     optimized_sequence = ''
 
     optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum) # optimal codons->dict(AA:codon)
@@ -84,7 +82,7 @@ def loss_function(high_expression_organisms, low_expression_organisms, codons, t
     """
 
     loss = {}
-    if local_maximum: #high_expression is optimized, low expression is deoptimized
+    if local_maximum:  # high_expression is optimized, low expression is deoptimized
         for high_expression_organism in high_expression_organisms:
             loss = iterate_through_feature([high_expression_organism], codons, loss, tuning_param, high_expression=True)
 
@@ -112,11 +110,8 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
     and adds it to the loss from the previously calculated organisms.
     """
 
-
     for feature_name in [feature.index_name for feature in organisms[0].features]:
-
         max_value = find_max_value_per_feature(organisms, feature_name, codons)
-
         for organism in organisms:
 
             feature = [feature for feature in organism.features if feature.index_name == feature_name]
@@ -138,13 +133,14 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
     return loss
 
 # --------------------------------------------------------------
-def find_max_value_per_feature(organisms, feature_name, codons):
 
+
+def find_max_value_per_feature(organisms, feature_name, codons):
     values = []
     for organism in organisms:
         for feature in organism.features:
             if feature.index_name == feature_name:
-                try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
+                try:    # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
                     values.extend([feature.weights[codon] for codon in codons])
                 except:
                     values.append(0)
@@ -157,14 +153,11 @@ def find_max_value_per_feature(organisms, feature_name, codons):
 # --------------------------------------------------------------
 def find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum, evaluation_function=loss_function):
     """
-
     :param high_expression_organisms: list of Organism objects. The organisms where we want to express the target gene in
     :param low_expression_organisms: list of Organism objects. The organisms where we do not want the expression in
     :param tuning_param:
     :param evaluation_function: function which evaluates loss
     :return: Dictionary in the format Amino Acid: Optimal codon.
-
-
     """
 
     optimal_codons = {}
