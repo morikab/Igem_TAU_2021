@@ -39,10 +39,6 @@ default_user_inp_raw = {
                     'blabla': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
                              'optimized': True,
                              'expression_csv': None},
-
-                    'opt2': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
                     #
 #                     'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
 #                              'optimized': True,
@@ -65,8 +61,14 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
     try:
         # TODO - convert the input dictionary to a model we can pass to the other models
-        input_dict = user_IO.UserInputModule.run_module(user_inp_raw)   # keys: sequence, selected_prom, organisms
 
+        before_parsing_input = time.time()
+        input_dict = user_IO.UserInputModule.run_module(user_inp_raw)   # keys: sequence, selected_prom, organisms
+        after_parsing_input = time.time()
+
+        logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
+        # TODO - continue from here.....
+        exit(0)
         ### unit 1 ############################################
         if model_preferences.restriction_enzymes or model_preferences.translation:
             final_cds, optimization_index, weakest_score = unit1(input_dict, model_preferences)

@@ -1,4 +1,4 @@
-from modules.ORF.calculating_cai import relative_adaptiveness, general_geomean
+from modules.ORF.calculating_cai import relative_adaptiveness
 from modules.ORF.TAI import TAI
 from modules.shared_functions_and_vars import *
 import pandas as pd
@@ -7,6 +7,7 @@ import operator
 import os
 
 logger = LoggerFactory.create_logger("user_input")
+
 
 # RE model
 def find_org_name(gb_file):
@@ -82,7 +83,6 @@ def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome
     return prom_dict
 
 
-
 def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent_used =1/3):
     exp_list = list(expression_estimation.values())
     exp_list.sort(reverse=True)
@@ -94,7 +94,7 @@ def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent
     return highly_exp_prom
 
 
-def extract_gene_data(genbank_path, expression_csv_fid=None):
+def extract_gene_data(genbank_path, expression_csv_fid = None):
     """
     regorgnize relevant genebank data
     :param genbank_path: cds file path
@@ -134,8 +134,6 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
             logger.info('3. Column with the gene names is labeled "gene"  ')
             logger.info('4. Column with the gene expression levels is labeled "mRNA_level" ')
 
-
-
     with open(genbank_path) as input_handle:
         for record in SeqIO.parse(input_handle, "genbank"):
             for feature in record.features:
@@ -152,8 +150,6 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
                         function = ' '.join(feature.qualifiers['product'])
                         if feature.location.strand == -1:
                             cds = reverse_complement(cds)
-
-
 
                         if len(cds)%3 !=0:
                             continue
@@ -180,8 +176,7 @@ def extract_gene_data(genbank_path, expression_csv_fid=None):
     return prom200_dict, cds_dict, intergenic_dict, estimated_expression
 
 
-
-def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_csv_fid):
+def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_csv_fid):
     """
     calculates the cai weights- if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.
@@ -209,8 +204,3 @@ def calculate_cai_weights_for_input (cds_dict, estimated_expression, expression_
             cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
             logger.info(f'Expression levels were found for {len(estimated_expression)}')
     return  cai_weights
-
-
-
-
-

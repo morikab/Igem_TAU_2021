@@ -18,7 +18,7 @@ class LoggerFactory(object):
             # If we already set the handlers for the logger, just return the initialized logger.
             return logger
         logger.setLevel(logging.INFO)
-        # logger.addHandler(logging.StreamHandler())    # TODO - un-comment if running only modules.
+        logger.addHandler(logging.StreamHandler())    # TODO - un-comment if running only modules.
         # Make sure logs directory exists
         Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
         # Generate log file
