@@ -13,7 +13,7 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
-from modules import user_IO, RE, ORF, promoters
+from modules import user_IO, RE, ORF
 from modules.stats.evaluation import ZscoreModule
 from modules import models
 
@@ -79,13 +79,10 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         #########################################################
 
         # ### unit 2 ############################################
-        if model_preferences.transcription:
-            p_name, native_prom, synth_promoter, evalue = promoters.promoterModule.run_module(input_dict)
-        else:
-            p_name = None
-            native_prom = None
-            synth_promoter = None
-            evalue = None
+        p_name = None
+        native_prom = None
+        synth_promoter = None
+        evalue = None
         # #######################################################
 
         # TODO - get zip_directory from the user
