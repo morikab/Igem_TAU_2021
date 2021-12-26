@@ -1,6 +1,6 @@
-from modules import Zscore_calculation
+from modules.stats.optimization import OptimizationModule
 from modules.shared_functions_and_vars import nt_to_aa
-
+from modules.models import TranslationFunction
 
 def change_all_codons_of_aa(seq, selected_codon):
     '''
@@ -31,9 +31,7 @@ def hill_climbing_optimize_by_zscore(seq, inp_dict, cai_or_tai, max_iter, optimi
     """
 
     seq_options = {}
-    mean_opt_index, mean_deopt_index, zscore, weakest_score = Zscore_calculation.ZscoreModule.run_module(seq,
-                                                                                                         inp_dict,
-                                                                                                         cai_or_tai)
+    mean_opt_index, mean_deopt_index, zscore, weakest_score = OptimizationModule.run_module(seq, inp_dict, cai_or_tai)
     if 'average' in cai_or_tai:
         seq_options[seq] = zscore
     else:
@@ -45,8 +43,9 @@ def hill_climbing_optimize_by_zscore(seq, inp_dict, cai_or_tai, max_iter, optimi
             tested_seq = change_all_codons_of_aa(seq, codon)
 
             mean_opt_index, mean_deopt_index, zscore, weakest_score = \
-                Zscore_calculation.ZscoreModule.run_module(tested_seq, inp_dict, cai_or_tai)
-            if 'average' in optimization_type:
+                OptimizationModule.run_module(tested_seq, inp_dict, cai_or_tai)
+            print(F"zscore: {zscore}")
+            if optimization_type == TranslationFunction.zscore_hill_climbing_average:
                 seq_options[tested_seq] = zscore
             else:
                 seq_options[tested_seq] = weakest_score
@@ -56,4 +55,5 @@ def hill_climbing_optimize_by_zscore(seq, inp_dict, cai_or_tai, max_iter, optimi
             break
         else:
             seq = new_seq
+            print(F"########################## max zscore: {zscore}")
     return seq

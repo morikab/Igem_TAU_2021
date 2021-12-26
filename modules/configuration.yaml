@@ -1,7 +1,7 @@
 MODEL_PREFERENCES:
-  RESTRICTION_ENZYMES: True
+  RESTRICTION_ENZYMES: False
   TRANSLATION: True
-  TRANSCRIPTION: True
+  TRANSCRIPTION: False
   # Optional values:
   #   * single_codon_global
   #   * zscore_hill_climbing_average

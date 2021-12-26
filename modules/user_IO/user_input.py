@@ -151,7 +151,8 @@ class UserInputModule(object):
         else:
             logger.info('Organism is deoptimized')
 
-        prom200_dict, cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
+        # prom200_dict, cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
+        cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
         gene_names = list(cds_dict.keys())
         cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression, exp_csv_fid)
@@ -170,15 +171,15 @@ class UserInputModule(object):
             std_tai = None
             tai_scores_dict = {}
 
-        if len(estimated_expression):
-            highly_exp_promoters = \
-                extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1/3)
-        else:
-            highly_exp_promoters = extract_highly_expressed_promoters(cai_scores_dict, prom200_dict, percent_used=1/3)
+        # if len(estimated_expression):
+        #     highly_exp_promoters = \
+        #         extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1/3)
+        # else:
+        #     highly_exp_promoters = extract_highly_expressed_promoters(cai_scores_dict, prom200_dict, percent_used=1/3)
 
         organism_dict = {
-            '200bp_promoters': prom200_dict,
-            'third_most_HE': highly_exp_promoters,
+            # '200bp_promoters': prom200_dict,
+            # 'third_most_HE': highly_exp_promoters,
             'intergenic': intergenic_dict,
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
             'tai_profile': tai_weights,  # {dna_codon:tai_score}, if not found in tgcnDB it will be an empty dict.

@@ -13,7 +13,8 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
-from modules import Zscore_calculation, user_IO, RE, ORF, promoters
+from modules import user_IO, RE, ORF, promoters
+from modules.stats.evaluation import ZscoreModule
 from modules import models
 
 logger = LoggerFactory.create_logger("main")
@@ -67,8 +68,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         after_parsing_input = time.time()
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
-        # TODO - continue from here.....
-        exit(0)
+
         ### unit 1 ############################################
         if model_preferences.restriction_enzymes or model_preferences.translation:
             final_cds, optimization_index, weakest_score = unit1(input_dict, model_preferences)
@@ -118,7 +118,7 @@ def unit1(input_dict, model_preferences: models.ModelPreferences):
             if model_preferences.restriction_enzymes:
                 cds_nt_final_tai = RE.REModule.run_module(input_dict, cds_nt_final_tai)
             tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
-                Zscore_calculation.ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
+                ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
 
             logger.info(f'Sequence:\n{cds_nt_final_tai}')
             logger.info(f'Optimized sequences score: {tai_mean_opt_index}, deoptimized sequence score: {tai_mean_deopt_index}')
@@ -130,7 +130,7 @@ def unit1(input_dict, model_preferences: models.ModelPreferences):
             if model_preferences.restriction_enzymes:
                 cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
             cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , cai_weakest_score = \
-                Zscore_calculation.ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
+                ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
 
             logger.info(f'Sequence:\n{cds_nt_final_cai}')
             logger.info(f'Optimized sequences score: {cai_mean_opt_index}, deoptimized sequence score: {cai_mean_deopt_index}')
@@ -157,12 +157,12 @@ def unit1(input_dict, model_preferences: models.ModelPreferences):
             if model_preferences.restriction_enzymes:
                 final_cds = RE.REModule.run_module(input_dict, final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
-                Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
+                ZscoreModule.run_module(final_cds, input_dict, 'cai')
 
     else:
         final_cds = RE.REModule.run_module(input_dict, input_dict['sequence'])
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score = \
-            Zscore_calculation.ZscoreModule.run_module(final_cds, input_dict, 'cai')
+            ZscoreModule.run_module(final_cds, input_dict, 'cai')
 
     logger.info(f'Sequence:\n{final_cds}')
     logger.info(f'Optimized sequences score: {mean_opt_index}, deoptimized sequence score: {mean_deopt_index}')

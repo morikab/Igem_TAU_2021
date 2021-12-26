@@ -6,20 +6,20 @@ from statistics import mean, stdev
 import pandas as pd
 
 
+# TODO - Add additional stats (% optimized, % deoptimized, etc.)
 class ZscoreModule(object):
 
     @staticmethod
-
     def run_module(final_seq, inp_dict, optimization_type = 'cai'):
         std = optimization_type + '_std'
         weights = optimization_type + '_profile'
 
         opt_index_org = []
         deopt_index_org = []
-        for key, val in inp_dict['organisms'].items(): #todo: add something related to the ratio between the two worst organisms
+        for key, val in inp_dict['organisms'].items(): # todo: add something related to the ratio between the two worst organisms
             sigma = val[std]
             # print(1,[inp_dict['sequence'], final_seq])
-            index= general_geomean([inp_dict['sequence'], final_seq], weights=val[weights])
+            index = general_geomean([inp_dict['sequence'], final_seq], weights=val[weights])
             initial_score = index[0]
             final_score = index[1]
             index_org = (final_score - initial_score) / sigma
@@ -30,7 +30,7 @@ class ZscoreModule(object):
 
         mean_opt_index = mean(opt_index_org)
         mean_deopt_index =mean(deopt_index_org)
-        # norm_factor = max(mean_opt_index, -mean_deopt_index)
+        # norm_factor = max(mean_opt_index, - mean_deopt_index)
         alpha = inp_dict['tuning_param']
         optimization_index = (alpha * mean_opt_index  - (1-alpha) * (mean_deopt_index ))#/norm_factor
         weakest_score = alpha*min(opt_index_org)-(1-alpha)*max(deopt_index_org)

@@ -125,7 +125,7 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
                 except:
                     continue
             mrna_levels = list(gene_name_to_mrna_level.values())
-            mrna_names =  list(gene_name_to_mrna_level.keys())
+            mrna_names = list(gene_name_to_mrna_level.keys())
         except:
             expression_csv_fid = None
             logger.info('Expression data file is corrupt. \nMake sure that: ')
@@ -169,11 +169,12 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
 
     entry_num = len(gene_names)
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
-    prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
+    # prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
     intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=2000, genome=genome, len_th=30)
 
-    return prom200_dict, cds_dict, intergenic_dict, estimated_expression
+    # return prom200_dict, cds_dict, intergenic_dict, estimated_expression
+    return cds_dict, intergenic_dict, estimated_expression
 
 
 def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_csv_fid):

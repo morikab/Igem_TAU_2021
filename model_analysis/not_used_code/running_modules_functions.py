@@ -1,5 +1,5 @@
 from modules.ORF.orf_main import *
-from modules.Zscore_calculation import ZscoreModule
+from modules.stats import ZscoreModule
 from modules.ORF.calculating_cai import *
 from statistics import mean
 
