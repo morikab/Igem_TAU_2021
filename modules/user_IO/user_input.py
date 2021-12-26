@@ -85,30 +85,6 @@ class UserInputModule(object):
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
         logger.info(f'containing this sequence: {orf_seq}')
 
-        # Read promoters data
-        prom_fasta_fid = usr_inp['selected_promoters']
-        selected_prom = {}
-        if prom_fasta_fid is not None:
-            try:
-                selected_prom = fasta_to_dict(prom_fasta_fid)
-                logger.info(f'Promoter options ranked are given in the following file {prom_fasta_fid}, '
-                            f'which contains {len(selected_prom)} promoters')
-            except:
-                raise ValueError(
-                    f'Error in promoter fasta file: {prom_fasta_fid}, make sure you inserted an undamaged .fasta file')
-        else:
-            logger.info(
-                f'External promoter options were not supplied. endogenous promoters will be used for optimization.'
-                f'promoters from the 1/3 most highly expressed genes of all organisms are used- ')
-            for org, organism_dict in full_inp_dict['organisms'].items():
-                if organism_dict['optimized']:
-                    org_third_he_prom_dict = organism_dict['third_most_HE']
-                    for prom_name, prom_Seq in org_third_he_prom_dict.items():
-                        selected_prom[prom_name + ' from organism: ' + org] = prom_Seq
-                    logger.info(f'{len(org_third_he_prom_dict)} promoters are selected from {org}')
-            logger.info(f'Resulting in a total of {len(selected_prom)} used for promoter selection and optimization')
-
-        full_inp_dict['selected_prom'] = selected_prom
         full_inp_dict['sequence'] = orf_seq
         full_inp_dict['tuning_param'] = usr_inp['tuning_param']
         return full_inp_dict
@@ -151,9 +127,8 @@ class UserInputModule(object):
         else:
             logger.info('Organism is deoptimized')
 
-        # prom200_dict, cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
-        cds_dict, intergenic_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
-        logger.info(f'Number of genes: {len(cds_dict)}, number of intregenic regions: {len(intergenic_dict)}')
+        cds_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
+        logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
         cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression, exp_csv_fid)
         cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
@@ -171,16 +146,7 @@ class UserInputModule(object):
             std_tai = None
             tai_scores_dict = {}
 
-        # if len(estimated_expression):
-        #     highly_exp_promoters = \
-        #         extract_highly_expressed_promoters(estimated_expression, prom200_dict, percent_used=1/3)
-        # else:
-        #     highly_exp_promoters = extract_highly_expressed_promoters(cai_scores_dict, prom200_dict, percent_used=1/3)
-
         organism_dict = {
-            # '200bp_promoters': prom200_dict,
-            # 'third_most_HE': highly_exp_promoters,
-            'intergenic': intergenic_dict,
             'cai_profile': cai_weights,  # {dna_codon:cai_score}
             'tai_profile': tai_weights,  # {dna_codon:tai_score}, if not found in tgcnDB it will be an empty dict.
             'cai_scores': cai_scores_dict,  # {'gene_name': score}

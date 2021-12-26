@@ -29,71 +29,6 @@ def tai_from_tgcnDB(org_name):
         logger.info(f'tGCN values were not found, tAI profile was not calculated')
     return tai_weights
 
-
-# promoter model
-def extract_intergenic(cds_start, cds_stop, cds_strand, prom_length, genome, len_th=30):
-    """
-    extract intergenic sequences for streme intergenic motifs
-    :param cds_start:
-    :param cds_stop:
-    :param cds_strand: -1 if the sequence is on the reverse strand, 1 for forward
-    :param prom_length: length of the sequences considered as promoters
-    :param genome: string of the whole 5'->3' genome on the fwd strand
-    :param len_th:shortest sequence to add to the file
-    :return: list of intergenic sequences
-    """
-    for idx, vals in enumerate(zip(cds_start, cds_stop, cds_strand)):
-        start, end, strand = vals
-        if strand == 1:
-            genome = genome[:start - prom_length] + '-' * (end - start + prom_length) + genome[end:]
-        else:  # strand ==-1
-            genome = genome[:start] + '-' * (end - start + prom_length) + genome[end + prom_length:]
-    intergenic_list = genome.split('-')
-    return {k: i for k, i in enumerate(intergenic_list) if len(i) > len_th}
-
-
-def extract_prom(cds_start, cds_stop, cds_strand, cds_names, prom_length, genome):
-    """
-    extracts prom_length bases before the cds on the correct strand
-    :param cds_start:
-    :param cds_stop:
-    :param cds_strand: -1 for reverse strand, 1 for forward
-    :param cds_names: list of gene names
-    :param prom_length: number of bases before cds to take
-    :param genome: string of the whole 5'->3' genome on the fwd strand
-    :return: dict of promoters {gene_name:promoter}
-    """
-    prom_dict = {}
-    genome_fwd = genome
-    genome_rev = genome
-    for idx, vals in enumerate(zip(cds_start, cds_stop, cds_strand)):
-        start, end, strand = vals
-        if strand == 1:
-            genome_fwd = genome[:start] + '-' * (end - start) + genome[end:]
-        else:
-            genome_rev = genome[:start] + '-' * (end - start) + genome[end:]
-    for idx, vals in enumerate(zip(cds_start, cds_strand, cds_names)):
-        start, strand, name = vals
-        if strand == 1:
-            prom = genome_fwd[start - prom_length:start]
-        else:
-            prom = reverse_complement(genome_rev[start:start + prom_length])
-        if prom != '-' * prom_length and len(prom.replace('-', '')) > 0:
-            prom_dict[name] = prom.replace('-', '')
-    return prom_dict
-
-
-def extract_highly_expressed_promoters(expression_estimation, prom_dict, percent_used =1/3):
-    exp_list = list(expression_estimation.values())
-    exp_list.sort(reverse=True)
-    exp_th = exp_list[round(len(exp_list)*percent_used)]
-    highly_exp_prom = {gene_name:prom_dict[gene_name]
-                       for gene_name in expression_estimation.keys()
-                       if expression_estimation[gene_name]>exp_th
-                       and gene_name in prom_dict.keys()} #todo: this last line in the conditions shouldn't be here!
-    return highly_exp_prom
-
-
 def extract_gene_data(genbank_path, expression_csv_fid = None):
     """
     regorgnize relevant genebank data
@@ -171,10 +106,9 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
     # prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
-    intergenic_dict = extract_intergenic(starts, ends, strands, prom_length=2000, genome=genome, len_th=30)
 
     # return prom200_dict, cds_dict, intergenic_dict, estimated_expression
-    return cds_dict, intergenic_dict, estimated_expression
+    return cds_dict, estimated_expression
 
 
 def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_csv_fid):
