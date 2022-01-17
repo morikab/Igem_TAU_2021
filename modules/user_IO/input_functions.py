@@ -29,6 +29,7 @@ def tai_from_tgcnDB(org_name):
         logger.info(f'tGCN values were not found, tAI profile was not calculated')
     return tai_weights
 
+
 def extract_gene_data(genbank_path, expression_csv_fid = None):
     """
     regorgnize relevant genebank data
@@ -124,7 +125,7 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
                     'All genes will be used as a reference set for CAI calculation, results may be less accurate.')
         cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
     else:
-        if len(estimated_expression) <len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+        if len(estimated_expression) < len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
             cai_weights = relative_adaptiveness(ribosomal_proteins)
             if expression_csv_fid is not None:
                 logger.info(
@@ -138,4 +139,4 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
             highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
             cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
             logger.info(f'Expression levels were found for {len(estimated_expression)}')
-    return  cai_weights
+    return cai_weights

@@ -4,6 +4,7 @@ MODEL_PREFERENCES:
   TRANSCRIPTION: False
   # Optional values:
   #   * single_codon_global
+  #   * single_codon_local
   #   * zscore_hill_climbing_average
   #   * zscore_hill_climbing_weakest_link
   TRANSLATION_FUNCTION: zscore_hill_climbing_average

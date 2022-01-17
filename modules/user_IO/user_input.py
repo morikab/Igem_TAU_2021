@@ -1,9 +1,10 @@
 import typing
+
+from modules import models
 from modules.user_IO.input_functions import *
 from modules.ORF.TAI import TAI
 from modules.ORF.calculating_cai import general_geomean
 from modules.logger_factory import LoggerFactory
-from modules.models import Organism
 
 # initialize the logger object
 logger = LoggerFactory.create_logger("user_input")
@@ -15,7 +16,7 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, user_inp_raw: typing.Dict) -> typing.Dict:
+    def run_module(cls, user_inp_raw: typing.Dict) -> models.UserInput:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
@@ -57,8 +58,6 @@ class UserInputModule(object):
             organisms_list.append(organism)
             organisms_names.add(organism.name)
 
-        # TODO - use data class instead of a dict for the return value
-
         # Read ORF sequence
         orf_fasta_fid = user_input['sequence']
         orf_seq = None
@@ -71,9 +70,11 @@ class UserInputModule(object):
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
         logger.info(f'containing this sequence: {orf_seq}')
 
-        full_inp_dict['sequence'] = orf_seq
-        full_inp_dict['tuning_param'] = user_input['tuning_param']
-        return full_inp_dict
+        tuning_parameter = user_input['tuning_param']
+
+        return models.UserInput(organisms=organisms_list,
+                                sequence=orf_seq,
+                                tuning_parameter=tuning_parameter)
 
     @staticmethod
     def _parse_single_input(organism_input):
@@ -113,16 +114,16 @@ class UserInputModule(object):
         tai_scores_dict = {}
         try:
             tai_weights = TAI(tai_from_tgcnDB(organism_name)).index
-            tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights= tai_weights)
+            tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
             tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
         except:
             pass
 
-        organism_object = Organism(name=organism_name,
-                                   cai_profile=cai_weights,
-                                   tai_profile=tai_weights,
-                                   cai_scores=cai_scores_dict,
-                                   tai_scores=tai_scores_dict,
-                                   is_optimized=is_optimized)
+        organism_object = models.Organism(name=organism_name,
+                                          cai_profile=cai_weights,
+                                          tai_profile=tai_weights,
+                                          cai_scores=cai_scores_dict,
+                                          tai_scores=tai_scores_dict,
+                                          is_optimized=is_optimized)
 
         return organism_object

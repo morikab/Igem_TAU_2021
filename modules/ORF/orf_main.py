@@ -11,64 +11,52 @@ logger = LoggerFactory.create_logger("ORF")
 
 
 class ORFModule(object):
-
     @staticmethod
-    def run_module(full_input_dict, cai_or_tai, optimization_type='zscore_hill_climbing_average'):
+    def run_module(user_input: models.UserInput,
+                   cai_or_tai: str,
+                   optimization_type: models.TranslationFunction =
+                   models.TranslationFunction.zscore_hill_climbing_average):
         """
-        :param full_input_dict: input from GUI parser (dict). Format:
-        full_inp_dict[org_name] = {
-                'tgcn': tgcn_dict,  # tgcn dict {codon:number of occurences}
-                '200bp_promoters': prom200_dict,  # prom_dict {gene name and function: prom}
-                '400bp_promoters': prom400_dict,  # prom_dict {gene name and function: prom}
-                'gene_cds': cds_dict,  # cds dict {gene name and function : cds}
-                'intergenic': intergenic_dict,  # intergenic dict {position along the genome: intergenic sequence}
-                'caiScore_dict': cai_dict,
-                'cai_profile': cai_weights,
-                'optimized': val['optimized']}  # is the sequence in the optimized or deoptimized group- bool
-
-                @selected_prom : final used list of promoters for MAST
-                @sequence : the ORF to optimize
-
+        :param user_input: input from GUI parser.
+        :cai_or_tai: string indicating whether to optimize by cai or tai.
+        :optimization_type: optimization method to use.
         :return: optimized sequence (Biopython Seq)
         """
-
-        target_gene = full_input_dict['sequence']
+        target_gene = user_input.sequence
         logger.info(optimization_type)
 
         if optimization_type in (models.TranslationFunction.zscore_hill_climbing_average,
                                  models.TranslationFunction.zscore_hill_climbing_weakest_link):
-            optimized_sequence = \
-                hill_climbing_optimize_by_zscore(target_gene, full_input_dict, cai_or_tai,
-                                                 max_iter=50,
-                                                 optimization_type=optimization_type)
-            print(target_gene)
-            print(optimized_sequence)
-        else:
-            input_organisms = full_input_dict['organisms']
-            high_expression_organisms = [
-                Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
-                         feature_to_generate=cai_or_tai, cai_std=org_dict['cai_std'], tai_std=org_dict['tai_std'])
-                for org_name, org_dict in input_organisms.items() if org_dict['optimized']]
+            return hill_climbing_optimize_by_zscore(target_gene,
+                                                    user_input,
+                                                    cai_or_tai,
+                                                    max_iter=50,
+                                                    optimization_type=optimization_type)
+        input_organisms = user_input.organisms
+        # TODO - remove old organism object / remove the method entirely?
+        high_expression_organisms = [
+            Organism(name=organism.name, tai_weights=organism.tai_profile, cai_weights=organism.cai_profile,
+                     feature_to_generate=cai_or_tai, cai_std=organism.cai_std, tai_std=organism.tai_std)
+            for organism in input_organisms if organism.is_optimized
+        ]
 
-            low_expression_organisms = [
-                Organism(name=org_name, tai_weights=org_dict['tai_profile'], cai_weights=org_dict['cai_profile'],
-                         feature_to_generate=cai_or_tai, cai_std=org_dict['cai_std'], tai_std=org_dict['tai_std'])
-                for org_name, org_dict in input_organisms.items() if not org_dict['optimized']]
-            if optimization_type == 'single_codon_global':
-                optimized_sequence = optimize_sequence(target_gene=target_gene,
-                                                       high_expression_organisms=high_expression_organisms,
-                                                       low_expression_organisms=low_expression_organisms,
-                                                       tuning_param=full_input_dict['tuning_param'],
-                                                       local_maximum = False
-                                                   )
-            elif optimization_type == 'single_codon_local':
-                optimized_sequence = optimize_sequence(target_gene=target_gene,
-                                                       high_expression_organisms=high_expression_organisms,
-                                                       low_expression_organisms=low_expression_organisms,
-                                                       tuning_param=full_input_dict['tuning_param'],
-                                                       local_maximum = True
-                                                   )
-            else:
-                ValueError('optimization type invalid')
+        low_expression_organisms = [
+            Organism(name=organism.name, tai_weights=organism.tai_profile, cai_weights=organism.cai_profile,
+                     feature_to_generate=cai_or_tai, cai_std=organism.cai_std, tai_std=organism.tai_std)
+            for organism in input_organisms if not organism.is_optimized
+        ]
 
-        return optimized_sequence
+        if optimization_type == models.TranslationFunction.single_codon_global:
+            return optimize_sequence(target_gene=target_gene,
+                                     high_expression_organisms=high_expression_organisms,
+                                     low_expression_organisms=low_expression_organisms,
+                                     tuning_param=user_input.tuning_parameter,
+                                     local_maximum=False)
+        if optimization_type == models.TranslationFunction.single_codon_local:
+            return optimize_sequence(target_gene=target_gene,
+                                     high_expression_organisms=high_expression_organisms,
+                                     low_expression_organisms=low_expression_organisms,
+                                     tuning_param=user_input.tuning_parameter,
+                                     local_maximum=True)
+
+        raise ValueError('optimization type invalid')

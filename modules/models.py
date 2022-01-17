@@ -5,8 +5,43 @@ from enum import Enum
 from modules.configuration import Configuration
 
 
+class Organism(object):
+    def __init__(self,
+                 name: str,
+                 cai_profile,
+                 tai_profile,
+                 cai_scores: typing.Dict,
+                 tai_scores: typing.Dict,
+                 is_optimized: bool):
+        self.name = name
+        self.cai_profile = cai_profile
+        self.tai_profile = tai_profile
+        self.cai_scores = cai_scores
+        self._cai_scores_values = cai_scores.values()
+        self.tai_scores = tai_scores
+        self._tai_scores_values = tai_scores.values()
+        self.is_optimized = is_optimized
+
+    @property
+    def cai_avg(self):
+        return statistics.mean(self._cai_scores_values)
+
+    @property
+    def tai_avg(self):
+        return statistics.mean(self._tai_scores_values)
+
+    @property
+    def cai_std(self):
+        return statistics.stdev(self._cai_scores_values)
+
+    @property
+    def tai_std(self):
+        return statistics.stdev(self._tai_scores_values)
+
+
 class TranslationFunction(Enum):
     single_codon_global = "single_codon_global"
+    single_codon_local = "single_codon_local"
     zscore_hill_climbing_average = "zscore_hill_climbing_average"
     zscore_hill_climbing_weakest_link = "zscore_hill_climbing_weakest_link"
 
@@ -39,33 +74,8 @@ class ModelPreferences:
         )
 
 
-class Organism(object):
-    def __init__(self,
-                 name: str,
-                 cai_profile,
-                 tai_profile,
-                 cai_scores,
-                 tai_scores,
-                 is_optimized):
-        self.name = name
-        self.cai_profile = cai_profile
-        self.tai_profile = tai_profile
-        self.cai_scores = cai_scores
-        self.tai_scores = tai_scores
-        self.is_optimized = is_optimized
-
-    @property
-    def cai_avg(self):
-        return statistics.mean(self.cai_scores)
-
-    @property
-    def tai_avg(self):
-        return statistics.mean(self.tai_scores)
-
-    @property
-    def cai_std(self):
-        return statistics.stdev(self.cai_scores)
-
-    @property
-    def tai_std(self):
-        return statistics.stdev(self.tai_scores)
+@dataclass
+class UserInput:
+    organisms: typing.List[Organism]
+    sequence: str
+    tuning_parameter: float

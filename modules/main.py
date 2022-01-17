@@ -26,30 +26,14 @@ default_user_inp_raw = {
     'selected_promoters': None,
     'tuning_param': 0.75,
     'organisms': {
-                    # 'opt1': {'genome_path': os.path.join(base_path, 'Escherichia coli.gb'),
-                    #          'optimized': True,
-                    #          'expression_csv': os.path.join(base_path, 'ecoli_mrna_level.csv')},
-                    #
-                    # 'deopt1': {'genome_path': os.path.join(base_path, 'Bacillus subtilis.gb'),
-                    #            'optimized': False,
-                    #            'expression_csv': os.path.join(base_path, 'bacillus_mrna_level.csv')},
-
-                    'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                              'optimized': False,
-                              'expression_csv': None},
-                    'blabla': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                             'optimized': True,
-                             'expression_csv': None},
-                    #
-#                     'opt3': {'genome_path': os.path.join(base_path, 'Pantoea ananatis.gb'),
-#                              'optimized': True,
-#                              'expression_csv': None},
-
-#                     'opt4': {'genome_path': os.path.join(base_path, 'Azospirillum brasilense.gb'),
-#                              'optimized': True,
-#                              'expression_csv': None}
-            }
+        'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
+                   'optimized': False,
+                   'expression_csv': None},
+        'blabla': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
+                   'optimized': True,
+                   'expression_csv': None},
     }
+}
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,
@@ -61,38 +45,31 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     ) if model_preferences_dict is not None else models.ModelPreferences.init_from_config()
 
     try:
-        # TODO - convert the input dictionary to a model we can pass to the other models
-
         before_parsing_input = time.time()
-        input_dict = user_IO.UserInputModule.run_module(user_inp_raw)   # keys: sequence, selected_prom, organisms
+        user_input = user_IO.UserInputModule.run_module(user_inp_raw)
         after_parsing_input = time.time()
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
 
-        ### unit 1 ############################################
-        if model_preferences.restriction_enzymes or model_preferences.translation:
-            final_cds, optimization_index, weakest_score = unit1(input_dict, model_preferences)
-        else:
-            final_cds = None
-            optimization_index = None
-            weakest_score = None
-        #########################################################
+        # ############################################ unit 1 ############################################
+        final_cds = None
+        optimization_index = None
+        weakest_score = None
 
-        # ### unit 2 ############################################
-        p_name = None
-        native_prom = None
-        synth_promoter = None
-        evalue = None
-        # #######################################################
+        if model_preferences.restriction_enzymes or model_preferences.translation:
+            final_cds, optimization_index, weakest_score = unit1(user_input, model_preferences)
+        ##################################################################################################
 
         # TODO - get zip_directory from the user
+
+        # TODO - change the user output to remove unneeded parameters
         final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                                           zscore=optimization_index,
                                                                           weakest_score=weakest_score,
-                                                                          p_name=p_name,
-                                                                          native_prom=native_prom,
-                                                                          synth_promoter=synth_promoter,
-                                                                          evalue=evalue,
+                                                                          p_name=None,
+                                                                          native_prom=None,
+                                                                          synth_promoter=None,
+                                                                          evalue=None,
                                                                           zip_directory=str(artifacts_directory))
         logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
     except Exception as e:
@@ -106,34 +83,41 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     return final_output, zip_file_path
 
 
-def unit1(input_dict, model_preferences: models.ModelPreferences):
+def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferences):
     if model_preferences.translation:
         optimization_func = model_preferences.translation_function
-        try:    # both CAI and tAI, select the one with the best optimization index tai optimization
-            logger.info('\ntAI information:')
-            cds_nt_final_tai = ORF.ORFModule.run_module(input_dict, 'tai', optimization_func)
+        try:
+            # both CAI and tAI, select the one with the best optimization index tai optimization
+            logger.info('tAI information:')
+            cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_func)
+
             if model_preferences.restriction_enzymes:
-                cds_nt_final_tai = RE.REModule.run_module(input_dict, cds_nt_final_tai)
+                cds_nt_final_tai = RE.REModule.run_module(user_input, cds_nt_final_tai)
             tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
-                ZscoreModule.run_module(cds_nt_final_tai, input_dict, optimization_type='tai')
+                ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
 
             logger.info(f'Sequence:\n{cds_nt_final_tai}')
-            logger.info(f'Optimized sequences score: {tai_mean_opt_index}, deoptimized sequence score: {tai_mean_deopt_index}')
+            logger.info(f'Optimized sequences score: {tai_mean_opt_index}, '
+                        f'deoptimized sequence score: {tai_mean_deopt_index}')
             logger.info(f'Final optimization score: {tai_optimization_index}')
 
             # cai optimization
-            logger.info('\nCAI information:')
-            cds_nt_final_cai = ORF.ORFModule.run_module(input_dict, 'cai', optimization_func)
+            logger.info('CAI information:')
+            cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_func)
+
             if model_preferences.restriction_enzymes:
-                cds_nt_final_cai = RE.REModule.run_module(input_dict, cds_nt_final_cai)  # todo: run both of them together to save time, or split creation of enzyme dict and the actual optimization (seems like a better solution)
-            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index , cai_weakest_score = \
-                ZscoreModule.run_module(cds_nt_final_cai, input_dict, optimization_type='cai')
+                # todo: run both of them together to save time, or split creation of enzyme dict and the actual
+                #  optimization (seems like a better solution)
+                cds_nt_final_cai = RE.REModule.run_module(user_input, cds_nt_final_cai)
+            cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
+                ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
 
             logger.info(f'Sequence:\n{cds_nt_final_cai}')
-            logger.info(f'Optimized sequences score: {cai_mean_opt_index}, deoptimized sequence score: {cai_mean_deopt_index}')
+            logger.info(f'Optimized sequences score: {cai_mean_opt_index}, '
+                        f'deoptimized sequence score: {cai_mean_deopt_index}')
             logger.info(f'Final optimization score: {cai_optimization_index}')
 
-            if cai_optimization_index>tai_optimization_index:
+            if cai_optimization_index > tai_optimization_index:
                 logger.info('CAI sequence was selected')
                 final_cds = cds_nt_final_cai
                 optimization_index = cai_optimization_index
@@ -149,17 +133,18 @@ def unit1(input_dict, model_preferences: models.ModelPreferences):
                 weakest_score = tai_weakest_score
 
         except:
-            logger.info('\nCAI information:')
-            final_cds = ORF.ORFModule.run_module(input_dict, 'cai', optimization_type=optimization_func)
+            logger.info('CAI information:')
+            final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=optimization_func)
             if model_preferences.restriction_enzymes:
-                final_cds = RE.REModule.run_module(input_dict, final_cds)
+
+                final_cds = RE.REModule.run_module(user_input, final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
-                ZscoreModule.run_module(final_cds, input_dict, 'cai')
+                ZscoreModule.run_module(final_cds, user_input, 'cai')
 
     else:
-        final_cds = RE.REModule.run_module(input_dict, input_dict['sequence'])
+        final_cds = RE.REModule.run_module(user_input, user_input.sequence)
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score = \
-            ZscoreModule.run_module(final_cds, input_dict, 'cai')
+            ZscoreModule.run_module(final_cds, user_input, 'cai')
 
     logger.info(f'Sequence:\n{final_cds}')
     logger.info(f'Optimized sequences score: {mean_opt_index}, deoptimized sequence score: {mean_deopt_index}')
