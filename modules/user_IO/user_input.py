@@ -1,5 +1,7 @@
 import typing
 
+from Bio import SeqIO
+
 from modules import models
 from modules.user_IO.input_functions import *
 from modules.ORF.TAI import TAI

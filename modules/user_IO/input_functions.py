@@ -1,10 +1,14 @@
+import os
+
+import operator
+from Bio import SeqIO
+import pandas as pd
+
+from modules.logger_factory import LoggerFactory
 from modules.ORF.calculating_cai import relative_adaptiveness
 from modules.ORF.TAI import TAI
 from modules.shared_functions_and_vars import *
-import pandas as pd
-from modules.logger_factory import LoggerFactory
-import operator
-import os
+
 
 logger = LoggerFactory.create_logger("user_input")
 

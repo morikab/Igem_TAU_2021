@@ -13,7 +13,7 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
-from modules import user_IO, RE, ORF
+from modules import user_IO, ORF
 from modules.stats.evaluation import ZscoreModule
 from modules import models
 
@@ -91,8 +91,6 @@ def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferenc
             logger.info('tAI information:')
             cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_func)
 
-            if model_preferences.restriction_enzymes:
-                cds_nt_final_tai = RE.REModule.run_module(user_input, cds_nt_final_tai)
             tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
                 ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
 
@@ -105,10 +103,6 @@ def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferenc
             logger.info('CAI information:')
             cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_func)
 
-            if model_preferences.restriction_enzymes:
-                # todo: run both of them together to save time, or split creation of enzyme dict and the actual
-                #  optimization (seems like a better solution)
-                cds_nt_final_cai = RE.REModule.run_module(user_input, cds_nt_final_cai)
             cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
                 ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
 
@@ -135,14 +129,11 @@ def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferenc
         except:
             logger.info('CAI information:')
             final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=optimization_func)
-            if model_preferences.restriction_enzymes:
-
-                final_cds = RE.REModule.run_module(user_input, final_cds)
             mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
                 ZscoreModule.run_module(final_cds, user_input, 'cai')
 
     else:
-        final_cds = RE.REModule.run_module(user_input, user_input.sequence)
+        final_cds = user_input.sequence
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score = \
             ZscoreModule.run_module(final_cds, user_input, 'cai')
 

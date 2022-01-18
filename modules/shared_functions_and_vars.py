@@ -1,16 +1,3 @@
-from Bio import SeqIO
-#todo: for all shared functions and variables (or things that should be defined as external data that we might want to change
-# later, like the sij) add them to this file and import into correct module ( look at RE!!!)
-
-#shared vars
-
-# used variables
-ambiguous_code = {'R': ['G', 'A'], 'Y': ['C', 'T'], 'M': ['A', 'C'], 'K': ['G', 'T'],
-      'S': ['G', 'C'], 'W': ['A', 'T'], 'B': ['G', 'C', 'T'],
-      'D': ['A', 'G', 'T'], 'H': ['A', 'C', 'T'], 'V': ['A', 'G', 'C'],
-      'N': ['A', 'G', 'C', 'T'], 'A':['A'], 'G':['G'], 'C':['C'], 'T':['T']
-                  }
-
 nt_to_aa = {
     'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
     'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
@@ -56,25 +43,19 @@ synonymous_codons = {
 }
 
 
-
-
-
-#shared functions
-def fasta_to_dict(fasta_fid):
-    fasta_dict = {record.description:str(record.seq) for record in SeqIO.parse(fasta_fid, 'fasta') }
-    return fasta_dict
-
 def write_fasta(fid, list_seq, list_name):
     ofile = open(fid + '.fasta', "w+")
     for i in range(len(list_seq)):
         ofile.write(">" + str(list_name[i]) + "\n" + str(list_seq[i]) + "\n")
     ofile.close()
 
+
 # write ideas for the promoter model
 def reverse_complement(seq):
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
     reverse_complement = "".join(complement.get(base, base) for base in reversed(seq))
     return reverse_complement
+
 
 def translate(seq, table=nt_to_aa):  # DONE
     protein = ""
@@ -85,6 +66,7 @@ def translate(seq, table=nt_to_aa):  # DONE
         return protein
     else:
         return ValueError('len(seq)%3 !=0')
+
 
 def unique(list1):
     return sorted(set(list1))

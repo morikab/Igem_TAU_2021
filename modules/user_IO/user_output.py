@@ -80,7 +80,7 @@ class UserOutputModule(object):
 
             # Add log files
             cls._write_log_file(zip_object=zip_object, log_file_name="user_input.log")
-            cls._write_log_file(zip_object=zip_object, log_file_name="coding_sequence.log")
+            cls._write_log_file(zip_object=zip_object, log_file_name="ORF.log")
             cls._write_log_file(zip_object=zip_object, log_file_name="user_output.log")
 
         return zip_file_path
