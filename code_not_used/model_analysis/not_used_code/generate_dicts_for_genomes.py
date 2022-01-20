@@ -19,7 +19,7 @@ def sample_run(gb_files):  # do not use!!
     print('\n', final_run(cds, optimized_org_dict, deoptimized_org_dict))
 
 
-# for all files in genomes directory- apply function and save the output
+# for all files in arabidopsis_microbiome directory- apply function and save the output
 
 def _parse_single_input(gb_path):
     exp_csv_fid = None
@@ -66,8 +66,8 @@ def input_json_for_all_org(gb_files, json_file_name):
 
 gene = read('../example_data/mcherry_original.fasta', 'fasta')
 cds = str(gene.seq)
-base_path = join(os.path.dirname(__file__), 'genomes')
-gb_files = [join('genomes', f) for f in listdir(base_path) if isfile(join(base_path, f))]
+base_path = join(os.path.dirname(__file__), 'arabidopsis_microbiome')
+gb_files = [join('arabidopsis_microbiome', f) for f in listdir(base_path) if isfile(join(base_path, f))]
 input_json_for_all_org(gb_files, json_file_name ='../data_for_analysis/org_name_to_dict.json')
 
 

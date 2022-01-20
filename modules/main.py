@@ -4,16 +4,16 @@ import time
 import traceback
 from pathlib import Path
 import typing
-
 from modules.logger_factory import LoggerFactory
+from testing_for_modules import generate_testing_data
+
 
 # Create clean artifacts directory
 artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
 if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
-
-from modules import user_IO, ORF
+from modules import user_IO, ORF, sequence_family
 from modules.stats.evaluation import ZscoreModule
 from modules import models
 
@@ -21,20 +21,9 @@ logger = LoggerFactory.create_logger("main")
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
-default_user_inp_raw = {
-    'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
-    'selected_promoters': None,
-    'tuning_param': 0.75,
-    'organisms': {
-        'deopt2': {'genome_path': os.path.join(base_path, 'Sulfolobus acidocaldarius.gb'),
-                   'optimized': False,
-                   'expression_csv': None},
-        'blabla': {'genome_path': os.path.join(base_path, 'Mycobacterium tuberculosis.gb'),
-                   'optimized': True,
-                   'expression_csv': None},
-    }
-}
 
+
+default_user_inp_raw = generate_testing_data(n_organisms=10, percent_optimized = 0.7)
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,
                 model_preferences_dict: typing.Optional[typing.Dict[str, str]] = None):
@@ -51,13 +40,22 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
 
+        # #######################################family of sequences #####################################
+        # in this part, user input is split into different inputs according to the sequence family theory-
+        clustered_user_inputs = sequence_family.Sequence_Family_Module.run_module(user_input)
+        ##################################################################################################
+
+
         # ############################################ unit 1 ############################################
-        final_cds = None
+        final_cds = None #todo: why is this trio here?
         optimization_index = None
         weakest_score = None
 
-        if model_preferences.restriction_enzymes or model_preferences.translation:
-            final_cds, optimization_index, weakest_score = unit1(user_input, model_preferences)
+        for input_cluster in clustered_user_inputs:
+            if model_preferences.restriction_enzymes or model_preferences.translation: #todo: fix unit1 except ORF configuration
+                final_cds, optimization_index, weakest_score = unit1(input_cluster, model_preferences)
+
+        print(final_cds, optimization_index, weakest_score)
         ##################################################################################################
 
         # TODO - get zip_directory from the user
@@ -66,10 +64,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                                           zscore=optimization_index,
                                                                           weakest_score=weakest_score,
-                                                                          p_name=None,
-                                                                          native_prom=None,
-                                                                          synth_promoter=None,
-                                                                          evalue=None,
+
                                                                           zip_directory=str(artifacts_directory))
         logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
     except Exception as e:
@@ -145,8 +140,9 @@ def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferenc
 
 
 if __name__ == "__main__":
-    tic = time.time()
-    run_modules()
-    toc = time.time()
-    modules_run_time = toc - tic
-    print('Total modules run time: ', modules_run_time)
+    for i in range(10):
+        tic = time.time()
+        run_modules()
+        toc = time.time()
+        modules_run_time = toc - tic
+        print('Total modules run time: ', modules_run_time)

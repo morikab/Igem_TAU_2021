@@ -46,7 +46,7 @@ not_really_small_genome = ['Agromyces allii', 'Arthrobacter crystallopoietes', '
               'Pedococcus bigeumensis', 'Pedococcus dokdonensis', 'Peribacillus muralis', 'Peribacillus simplex',
               'Phycicoccus duodecadis', 'Priestia flexa', 'Pseudarthrobacter phenanthrenivorans',
               'Rhodanobacter denitrificans', 'Terrabacter aerolatus', 'Terrabacter tumescens',
-              'Yonghaparkia alkaliphila'] #deleted all 3 genomes that are smaller than 1kb
+              'Yonghaparkia alkaliphila'] #deleted all 3 arabidopsis_microbiome that are smaller than 1kb
 
 
 

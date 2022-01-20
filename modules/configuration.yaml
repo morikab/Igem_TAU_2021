@@ -1,7 +1,6 @@
 MODEL_PREFERENCES:
   RESTRICTION_ENZYMES: False
   TRANSLATION: True
-  TRANSCRIPTION: False
   # Optional values:
   #   * single_codon_global
   #   * single_codon_local
@@ -11,3 +10,4 @@ MODEL_PREFERENCES:
 
 ORF:
   HILL_CLIMBING_MAX_ITERATIONS: 50
+  MAX_N_OPTIMIZED_SEQS: 10

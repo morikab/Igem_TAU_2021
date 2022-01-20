@@ -50,7 +50,6 @@ class TranslationFunction(Enum):
 class ModelPreferences:
     restriction_enzymes: bool
     translation: bool
-    transcription: bool
     translation_function: TranslationFunction = TranslationFunction.zscore_hill_climbing_average
 
     @classmethod
@@ -58,8 +57,8 @@ class ModelPreferences:
         return ModelPreferences(
             restriction_enzymes=model_preferences_dict["RE"],
             translation=model_preferences_dict["translation"],
-            transcription=model_preferences_dict["transcription"],
             translation_function=TranslationFunction[model_preferences_dict["translation_function"]],
+
         )
 
     @classmethod
@@ -69,7 +68,6 @@ class ModelPreferences:
         return ModelPreferences(
             restriction_enzymes=model_preferences["RESTRICTION_ENZYMES"],
             translation=model_preferences["TRANSLATION"],
-            transcription=model_preferences["TRANSCRIPTION"],
             translation_function=TranslationFunction[model_preferences["TRANSLATION_FUNCTION"]],
         )
 

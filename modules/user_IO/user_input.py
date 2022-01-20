@@ -74,6 +74,7 @@ class UserInputModule(object):
 
         tuning_parameter = user_input['tuning_param']
 
+
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter)

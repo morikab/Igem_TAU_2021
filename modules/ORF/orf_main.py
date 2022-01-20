@@ -27,10 +27,11 @@ class ORFModule(object):
 
         if optimization_type in (models.TranslationFunction.zscore_hill_climbing_average,
                                  models.TranslationFunction.zscore_hill_climbing_weakest_link):
+            max_iter = 50 #todo: load from config
             return hill_climbing_optimize_by_zscore(target_gene,
                                                     user_input,
-                                                    cai_or_tai,
-                                                    max_iter=50,
+                                                    cai_or_tai='cai',
+                                                    max_iter= max_iter,
                                                     optimization_type=optimization_type)
         input_organisms = user_input.organisms
         # TODO - remove old organism object / remove the method entirely?
