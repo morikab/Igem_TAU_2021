@@ -25,6 +25,7 @@ def dict_to_cluster_np_array(user_input: models.UserInput): #todo: make this wor
     clustering_mat=np.array(clustering_mat)
     return clustering_mat, opt_org_list
 
+
 def make_distance_matrix(clustering_mat):
     n_samples = clustering_mat.shape
     n_samples = n_samples[0]
