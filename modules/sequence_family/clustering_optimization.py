@@ -1,4 +1,4 @@
-import json
+from scipy.stats import spearmanr
 import numpy as np
 from modules import models
 from sklearn.metrics import silhouette_score, davies_bouldin_score
@@ -25,18 +25,35 @@ def dict_to_cluster_np_array(user_input: models.UserInput): #todo: make this wor
     clustering_mat=np.array(clustering_mat)
     return clustering_mat, opt_org_list
 
-#sklearn
-def find_best_clustering(clustering_mat, max_clus_num, c_index = 'dbi', c_method = 'kmeans' ):
-    dist_metric = 'euclidean'
+def make_distance_matrix(clustering_mat):
+    n_samples = clustering_mat.shape
+    n_samples = n_samples[0]
+    distance_matrix = np.zeros(shape=(n_samples, n_samples))
+    for i in range(n_samples):
+        sample_i = clustering_mat[i,:]
+        for k in range(n_samples):
+            sample_k = clustering_mat[k,:]
+            distance_matrix[i,k]= 1-spearmanr(sample_k, sample_i)[0] # using -1 for distance instead of similarity
+    return distance_matrix
+
+
+def find_best_clustering(clustering_mat, max_clus_num, c_index = 'dbi', c_method = 'alggomerative' ):
+    dist_metric = 'precomputed'
     scores = []
     clusters = []
-    for n_clus in range(2, min(np.size(clustering_mat), max_clus_num)):
+
+    distance_mat = make_distance_matrix(clustering_mat)
+    n_samples = distance_mat.shape
+    n_samples = n_samples[0]
+    for n_clus in range(2, min(n_samples, max_clus_num)):
 
         ##### clustering options ######
-        if c_method == 'kmeans':
-            clustering = KMeans(n_clusters=n_clus).fit(clustering_mat)
-        else:
-            clustering = AgglomerativeClustering(n_clusters=n_clus, affinity= dist_metric).fit(clustering_mat)
+        # if c_method == 'kmeans':
+        #     clustering = KMeans(n_clusters=n_clus).fit(clustering_mat)
+        # else:
+        clustering = AgglomerativeClustering(n_clusters=n_clus,
+                                             affinity= dist_metric,
+                                             linkage='average').fit(distance_mat, )
 
         labels = clustering.labels_
 

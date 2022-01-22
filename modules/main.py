@@ -23,7 +23,6 @@ current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
 
-default_user_inp_raw = generate_testing_data(n_organisms=10, percent_optimized = 0.7)
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,
                 model_preferences_dict: typing.Optional[typing.Dict[str, str]] = None):
@@ -42,7 +41,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
         # #######################################family of sequences #####################################
         # in this part, user input is split into different inputs according to the sequence family theory-
-        clustered_user_inputs = sequence_family.Sequence_Family_Module.run_module(user_input)
+        clustered_user_inputs = sequence_family.Sequence_Family_Module.run_module(user_input, )
         ##################################################################################################
 
 
@@ -140,9 +139,9 @@ def unit1(user_input: models.UserInput, model_preferences: models.ModelPreferenc
 
 
 if __name__ == "__main__":
-    for i in range(10):
-        tic = time.time()
-        run_modules()
-        toc = time.time()
-        modules_run_time = toc - tic
-        print('Total modules run time: ', modules_run_time)
+    tic = time.time()
+    default_user_inp_raw = generate_testing_data(n_organisms=7, percent_optimized=0.7)
+    run_modules()
+    toc = time.time()
+    modules_run_time = toc - tic
+    print('Total modules run time: ', modules_run_time)
