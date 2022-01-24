@@ -1,4 +1,4 @@
-venv\
-modules\artifacts\
-.idea\
+venv/
+modules/artifacts/
+.idea/
 *.pyc
