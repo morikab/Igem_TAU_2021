@@ -2,7 +2,7 @@ from modules.shared_functions_and_vars import translate, synonymous_codons
 
 # --------------------------------------------------------------
 
-def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, local_maximum, tuning_param=0.5, n_initiation_codons=12):
+def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, local_maximum, tuning_param, n_initiation_codons=12):
     """
 
     :param target_gene: Gene object, which is to be optimized

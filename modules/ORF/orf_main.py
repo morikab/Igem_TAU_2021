@@ -15,7 +15,9 @@ class ORFModule(object):
     def run_module(user_input: models.UserInput,
                    cai_or_tai: str,
                    optimization_type: models.TranslationFunction =
-                   models.TranslationFunction.zscore_hill_climbing_average):
+                   models.TranslationFunction.zscore_hill_climbing_average,
+                   max_iter = 50
+                   ):
         """
         :param user_input: input from GUI parser.
         :cai_or_tai: string indicating whether to optimize by cai or tai.
@@ -29,8 +31,8 @@ class ORFModule(object):
                                  models.TranslationFunction.zscore_hill_climbing_weakest_link):
             return hill_climbing_optimize_by_zscore(target_gene,
                                                     user_input,
-                                                    cai_or_tai,
-                                                    max_iter=50,
+                                                    cai_or_tai='cai',
+                                                    max_iter= max_iter,
                                                     optimization_type=optimization_type)
         input_organisms = user_input.organisms
         # TODO - remove old organism object / remove the method entirely?

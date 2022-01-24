@@ -49,7 +49,7 @@ def hill_climbing_optimize_by_zscore(seq: str,
 
             mean_opt_index, mean_deopt_index, zscore, weakest_score = \
                 OptimizationModule.run_module(tested_seq, user_input, cai_or_tai)
-            print(F"zscore: {zscore}")
+            # print(F"zscore: {zscore}")
             if optimization_type == models.TranslationFunction.zscore_hill_climbing_average:
                 seq_options[tested_seq] = zscore
             else:
@@ -60,5 +60,4 @@ def hill_climbing_optimize_by_zscore(seq: str,
             break
         else:
             seq = new_seq
-            print(F"########################## max zscore: {zscore}")
     return seq
