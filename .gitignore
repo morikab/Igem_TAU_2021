@@ -1,4 +1,6 @@
 venv/
 modules/artifacts/
+GUI/static/uploads/
 .idea/
+meme-5.4.1/
 *.pyc
