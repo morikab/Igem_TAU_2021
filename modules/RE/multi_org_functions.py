@@ -43,12 +43,16 @@ def multi_org_remove_site(optimized_RE_dict, cds_nt):
 
 
 def multi_org_final_found_sites(RE_dict, final_cds_nt):
+    n_sites = {}
     for org, org_enzyme_dict in RE_dict.items():
         found_sites_dict = sites_in_cds(org_enzyme_dict, final_cds_nt)
         logger.info(f'For {org}, {len(found_sites_dict)} sites were found in the final coding sequence,'
                     f'belonging to the following enzymes')
+        n_sites[org] = len(found_sites_dict)
         for enzyme_name in found_sites_dict.keys():
             logger.info(f'{enzyme_name} : {found_sites_dict[enzyme_name]}')
+
+    return n_sites
             # logger.info(found_sites_dict)
 #            ambiguous_site = found_sites_dict[enzyme_name]['ambiguous_site']
 #            logger.info(f'{enzyme_name}, which has the ambiguous site {ambiguous_site}')
@@ -59,3 +63,4 @@ def total_sequence_analysis(optimized_RE_dict, deoptimized_RE_dict, final_cds_nt
     multi_org_final_found_sites(optimized_RE_dict, final_cds_nt)
     logger.info('Sites from deoptimized organisms: ')
     multi_org_final_found_sites(deoptimized_RE_dict, final_cds_nt)
+    return
