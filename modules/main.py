@@ -5,7 +5,7 @@ import traceback
 from pathlib import Path
 import typing
 from modules.logger_factory import LoggerFactory
-from testing_for_modules import generate_testing_data
+from modules.testing_for_modules import generate_testing_data
 
 
 # Create clean artifacts directory
@@ -21,7 +21,6 @@ logger = LoggerFactory.create_logger("main")
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
-
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,

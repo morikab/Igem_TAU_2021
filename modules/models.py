@@ -12,7 +12,8 @@ class Organism(object):
                  tai_profile,
                  cai_scores: typing.Dict,
                  tai_scores: typing.Dict,
-                 is_optimized: bool):
+                 is_optimized: bool,
+                 optimization_priority: float):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
@@ -21,6 +22,8 @@ class Organism(object):
         self.tai_scores = tai_scores
         self._tai_scores_values = tai_scores.values()
         self.is_optimized = is_optimized
+        self.optimization_priority = optimization_priority
+
 
     @property
     def cai_avg(self):

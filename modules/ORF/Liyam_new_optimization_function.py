@@ -37,6 +37,7 @@ def hill_climbing_optimize_by_zscore(seq: str,
 
     seq_options = {}
     mean_opt_index, mean_deopt_index, zscore, weakest_score = OptimizationModule.run_module(seq, user_input, cai_or_tai)
+    # FIXME - should we check this against the optimization_type parameter?
     if 'average' in cai_or_tai:
         seq_options[seq] = zscore
     else:

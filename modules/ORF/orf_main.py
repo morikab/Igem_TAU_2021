@@ -16,12 +16,13 @@ class ORFModule(object):
                    cai_or_tai: str,
                    optimization_type: models.TranslationFunction =
                    models.TranslationFunction.zscore_hill_climbing_average,
-                   max_iter = 50
+                   max_iter = 50,
                    ):
         """
         :param user_input: input from GUI parser.
         :cai_or_tai: string indicating whether to optimize by cai or tai.
         :optimization_type: optimization method to use.
+        :max_iter: Number of iterations for hill climbing.
         :return: optimized sequence (Biopython Seq)
         """
         target_gene = user_input.sequence
@@ -29,10 +30,10 @@ class ORFModule(object):
 
         if optimization_type in (models.TranslationFunction.zscore_hill_climbing_average,
                                  models.TranslationFunction.zscore_hill_climbing_weakest_link):
-            return hill_climbing_optimize_by_zscore(target_gene,
-                                                    user_input,
+            return hill_climbing_optimize_by_zscore(seq=target_gene,
+                                                    user_input=user_input,
                                                     cai_or_tai='cai',
-                                                    max_iter= max_iter,
+                                                    max_iter=max_iter,
                                                     optimization_type=optimization_type)
         input_organisms = user_input.organisms
         # TODO - remove old organism object / remove the method entirely?

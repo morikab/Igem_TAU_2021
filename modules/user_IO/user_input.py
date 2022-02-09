@@ -100,11 +100,13 @@ class UserInputModule(object):
 
         organism_name = find_org_name(gb_file)
         logger.info(f'\nInformation about {organism_name}:')
-        is_optimized = organism_input['optimized']
+        is_optimized = organism_input["optimized"]
         if is_optimized:
-            logger.info('Organism is optimized')
+            logger.info("Organism is optimized")
         else:
-            logger.info('Organism is deoptimized')
+            logger.info("Organism is deoptimized")
+        # TODO - change 50 according to the range we choose
+        optimization_priority = organism_input.get("optimization_priority") or 50
 
         cds_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}')
@@ -127,6 +129,7 @@ class UserInputModule(object):
                                           tai_profile=tai_weights,
                                           cai_scores=cai_scores_dict,
                                           tai_scores=tai_scores_dict,
-                                          is_optimized=is_optimized)
+                                          is_optimized=is_optimized,
+                                          optimization_priority=optimization_priority)
 
         return organism_object
