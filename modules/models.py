@@ -24,7 +24,6 @@ class Organism(object):
         self.is_optimized = is_optimized
         self.optimization_priority = optimization_priority
 
-
     @property
     def cai_avg(self):
         return statistics.mean(self._cai_scores_values)

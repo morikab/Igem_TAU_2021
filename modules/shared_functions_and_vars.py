@@ -42,6 +42,8 @@ synonymous_codons = {
     "Y": ["TAT", "TAC"],
 }
 
+DEFAULT_ORGANISM_PRIORITY = 5
+
 
 def write_fasta(fid, list_seq, list_name):
     ofile = open(fid + '.fasta', "w+")

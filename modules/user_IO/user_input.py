@@ -44,9 +44,6 @@ class UserInputModule(object):
             @organism: contains the org names as keys, and for each organism- the key is the scientific organism name,
             and the value is _parse_single_input for the organism's input
         """
-
-        full_inp_dict = {}
-
         organisms_list = []
         organisms_names = set()
 
@@ -59,6 +56,18 @@ class UserInputModule(object):
                 raise ValueError(f"Organism: {organism.name}'s genome is inserted twice, re-check your input.")
             organisms_list.append(organism)
             organisms_names.add(organism.name)
+
+        # Normalize prioritization weights - from user's defined values (1-10) to normalized values in range (0, 1)
+        total_optimized_weights = sum([organism.optimization_priority for organism in organisms_list if
+                                       organism.is_optimized])
+        total_deoptimized_weights = sum([organism.optimization_priority for organism in organisms_list if
+                                         not organism.is_optimized])
+        for organism in organisms_list:
+            if organism.is_optimized:
+                organism.optimization_priority /= total_optimized_weights
+            else:
+                organism.optimization_priority /= total_deoptimized_weights
+            logger.info(f"{organism.name} has weight of {organism.optimization_priority}")
 
         # Read ORF sequence
         orf_fasta_fid = user_input['sequence']
@@ -73,7 +82,6 @@ class UserInputModule(object):
         logger.info(f'containing this sequence: {orf_seq}')
 
         tuning_parameter = user_input['tuning_param']
-
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
@@ -105,8 +113,7 @@ class UserInputModule(object):
             logger.info("Organism is optimized")
         else:
             logger.info("Organism is deoptimized")
-        # TODO - change 50 according to the range we choose
-        optimization_priority = organism_input.get("optimization_priority") or 50
+        optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
 
         cds_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}')
