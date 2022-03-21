@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+/*custom font*/
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+
+/*basic reset*/
+* {margin: 0; padding: 0;}
+
+html {
+	height: 100%;
+	/*Image only BG fallback*/
+	background: url('http://thecodeplayer.com/uploads/media/gs.png');
+	/*background = gradient + image pattern combo*/
+	background:
+		linear-gradient(0.25turn, rgba(242, 242, 242, 1), rgba(155, 89, 182, 0.2)),
+		url('http://thecodeplayer.com/uploads/media/gs.png');
+}
+body {
+	font-family: montserrat, arial, verdana;
+	text-align: center;
+}
+table {
+    border: 1px solid black;
+    text-align: left;
+    padding: 5px;
+}
+th, td {
+    border-bottom: 1px solid #f07;
+    padding: 5px;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+tr:hover {background-color: #c6f0ff;}
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Summary</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <h2>You can find your files in the following path</h2><br>
+    <center>
+        <table>
+            <tr>
+                <th>Path to files</th>
+                <td>{{ zip_file_path }} </td>
+            </tr>
+        {% for key, value in user_output.items() %}
+           <tr>
+                <th> {{ key }} </th>
+                <td> {{ value }} </td>
+           </tr>
+        {% endfor %}
+        </table>
+        <br>
+        <h2>Thanks for waiting, hope to see you soon ! :)</h2>
+    </center>
+    <script src="https://cdn.enable.co.il/licenses/enable-L6430uy5eg4lidt-0920-15376/init.js"></script>
+</body>
+</html>
