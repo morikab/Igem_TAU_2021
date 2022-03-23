@@ -43,14 +43,7 @@ class CommuniqueApp(object):
         # ttk.Label(mainframe, textvariable=self.meters).grid(column=2, row=2, sticky=(W, E))
         #
         # ttk.Button(mainframe, text="Calculate", command=self.calculate).grid(column=3, row=3, sticky=W)
-        #
-        # ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-        # ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-        # ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
-        #
-        # for child in mainframe.winfo_children():
-        #     child.grid_configure(padx=5, pady=5)
-        #
+
         # feet_entry.focus()
         # root.bind("<Return>", self.calculate)
         self.input_dict = {"organisms": {}}
@@ -82,10 +75,12 @@ class CommuniqueApp(object):
             host_name = StringVar()
             host_name.set(os.path.basename(genome_path))
             ttk.Entry(self.wanted_hosts_grid, textvariable=host_name).grid(column=0, row=row)
-            # host_name_entry.insert(0, os.path.basename(genome_path))
 
-            # TODO - make it collapsible/fixed size
-            ttk.Label(self.wanted_hosts_grid, text=genome_path).grid(column=1, row=row)
+            genome_path_var = StringVar()
+            genome_path_var.set(genome_path)
+            # TODO - make the path scrollable + add option to change the path (and update path and name, accordingly)
+            ttk.Entry(self.wanted_hosts_grid, textvariable=genome_path_var).grid(column=1, row=row)
+            # ttk.Label(self.wanted_hosts_grid, text=genome_path).grid(column=1, row=row)
             optimization_priority = IntVar()
             optimization_priority.set(50)
             ttk.Spinbox(self.wanted_hosts_grid, from_=1, to=100, textvariable=optimization_priority).grid(column=2,
@@ -94,6 +89,7 @@ class CommuniqueApp(object):
 
             organism = {
                 "host_name": host_name,
+                "genome_path": genome_path_var,
                 "optimized": True,
                 "expression_csv": None,  # TODO - fix this
                 "optimization_priority": optimization_priority,
