@@ -102,8 +102,6 @@ def get_default_chrome_path():
         return find_chrome_linux()
 
 
-
-
 # class FlaskwebguiDjangoMiddleware:
     
 #     def __init__(self, get_response=None):
@@ -156,14 +154,11 @@ class FlaskUI:
         self.supported_frameworks = list(self.webserver_dispacher.keys())
         self.lock = Lock()
 
-
     def update_timestamp(self):
         self.lock.acquire()
         global current_timestamp
         current_timestamp = datetime.now()
         self.lock.release()
-        
-
 
     def run(self):
         """ 
@@ -173,10 +168,11 @@ class FlaskUI:
         self.update_timestamp()
 
         t_start_webserver = Thread(target=self.start_webserver)
-        t_open_chromium   = Thread(target=self.open_chromium)
-        t_stop_webserver  = Thread(target=self.stop_webserver)
+        # t_open_chromium = Thread(target=self.open_chromium)
+        t_stop_webserver = Thread(target=self.stop_webserver)
 
-        threads = [t_start_webserver, t_open_chromium, t_stop_webserver]
+        threads = [t_start_webserver, t_stop_webserver]
+        # threads = [t_start_webserver, t_open_chromium, t_stop_webserver]
         for t in threads: t.start()
         for t in threads: t.join()
 
@@ -188,7 +184,6 @@ class FlaskUI:
         self.host = host or '127.0.0.1'
         if self.host == "0.0.0.0":
             self.host = self.get_interface_ip(socket.AF_INET)
-
 
         self.port = free_port
         self.localhost = f"http://{self.host}:{self.port}"
@@ -211,7 +206,6 @@ class FlaskUI:
             return s.getsockname()[0]  # type: ignore
 
     def start_webserver(self):
-
         if isfunction(self.start_server):
             self.start_server()
 
@@ -220,9 +214,7 @@ class FlaskUI:
 
         self.webserver_dispacher[self.start_server]()
 
-
     def add_flask_middleware(self):
-
         @self.app.after_request
         def keep_alive_after_request(response):
             self.keep_server_running()
@@ -232,12 +224,8 @@ class FlaskUI:
         def keep_alive_pooling():
             self.keep_server_running()
             return "ok"
-        
-        
-
 
     def start_flask(self):
-        
         self.add_flask_middleware()
         
         try:
@@ -245,7 +233,6 @@ class FlaskUI:
             waitress.serve(self.app, host=self.host, port=self.port)
         except:
             self.app.run(host=self.host, port=self.port)
-
 
     def start_flask_socketio(self):
         self.add_flask_middleware()
@@ -283,7 +270,6 @@ class FlaskUI:
         uvicorn.run(self.app, host=self.host, port=self.port, log_level="warning")
 
 
-
     def open_chromium(self):
         """
             Open the browser selected (by default it looks for chrome)
@@ -319,10 +305,7 @@ class FlaskUI:
             import webbrowser
             webbrowser.open_new(self.localhost)
 
-
-
     def stop_webserver(self):
-        
         #TODO add middleware for Django
         if self.start_server == 'django':
             logger.info("Middleware not implemented (yet) for Django.")

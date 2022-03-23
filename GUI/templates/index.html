@@ -148,8 +148,6 @@ body {
     		<li class="active">Optimized Organisms</li>
     		<li>Deoptimized Organisms</li>
             <li>Selective Optimization Tuning</li>
-    		<li>Protein Optimization</li>
-            <li>Transcription Optimization</li>
             <li>Review</li>
     	</ul>
     	<!-- fieldsets -->
@@ -209,113 +207,11 @@ body {
     	</fieldset>
         <!-- step #4 -->
         <fieldset>
-            <h2 class="fs-title">Protein optimization</h2>
-            <label>Would you like to optimize protein sequence?</label>
-            <div class="checkbox">
-                <select name="protein_optimization_options" id="protein_optimization_options">
-                    <option value="yes">Yes</option>
-                    <option value="no" selected>No</option>
-                </select>
-            </div>
-            <br>
-            <div class="form-group" id="protein-optimization-input" style="display:none;">
-                <h2 class="fs-title">Optimized protein</h2>
-                <h3 class="fs-subtitle">#4: Upload DNA sequence to optimize (as .fa file)</h3>
-                <h3 class="fs-subtitle">Please upload a fasta file containing the DNA sequence of the gene you would like to express.</h3>
-                <input type="text" id="protein_seq_name" name="protein_seq_name" placeholder="Protein Name">
-                <input type="file" id="protein_seq" name="protein_seq" accept=".fa, .fasta" onchange="return fileValidation('protein_seq', '.fa, .fasta')"/>
-                <br>
-                <h2 class="fs-title">Translation efficiency optimization</h2>
-                <label>Would you like to enable translation efficiency optimization?</label>
-                <div class="checkbox">
-                    <select name="translation_optimization_options" id="translation_optimization_options">
-                        <option value="yes">Yes</option>
-                        <option value="no" selected>No</option>
-                    </select>
-                </div>
-                <br>
-                <div class="form-group" id="translation-optimization-input" style="display:none;">
-                    <h2 class="fs-title">Optimization function</h2>
-                    <h3 class="fs-subtitle">Choose a preferred optimization function for optimizing the protein sequence</h3>
-                    <select name="selected_translation_function" id="selected_translation_functions">
-                      <option value="zscore_hill_climbing_average">Zscore hill climbing average</option>
-                      <option value="zscore_hill_climbing_weakest_link">Zscore hill climbing weakest link</option>
-                      <option value="single_codon_global">Single codon global</option>
-                      <option value="single_codon_local">Single codon local</option>
-                    </select>
-                    <br><br>
-                </div>
-                <h2 class="fs-title">Restriction sites optimization</h2>
-                <div class="checkbox">
-                  <label>Would you like to optimize restriction sites?</label>
-                    <br>
-                  <select name="restrict_enzyme_options" id="restrict_enzyme_options">
-                    <option value="yes">Yes</option>
-                    <option value="no" selected>No</option>
-                  </select>
-                    <br>
-                </div>
-            </div>
-            <script>
-            document.getElementById('protein_optimization_options').onchange = function(){
-              if(this.value == 'yes'){
-                document.getElementById('protein-optimization-input').style.display='block';
-               }
-               else {
-                document.getElementById('protein-optimization-input').style.display='none';
-               }
-            };
-            </script>
-            <script>
-            document.getElementById('translation_optimization_options').onchange = function(){
-              if(this.value == 'yes'){
-                document.getElementById('translation-optimization-input').style.display='block';
-               }
-               else {
-                document.getElementById('translation-optimization-input').style.display='none';
-               }
-            };
-            </script>
-            <br>
-            <input type="button" name="previous" class="previous action-button" value="Previous" />
-    		<input type="button" name="next" class="next action-button" value="Next" />
-    	</fieldset>
-        <!-- step #5 -->
-        <fieldset>
-        <h2 class="fs-title">Transcription Optimization</h2>
-        <h3 class="fs-subtitle">#5: Promoter sequence optimization</h3>
-        <label>Would you like to optimize promoters?</label>
-        <div class="checkbox">
-            <select name="promoter_optimization_options" id="promoter_optimization_options">
-                <option value="yes">Yes</option>
-                <option value="no" selected>No</option>
-            </select>
-        </div>
-        <div class="form-group" id="file-input" style="display:none;">
-            <label id="promoter_optimization">Please upload a fasta file (.fa file) of promoter options you would like to optimize.</label>
-            <input type="file" id="promoter_seq" name="promoter_seq" placeholder="Promoter Sequence" accept=".fa, .fasta" onchange="return fileValidation('promoter_seq', '.fa, .fasta')">
-            <p style="color:red;font-size:10px">Note: In case you will not upload your own promoter options, the organisms’ endogenous promoters will be optimized.</p>
-        </div>
-        <script>
-        document.getElementById('promoter_optimization_options').onchange = function(){
-          if(this.value == 'yes'){
-            document.getElementById('file-input').style.display='block';
-           }
-           else {
-            document.getElementById('file-input').style.display='none';
-           }
-        };
-        </script>
-        <input type="button" name="previous" class="previous action-button" value="Previous" />
-        <input type="button" name="next" class="next action-button" value="Next" />
-        </fieldset>
-        <!-- step #6 -->
-        <fieldset>
             <h2 class="fs-title">Review</h2>
             <h3 class="fs-subtitle">#6: Review your application.</h3>
             <span>Please reassure your selections along the application.<br>
                 When you are ready, Press to Express!</span><br>
-            <button type="submit" name="submit_optimization" class="submit action-button">Press to Express</button></br>
+            <button type="submit" name="submit_optimization" class="submit action-button">Press to Express</button>
             <input type="button" name="previous" class="previous action-button" value="Previous" />
         </fieldset>
     </form>

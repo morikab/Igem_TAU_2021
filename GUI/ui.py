@@ -64,12 +64,11 @@ def success():
 def output():
     if request.method == "POST":
         user_output, zip_file_path = run_modules(user_inp_raw=processed_user_input, model_preferences=model_preferences)
-        print("zip file path: %s", zip_file_path)
         return render_template("user_output.html", user_output=user_output, zip_file_path=zip_file_path)
     return redirect("/")
 
 
-@app.route('/communique', methods=['POST', 'GET'])
-def communique():
-    return render_template("optimize_form.html")
+# @app.route('/communique', methods=['POST', 'GET'])
+# def communique():
+#     return render_template("optimize_form.html")
 
