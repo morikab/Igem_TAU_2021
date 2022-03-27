@@ -13,7 +13,7 @@ class CommuniqueApp(object):
         mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         master.columnconfigure(0, weight=1)
         master.rowconfigure(0, weight=1)
-        master.geometry("500x1200")  # Set window size
+        master.geometry("700x1200")  # Set window size
 
         # Sequence to optimize
         self.sequence_label_frame = ttk.Labelframe(mainframe, text="Sequence to Optimize")
@@ -116,17 +116,17 @@ class CommuniqueApp(object):
         remove_widget = event.widget
         row_to_remove = remove_widget.grid_info()["row"]
         remove_widget.grid_remove()
-        for i in range(row_to_remove, self.wanted_hosts_count+1):
-            if i == self.wanted_hosts_count:
-                for j in range(number_of_columns-1):
-                    self.wanted_hosts_grid.grid_slaves(row=i, column=j)[0].grid_remove()
-            else:
-                for j in range(number_of_columns):
-                    self.wanted_hosts_grid.grid_slaves(row=i, column=j)[0].grid(row=i-1, column=j)
+        for j in range(number_of_columns - 1):
+            self.wanted_hosts_grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
+
+        for i in range(row_to_remove+1, self.wanted_hosts_count+1):
+            for j in range(number_of_columns):
+                self.wanted_hosts_grid.grid_slaves(row=i, column=j)[0].grid(row=i-1, column=j)
         self.wanted_hosts_count -= 1
+        self.wanted_hosts_grid.pack()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # root = ThemedTk(theme="arc")      # TODO - very very slow. Try to find another reasonable style
     root = Tk()
     CommuniqueApp(root)
