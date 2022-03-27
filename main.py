@@ -15,6 +15,10 @@ class CommuniqueApp(object):
         master.rowconfigure(0, weight=1)
         master.geometry("700x1200")  # Set window size
 
+        # Scroll Bar
+        self.scrollbar = ttk.Scrollbar(mainframe, orient="vertical")
+        self.scrollbar.pack(side="right", fill="y")
+
         # Sequence to optimize
         self.sequence_label_frame = ttk.Labelframe(mainframe, text="Sequence to Optimize")
         self.sequence_label_frame.pack(fill="both", expand="yes")
@@ -34,6 +38,10 @@ class CommuniqueApp(object):
 
         self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
 
+        # Optimize Button
+        self.optimize_button = ttk.Button(mainframe, text="Optimize", command=self.optimize)
+        self.optimize_button.pack(side=BOTTOM, pady=20)
+
         # User Input Parameters
         self.organisms = {}
         self.sequence = None
@@ -45,15 +53,16 @@ class CommuniqueApp(object):
         return len({key: value for key, value in self.organisms.items() if value["optimized"]})
 
     def upload_sequence(self):
-        sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])  # TODO - add *.fasta files
+        # TODO - add *.fasta files
+        sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])
         self.sequence_path_label.config(text=sequence_file_name)
         # TODO - add Label or entry for the file name
         self.sequence = sequence_file_name
 
     def upload_hosts_files(self):
-        # TODO - need to add fltering and correct handling of organisms for various edge cases (together with unwanted hosts)
+        # TODO - throw error if using the same file twice (same/different groups)
         hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", "*.gb")], multiple=True)
-        if len(hosts_files) > 10:
+        if len(hosts_files) > 10:   # TODO - is really necessary?
             # TODO - convert to alert box
             print("Cannot upload more than 10 files. Please remove some files and try again")
 
@@ -64,7 +73,6 @@ class CommuniqueApp(object):
 
         initial_row = 1
         if self.wanted_hosts_count > 0:
-            # TODO - handle duplicates
             initial_row = self.wanted_hosts_count + 1
 
         for index, genome_path in enumerate(hosts_files):
@@ -79,10 +87,10 @@ class CommuniqueApp(object):
             # TODO - make the path scrollable + add option to change the path (and update path and name, accordingly)
             ttk.Entry(self.wanted_hosts_grid, textvariable=genome_path_var).grid(column=1, row=row)
             # ttk.Label(self.wanted_hosts_grid, text=genome_path).grid(column=1, row=row)
-            optimization_priority = IntVar()
-            optimization_priority.set(50)
-            ttk.Spinbox(self.wanted_hosts_grid, from_=1, to=100, textvariable=optimization_priority).grid(column=2,
-                                                                                                          row=row)
+            optimization_priority_var = IntVar()
+            optimization_priority_var.set(50)
+            ttk.Spinbox(self.wanted_hosts_grid, from_=1, to=100, textvariable=optimization_priority_var).grid(column=2,
+                                                                                                              row=row)
 
             expression_level_button = ttk.Button(self.wanted_hosts_grid, text="upload")
             expression_level_button.grid(column=3, row=row)
@@ -97,7 +105,7 @@ class CommuniqueApp(object):
                 "genome_path": genome_path_var,
                 "optimized": True,
                 "expression_csv": None,
-                "optimization_priority": optimization_priority,
+                "optimization_priority": optimization_priority_var,
             }
             self.organisms[genome_path] = organism
 
@@ -133,6 +141,10 @@ class CommuniqueApp(object):
         if not self.organisms:
             self.wanted_hosts_grid.destroy()
             self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
+
+    def optimize(self) -> None:
+        # TODO - create dict, run modules and display the final window
+        print("Optimize")
 
 
 if __name__ == "__main__":
