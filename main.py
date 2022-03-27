@@ -33,20 +33,25 @@ class CommuniqueApp(object):
         upload_wanted_hosts.pack(side=TOP)
 
         self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
-        self.wanted_hosts_count = 0
-        self.input_dict = {"organisms": {}}
+
+        # User Input Parameters
+        self.organisms = {}
+        self.sequence = None
 
         # TODO - after running "optimize", we need to regenerate the dictionary for the modules code
 
+    @property
+    def wanted_hosts_count(self) -> int:
+        return len({key: value for key, value in self.organisms.items() if value["optimized"]})
+
     def upload_sequence(self):
-        sequence_file = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])  # TODO - add *.fasta files
-        self.sequence_path_label.config(text=sequence_file)
+        sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])  # TODO - add *.fasta files
+        self.sequence_path_label.config(text=sequence_file_name)
         # TODO - add Label or entry for the file name
-        self.input_dict["sequence"] = sequence_file
+        self.sequence = sequence_file_name
 
     def upload_hosts_files(self):
         # TODO - need to add fltering and correct handling of organisms for various edge cases (together with unwanted hosts)
-        organisms = self.input_dict["organisms"]
         hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", "*.gb")], multiple=True)
         if len(hosts_files) > 10:
             # TODO - convert to alert box
@@ -94,27 +99,26 @@ class CommuniqueApp(object):
                 "expression_csv": None,
                 "optimization_priority": optimization_priority,
             }
-            organisms[genome_path] = organism
+            self.organisms[genome_path] = organism
 
         for child in self.wanted_hosts_grid.winfo_children():
             child.grid_configure(padx=5, pady=5)
         self.wanted_hosts_grid.pack()
-
-        self.wanted_hosts_count += len(hosts_files)
 
     def upload_expression(self, event) -> None:
         expression_file_name = filedialog.askopenfilename(filetypes=[("csv", "*.csv")])
         upload_widget = event.widget
         host_row = upload_widget.grid_info()["row"]
         # TODO - define consts for column numbers
-        genome_path = self.wanted_hosts_grid.grid_slaves(row=host_row, column=1)[0]
-        host_entry = self.input_dict["organisms"][genome_path]
+        genome_path = self.wanted_hosts_grid.grid_slaves(row=host_row, column=1)[-1]
+        host_entry = self.organisms[genome_path]
         host_entry["expression_csv"] = expression_file_name
 
     def remove_host(self, event) -> None:
         number_of_columns = 5
         remove_widget = event.widget
         row_to_remove = remove_widget.grid_info()["row"]
+        genome_path = self.wanted_hosts_grid.grid_slaves(row=row_to_remove, column=1)[-1].get()
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
             self.wanted_hosts_grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
@@ -122,8 +126,13 @@ class CommuniqueApp(object):
         for i in range(row_to_remove+1, self.wanted_hosts_count+1):
             for j in range(number_of_columns):
                 self.wanted_hosts_grid.grid_slaves(row=i, column=j)[0].grid(row=i-1, column=j)
-        self.wanted_hosts_count -= 1
+
+        self.organisms.pop(genome_path)
         self.wanted_hosts_grid.pack()
+
+        if not self.organisms:
+            self.wanted_hosts_grid.destroy()
+            self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
 
 
 if __name__ == "__main__":
