@@ -1,4 +1,5 @@
 import os
+import typing
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
@@ -46,8 +47,6 @@ class CommuniqueApp(object):
         self.organisms = {}
         self.sequence = None
 
-        # TODO - after running "optimize", we need to regenerate the dictionary for the modules code
-
     @property
     def wanted_hosts_count(self) -> int:
         return len({key: value for key, value in self.organisms.items() if value["optimized"]})
@@ -84,17 +83,15 @@ class CommuniqueApp(object):
 
             genome_path_var = StringVar()
             genome_path_var.set(genome_path)
-            # TODO - make the path scrollable + add option to change the path (and update path and name, accordingly)
+            # TODO - make the path scrollable
             ttk.Entry(self.wanted_hosts_grid, textvariable=genome_path_var).grid(column=1, row=row)
-            # ttk.Label(self.wanted_hosts_grid, text=genome_path).grid(column=1, row=row)
             optimization_priority_var = IntVar()
             optimization_priority_var.set(50)
+            # TODO - recheck from and to parameters here.
             ttk.Spinbox(self.wanted_hosts_grid, from_=1, to=100, textvariable=optimization_priority_var).grid(column=2,
                                                                                                               row=row)
 
-            expression_level_button = ttk.Button(self.wanted_hosts_grid, text="upload")
-            expression_level_button.grid(column=3, row=row)
-            expression_level_button.bind("<Button-1>", self.upload_expression)
+            self.create_upload_expression_frame(row=row)
 
             remove_button = ttk.Button(self.wanted_hosts_grid, text="remove")
             remove_button.grid(column=4, row=row)
@@ -116,11 +113,32 @@ class CommuniqueApp(object):
     def upload_expression(self, event) -> None:
         expression_file_name = filedialog.askopenfilename(filetypes=[("csv", "*.csv")])
         upload_widget = event.widget
-        host_row = upload_widget.grid_info()["row"]
+        host_row = upload_widget.master.grid_info()["row"]
+
+        upload_widget.master.destroy()
+        self.create_upload_expression_frame(row=host_row, expression_file_name=expression_file_name)
+
+    def create_upload_expression_frame(self, row: int, expression_file_name: typing.Optional[str] = None):
+        expression_frame = Frame(self.wanted_hosts_grid)
+        expression_frame.grid(row=row, column=3)
+
+        expression_level_button = ttk.Button(expression_frame, text="upload")
+        expression_level_button.bind("<Button-1>", self.upload_expression)
+        expression_level_button.pack()
+
+        if expression_file_name is not None:
+            expression_path_var = StringVar()
+            expression_path_var.set(expression_file_name)
+            expression_path_entry = ttk.Entry(expression_frame, textvariable=expression_path_var)
+            # expression_label = ttk.Label(expression_frame, text=expression_file_name)
+            expression_path_entry.pack()
+            host_info = self.get_host_info(row=row)
+            host_info["expression_csv"] = expression_path_var
+
+    def get_host_info(self, row: int) -> typing.Dict:
         # TODO - define consts for column numbers
-        genome_path = self.wanted_hosts_grid.grid_slaves(row=host_row, column=1)[-1]
-        host_entry = self.organisms[genome_path]
-        host_entry["expression_csv"] = expression_file_name
+        genome_path = self.wanted_hosts_grid.grid_slaves(row=row, column=1)[-1].get()
+        return self.organisms[genome_path]
 
     def remove_host(self, event) -> None:
         number_of_columns = 5
@@ -129,6 +147,7 @@ class CommuniqueApp(object):
         genome_path = self.wanted_hosts_grid.grid_slaves(row=row_to_remove, column=1)[-1].get()
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
+            # TODO - check using destroy instead
             self.wanted_hosts_grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
 
         for i in range(row_to_remove+1, self.wanted_hosts_count+1):
