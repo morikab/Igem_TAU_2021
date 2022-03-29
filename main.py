@@ -21,11 +21,17 @@ class CommuniqueApp(object):
     REMOVE_HOST_COLUMN_INDEX = 4
 
     def __init__(self, master: tk.Tk) -> None:
-        master.title("Communique")
-        master.geometry(F"{self.INITIAL_WIDTH}x{self.INITIAL_HEIGHT}")
+        self.master = master
+        self.master.title("Communique")
+        self.master.geometry(F"{self.INITIAL_WIDTH}x{self.INITIAL_HEIGHT}")
 
-        canvas = tk.Canvas(master, width=self.INITIAL_WIDTH, height=self.INITIAL_HEIGHT)
-        scrollbar = ttk.Scrollbar(master, orient="vertical", command=canvas.yview)
+        self.mainframe = None
+        self.sequence_label_frame = None    # TODO - check what needs to be property and what not
+        self.initialize_for_new_run()
+
+    def initialize_for_new_run(self) -> None:
+        canvas = tk.Canvas(self.master, width=self.INITIAL_WIDTH, height=self.INITIAL_HEIGHT)
+        scrollbar = ttk.Scrollbar(self.master, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
         canvas.pack(fill="both", expand=True)
@@ -35,7 +41,7 @@ class CommuniqueApp(object):
         self.mainframe.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window, width=e.width))
         canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(-1 * e.delta//120, "units"))
-        master.after_idle(canvas.yview_moveto, 0)
+        self.master.after_idle(canvas.yview_moveto, 0)
 
         #########################
         # Sequence to optimize
@@ -314,7 +320,9 @@ class CommuniqueApp(object):
 
     def recreate(self) -> None:
         # TODO - should we recreate all the params, just run again the modules (add two buttons for both?)
-        pass
+        for widget in self.master.winfo_children():
+            widget.destroy()
+        self.initialize_for_new_run()
 
 
 if __name__ == "__main__":
