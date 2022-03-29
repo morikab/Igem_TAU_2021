@@ -12,6 +12,13 @@ class CommuniqueApp(object):
     MAX_HOSTS_COUNT = 10
     INITIAL_WIDTH = 700
     INITIAL_HEIGHT = 1000
+    DEFAULT_TUNING_PARAMETER_VALUE = 50
+    DEFAULT_PRIORITY_VALUE = 50
+    HOST_NAME_COLUMN_INDEX = 0
+    GENOME_PATH_COLUMN_INDEX = 1
+    HOST_PRIORITY_COLUMN_INDEX = 2
+    EXPRESSION_LEVEL_COLUMN_INDEX = 3
+    REMOVE_HOST_COLUMN_INDEX = 4
 
     def __init__(self, master: tk.Tk) -> None:
         master.title("Communique")
@@ -37,7 +44,6 @@ class CommuniqueApp(object):
         self.sequence_label_frame.pack(fill="both", expand="yes")
         upload_sequence = ttk.Button(self.sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
         upload_sequence.pack(side=tk.TOP)
-        # TODO - consider another widget with white background for the path
         self.sequence_path_label = ttk.Label(self.sequence_label_frame)
         self.sequence_path_label.pack(side=tk.TOP, pady=5)
 
@@ -63,13 +69,14 @@ class CommuniqueApp(object):
         upload_unwanted_hosts.pack(side=tk.TOP, pady=5)
         self.unwanted_hosts_grid = tk.Frame(self.unwanted_hosts_frame)
 
+        #########################
+        # Bottom Frame
+        #########################
         self.bottom_frame = ttk.Frame(self.mainframe)
         self.bottom_frame.pack(side=tk.BOTTOM, pady=20)
-
         # Advanced Options
         self.options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
         self.options_button.grid(row=0, column=0)
-
         # Optimize Button
         self.optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
         self.optimize_button.grid(row=0, column=1)
@@ -79,20 +86,16 @@ class CommuniqueApp(object):
         # User Input Parameters
         self.organisms = {}
         self.sequence = None
-
         self.tuning_parameter = tk.IntVar()
-        self.tuning_parameter.set(50)       # TODO - move to constant
-
-        # TODO - add option to configure the optimization method in advanced options
+        self.tuning_parameter.set(self.DEFAULT_TUNING_PARAMETER_VALUE)
 
     def get_hosts_count(self, is_optimized: bool) -> int:
         return len({key: value for key, value in self.organisms.items() if value["optimized"] == is_optimized})
 
-    def upload_sequence(self):
+    def upload_sequence(self) -> None:
         # TODO - add *.fasta files
         sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])
         self.sequence_path_label.config(text=sequence_file_name)
-        # TODO - add Label or entry for the file name
         self.sequence = sequence_file_name
 
     def upload_wanted_hosts_files(self) -> None:
@@ -106,10 +109,12 @@ class CommuniqueApp(object):
         if not self.validate_uploaded_files(hosts_files):
             return
 
-        ttk.Label(grid, text="host name").grid(column=0, row=0)
-        ttk.Label(grid, text="genome path").grid(column=1, row=0)
-        ttk.Label(grid, text="optimization priority").grid(column=2, row=0)
-        ttk.Label(grid, text="expression levels (optional)").grid(column=3, row=0)
+        headers_row = 0
+        ttk.Label(grid, text="host name").grid(column=self.HOST_NAME_COLUMN_INDEX, row=headers_row)
+        ttk.Label(grid, text="genome path").grid(column=self.GENOME_PATH_COLUMN_INDEX, row=headers_row)
+        ttk.Label(grid, text="optimization priority").grid(column=self.HOST_PRIORITY_COLUMN_INDEX, row=headers_row)
+        ttk.Label(grid, text="expression levels (optional)").grid(column=self.EXPRESSION_LEVEL_COLUMN_INDEX,
+                                                                  row=headers_row)
 
         initial_row = self.get_hosts_count(is_optimized) + 1
 
@@ -119,19 +124,22 @@ class CommuniqueApp(object):
             host_name_var = tk.StringVar()
             host_name = Path(genome_path).stem
             host_name_var.set(host_name)
-            ttk.Entry(grid, textvariable=host_name_var).grid(column=0, row=row)
+            ttk.Entry(grid, textvariable=host_name_var).grid(column=self.HOST_NAME_COLUMN_INDEX, row=row)
 
             genome_path_var = tk.StringVar()
             genome_path_var.set(genome_path)
-            ttk.Entry(grid, textvariable=genome_path_var).grid(column=1, row=row)
+            ttk.Entry(grid, textvariable=genome_path_var).grid(column=self.GENOME_PATH_COLUMN_INDEX, row=row)
             optimization_priority_var = tk.IntVar()
-            optimization_priority_var.set(50)
-            ttk.Spinbox(grid, from_=1, to=100, textvariable=optimization_priority_var).grid(column=2, row=row)
+            optimization_priority_var.set(self.DEFAULT_PRIORITY_VALUE)
+            ttk.Spinbox(grid, from_=1, to=100, textvariable=optimization_priority_var).grid(
+                column=self.HOST_PRIORITY_COLUMN_INDEX,
+                row=row,
+            )
 
             self.create_upload_expression_frame(grid=grid, row=row)
 
             remove_button = ttk.Button(grid, text="remove")
-            remove_button.grid(column=4, row=row)
+            remove_button.grid(column=self.REMOVE_HOST_COLUMN_INDEX, row=row)
             remove_button.bind("<Button-1>", self.remove_wanted_host if is_optimized else self.remove_unwanted_host)
 
             organism = {
@@ -179,7 +187,7 @@ class CommuniqueApp(object):
             expression_file_name: typing.Optional[str] = None,
     ) -> None:
         expression_frame = tk.Frame(grid)
-        expression_frame.grid(row=row, column=3)
+        expression_frame.grid(row=row, column=self.EXPRESSION_LEVEL_COLUMN_INDEX)
 
         expression_level_button = ttk.Button(expression_frame, text="upload")
         expression_level_button.bind("<Button-1>", self.upload_expression)
@@ -195,8 +203,7 @@ class CommuniqueApp(object):
             host_info["expression_csv"] = expression_path_var
 
     def get_host_info(self, grid: tk.Frame, row: int) -> typing.Dict:
-        # TODO - define consts for column numbers
-        genome_path = grid.grid_slaves(row=row, column=1)[-1].get()
+        genome_path = grid.grid_slaves(row=row, column=self.GENOME_PATH_COLUMN_INDEX)[-1].get()
         return self.organisms[genome_path]
 
     def remove_wanted_host(self, event) -> None:
@@ -210,7 +217,7 @@ class CommuniqueApp(object):
         remove_widget = event.widget
         grid = remove_widget.master
         row_to_remove = remove_widget.grid_info()["row"]
-        genome_path = grid.grid_slaves(row=row_to_remove, column=1)[-1].get()
+        genome_path = grid.grid_slaves(row=row_to_remove, column=self.GENOME_PATH_COLUMN_INDEX)[-1].get()
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
             # TODO - check using destroy instead
@@ -225,7 +232,6 @@ class CommuniqueApp(object):
 
         if self.get_hosts_count(is_optimized) == 0:
             grid.destroy()
-
             if is_optimized:
                 self.wanted_hosts_grid = tk.Frame(self.wanted_hosts_frame)
             else:
@@ -239,7 +245,8 @@ class CommuniqueApp(object):
         options_frame = ttk.Frame(options_window, padding="3 3 12 12")
         ttk.Label(options_frame, text="Tuning Parameter: ").grid(row=0, column=0)
         ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=1)
-        # TODO - add clustering number (talk with Liyam)
+        # TODO - add clustering params?
+        # TODO - add option to configure the optimization method in advanced options
 
         options_frame.pack()
 
@@ -247,24 +254,12 @@ class CommuniqueApp(object):
         if not self.validate_user_input():
             return
 
-        user_input = {
-            "sequence": self.sequence,
-            "tuning_param":  self.tuning_parameter.get() / 100,
-        }
-        input_organisms = {}
-        for organism in self.organisms.values():
-            organism_name = organism["host_name"].get()
-            input_organisms[organism_name] = {
-                "genome_path": organism["genome_path"].get(),
-                "expression_csv": organism["expression_csv"].get() if organism["expression_csv"] else None,
-                "optimized": organism["optimized"],
-                "optimization_priority": organism["optimization_priority"].get(),
-            }
-        user_input["organisms"] = input_organisms
-
-        # TODO - add option to configure optimization method (from a drop-down menu)
+        user_input = self.generate_user_input()
         user_output, zip_file_path = run_modules(user_input_dict=user_input)
 
+        #########################
+        # Results widgets
+        #########################
         self.bottom_frame.destroy()
 
         self.results_frame = ttk.Labelframe(self.mainframe, text="Results")
@@ -281,8 +276,25 @@ class CommuniqueApp(object):
         optimized_sequence.grid(row=0, column=1)
         optimized_sequence.insert(tk.END, user_output["final_sequence"])
 
-        self.new_run_botton = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
-        self.new_run_botton.grid(row=0, column=0)
+        new_run_button = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
+        new_run_button.grid(row=0, column=0)
+
+    def generate_user_input(self) -> typing.Dict:
+        user_input = {
+            "sequence": self.sequence,
+            "tuning_param": self.tuning_parameter.get() / 100,
+        }
+        input_organisms = {}
+        for organism in self.organisms.values():
+            organism_name = organism["host_name"].get()
+            input_organisms[organism_name] = {
+                "genome_path": organism["genome_path"].get(),
+                "expression_csv": organism["expression_csv"].get() if organism["expression_csv"] else None,
+                "optimized": organism["optimized"],
+                "optimization_priority": organism["optimization_priority"].get(),
+            }
+        user_input["organisms"] = input_organisms
+        return user_input
 
     def validate_user_input(self) -> bool:
         if self.sequence is None:
