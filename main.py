@@ -10,30 +10,25 @@ from modules.main import run_modules
 
 class CommuniqueApp(object):
     MAX_HOSTS_COUNT = 10
+    INITIAL_WIDTH = 700
+    INITIAL_HEIGHT = 1000
 
     def __init__(self, master: tk.Tk) -> None:
         master.title("Communique")
-        # master.columnconfigure(0, weight=1)
-        # master.rowconfigure(0, weight=1)
-        master.geometry("700x1000")
+        master.geometry(F"{self.INITIAL_WIDTH}x{self.INITIAL_HEIGHT}")
 
-        canvas = tk.Canvas(master, width=1000, height=1000)
+        canvas = tk.Canvas(master, width=self.INITIAL_WIDTH, height=self.INITIAL_HEIGHT)
         scrollbar = ttk.Scrollbar(master, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
         canvas.pack(fill="both", expand=True)
 
         self.mainframe = ttk.Frame(canvas)
-        # self.mainframe.pack(fill="both", expand=True)
-        # self.mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
-
         window = canvas.create_window((0, 0), window=self.mainframe, anchor="nw")
         self.mainframe.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window, width=e.width))
+        canvas.bind_all("<MouseWheel>", lambda e: canvas.yview_scroll(-1 * e.delta//120, "units"))
         master.after_idle(canvas.yview_moveto, 0)
-
-        # self.scrollbar = ttk.Scrollbar(self.mainframe, orient="vertical")
-        # self.scrollbar.pack(side="right", fill="y")
 
         #########################
         # Sequence to optimize
