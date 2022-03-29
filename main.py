@@ -1,30 +1,39 @@
-import os
 import typing
 from pathlib import Path
-from tkinter import *
+import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
-from ttkthemes import ThemedTk
 
 from modules.main import run_modules
+
 
 class CommuniqueApp(object):
     MAX_HOSTS_COUNT = 10
 
-    def __init__(self, master: Tk) -> None:
+    def __init__(self, master: tk.Tk) -> None:
         master.title("Communique")
+        # master.columnconfigure(0, weight=1)
+        # master.rowconfigure(0, weight=1)
+        master.geometry("700x1000")
 
-        self.mainframe = ttk.Frame(master, padding="3 3 12 12")
-        self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-        master.columnconfigure(0, weight=1)
-        master.rowconfigure(0, weight=1)
-        master.geometry("700x1000")  # Set window size
+        canvas = tk.Canvas(master, width=1000, height=1000)
+        scrollbar = ttk.Scrollbar(master, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(fill="both", expand=True)
 
-        # Scroll Bar
-        # TODO - fix it to make it scrollable for real
-        self.scrollbar = ttk.Scrollbar(self.mainframe, orient="vertical")
-        self.scrollbar.pack(side="right", fill="y")
+        self.mainframe = ttk.Frame(canvas)
+        # self.mainframe.pack(fill="both", expand=True)
+        # self.mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+
+        window = canvas.create_window((0, 0), window=self.mainframe, anchor="nw")
+        self.mainframe.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.bind("<Configure>", lambda e: canvas.itemconfigure(window, width=e.width))
+        master.after_idle(canvas.yview_moveto, 0)
+
+        # self.scrollbar = ttk.Scrollbar(self.mainframe, orient="vertical")
+        # self.scrollbar.pack(side="right", fill="y")
 
         #########################
         # Sequence to optimize
@@ -32,10 +41,10 @@ class CommuniqueApp(object):
         self.sequence_label_frame = ttk.Labelframe(self.mainframe, text="Sequence to Optimize")
         self.sequence_label_frame.pack(fill="both", expand="yes")
         upload_sequence = ttk.Button(self.sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
-        upload_sequence.pack(side=TOP)
+        upload_sequence.pack(side=tk.TOP)
         # TODO - consider another widget with white background for the path
         self.sequence_path_label = ttk.Label(self.sequence_label_frame)
-        self.sequence_path_label.pack(side=TOP, pady=5)
+        self.sequence_path_label.pack(side=tk.TOP, pady=5)
 
         #########################
         # Wanted hosts
@@ -45,8 +54,8 @@ class CommuniqueApp(object):
         upload_wanted_hosts = ttk.Button(self.wanted_hosts_frame,
                                          text="Upload .gb files",
                                          command=self.upload_wanted_hosts_files)
-        upload_wanted_hosts.pack(side=TOP, pady=5)
-        self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
+        upload_wanted_hosts.pack(side=tk.TOP, pady=5)
+        self.wanted_hosts_grid = tk.Frame(self.wanted_hosts_frame)
 
         #########################
         # Unwanted hosts
@@ -56,11 +65,11 @@ class CommuniqueApp(object):
         upload_unwanted_hosts = ttk.Button(self.unwanted_hosts_frame,
                                            text="Upload .gb files",
                                            command=self.upload_unwanted_hosts_files)
-        upload_unwanted_hosts.pack(side=TOP, pady=5)
-        self.unwanted_hosts_grid = Frame(self.unwanted_hosts_frame)
+        upload_unwanted_hosts.pack(side=tk.TOP, pady=5)
+        self.unwanted_hosts_grid = tk.Frame(self.unwanted_hosts_frame)
 
         self.bottom_frame = ttk.Frame(self.mainframe)
-        self.bottom_frame.pack(side=BOTTOM, pady=20)
+        self.bottom_frame.pack(side=tk.BOTTOM, pady=20)
 
         # Advanced Options
         self.options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
@@ -76,7 +85,7 @@ class CommuniqueApp(object):
         self.organisms = {}
         self.sequence = None
 
-        self.tuning_parameter = IntVar()
+        self.tuning_parameter = tk.IntVar()
         self.tuning_parameter.set(50)       # TODO - move to constant
 
         # TODO - add option to configure the optimization method in advanced options
@@ -97,7 +106,7 @@ class CommuniqueApp(object):
     def upload_unwanted_hosts_files(self) -> None:
         self.upload_hosts_files(grid=self.unwanted_hosts_grid, is_optimized=False)
 
-    def upload_hosts_files(self, grid: Frame, is_optimized: bool) -> None:
+    def upload_hosts_files(self, grid: tk.Frame, is_optimized: bool) -> None:
         hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", "*.gb")], multiple=True)
         if not self.validate_uploaded_files(hosts_files):
             return
@@ -112,15 +121,15 @@ class CommuniqueApp(object):
         for index, genome_path in enumerate(hosts_files):
             row = initial_row + index
 
-            host_name_var = StringVar()
+            host_name_var = tk.StringVar()
             host_name = Path(genome_path).stem
             host_name_var.set(host_name)
             ttk.Entry(grid, textvariable=host_name_var).grid(column=0, row=row)
 
-            genome_path_var = StringVar()
+            genome_path_var = tk.StringVar()
             genome_path_var.set(genome_path)
             ttk.Entry(grid, textvariable=genome_path_var).grid(column=1, row=row)
-            optimization_priority_var = IntVar()
+            optimization_priority_var = tk.IntVar()
             optimization_priority_var.set(50)
             ttk.Spinbox(grid, from_=1, to=100, textvariable=optimization_priority_var).grid(column=2, row=row)
 
@@ -170,11 +179,11 @@ class CommuniqueApp(object):
 
     def create_upload_expression_frame(
             self,
-            grid: Frame,
+            grid: tk.Frame,
             row: int,
             expression_file_name: typing.Optional[str] = None,
     ) -> None:
-        expression_frame = Frame(grid)
+        expression_frame = tk.Frame(grid)
         expression_frame.grid(row=row, column=3)
 
         expression_level_button = ttk.Button(expression_frame, text="upload")
@@ -182,7 +191,7 @@ class CommuniqueApp(object):
         expression_level_button.pack()
 
         if expression_file_name is not None:
-            expression_path_var = StringVar()
+            expression_path_var = tk.StringVar()
             expression_path_var.set(expression_file_name)
             expression_path_entry = ttk.Entry(expression_frame, textvariable=expression_path_var)
             expression_path_entry.pack()
@@ -190,7 +199,7 @@ class CommuniqueApp(object):
             host_info = self.get_host_info(grid=grid, row=row)
             host_info["expression_csv"] = expression_path_var
 
-    def get_host_info(self, grid: Frame, row: int) -> typing.Dict:
+    def get_host_info(self, grid: tk.Frame, row: int) -> typing.Dict:
         # TODO - define consts for column numbers
         genome_path = grid.grid_slaves(row=row, column=1)[-1].get()
         return self.organisms[genome_path]
@@ -223,12 +232,12 @@ class CommuniqueApp(object):
             grid.destroy()
 
             if is_optimized:
-                self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
+                self.wanted_hosts_grid = tk.Frame(self.wanted_hosts_frame)
             else:
-                self.unwanted_hosts_grid = Frame(self.unwanted_hosts_frame)
+                self.unwanted_hosts_grid = tk.Frame(self.unwanted_hosts_frame)
 
     def advanced_options(self) -> None:
-        options_window = Toplevel(self.mainframe)
+        options_window = tk.Toplevel(self.mainframe)
         options_window.title("Advanced Options")
         options_window.geometry("300x200")
 
@@ -266,21 +275,19 @@ class CommuniqueApp(object):
         self.results_frame = ttk.Labelframe(self.mainframe, text="Results")
         self.results_frame.pack(fill="both", expand="yes")
         results_grid = ttk.Frame(self.results_frame)
-        results_grid.pack(side=TOP, pady=5)
+        results_grid.pack(side=tk.TOP, pady=5)
 
         self.bottom_frame = ttk.Frame(self.mainframe)
-        self.bottom_frame.pack(side=BOTTOM, pady=20)
+        self.bottom_frame.pack(side=tk.BOTTOM, pady=20)
 
         # New Run
         ttk.Label(results_grid, text="Optimized sequence:").grid(row=0, column=0)
-        optimized_sequence = Text(results_grid)
+        optimized_sequence = tk.Text(results_grid)
         optimized_sequence.grid(row=0, column=1)
-        optimized_sequence.insert(END, user_output["final_sequence"])
+        optimized_sequence.insert(tk.END, user_output["final_sequence"])
 
         self.new_run_botton = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
         self.new_run_botton.grid(row=0, column=0)
-
-        # TODO - display the final window
 
     def validate_user_input(self) -> bool:
         if self.sequence is None:
@@ -304,7 +311,6 @@ class CommuniqueApp(object):
 
 
 if __name__ == "__main__":
-    # root = ThemedTk(theme="arc")      # TODO - very very slow. Try to find another reasonable style
-    root = Tk()
+    root = tk.Tk()
     CommuniqueApp(root)
     root.mainloop()
