@@ -38,37 +38,48 @@ def make_distance_matrix(clustering_mat):
     return distance_matrix
 
 
-def find_best_clustering(clustering_mat, max_clus_num, c_index='dbi', c_method = 'alggomerative' ):
+
+
+def create_n_clusters(clustering_mat, n_clus ):
     dist_metric = 'precomputed'
-    scores = []
-    clusters = []
-
     distance_mat = make_distance_matrix(clustering_mat)
-    n_samples = distance_mat.shape
-    n_samples = n_samples[0]
-    for n_clus in range(2, min(n_samples, max_clus_num)):
-        ##### clustering options ######
-        # if c_method == 'kmeans':
-        #     clustering = KMeans(n_clusters=n_clus).fit(clustering_mat)
-        # else:
-        clustering = AgglomerativeClustering(n_clusters=n_clus,
-                                             affinity= dist_metric,
-                                             linkage='average').fit(distance_mat, )
+    clustering = AgglomerativeClustering(n_clusters=n_clus,
+                                         affinity=dist_metric,
+                                         linkage='average').fit(distance_mat, )
 
-        labels = clustering.labels_
-
-        ##### cluster eval indexes ####
-        if c_index == 'dbi':
-            score = davies_bouldin_score(clustering_mat, labels)
-        else:
-            score = silhouette_score(clustering_mat, labels, metric= dist_metric)
-
-        scores.append(score)
-        clusters.append(labels)
-
-    best_score = min(scores)
-    best_clusturing = clusters[scores.index(best_score)]
-    return best_clusturing, best_score
+    return clustering.labels_
+#
+# def find_best_clustering(clustering_mat, max_clus_num, c_index='dbi', c_method = 'alggomerative' ):
+#     dist_metric = 'precomputed'
+#     scores = []
+#     clusters = []
+#
+#     distance_mat = make_distance_matrix(clustering_mat)
+#     n_samples = distance_mat.shape
+#     n_samples = n_samples[0]
+#     for n_clus in range(2, min(n_samples, max_clus_num)):
+#         ##### clustering options ######
+#         # if c_method == 'kmeans':
+#         #     clustering = KMeans(n_clusters=n_clus).fit(clustering_mat)
+#         # else:
+#         clustering = AgglomerativeClustering(n_clusters=n_clus,
+#                                              affinity= dist_metric,
+#                                              linkage='average').fit(distance_mat, )
+#
+#         labels = clustering.labels_
+#
+#         ##### cluster eval indexes ####
+#         if c_index == 'dbi':
+#             score = davies_bouldin_score(clustering_mat, labels)
+#         else:
+#             score = silhouette_score(clustering_mat, labels, metric= dist_metric)
+#
+#         scores.append(score)
+#         clusters.append(labels)
+#
+#     best_score = min(scores)
+#     best_clusturing = clusters[scores.index(best_score)]
+#     return best_clusturing, best_score
 
 
 def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserInput):
@@ -79,7 +90,6 @@ def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserI
          for n in set(c_assignment_dict.values())}.values())
 
     inp_obj_list = []
-    opt_and_deopt = []
     for c_opt_org_list in opt_org_clusters:
         opt_and_deopt = c_opt_org_list+deopt_org_list
         new_user_input = models.UserInput(organisms=[],
