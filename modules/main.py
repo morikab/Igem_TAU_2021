@@ -40,7 +40,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input, n_clus=n_clus)
         for input_cluster in clustered_user_inputs:
             final_cds, optimization_index, weakest_score = unit1(input_cluster)
-            logger.info(final_cds, optimization_index, weakest_score)
+            # logger.info(final_cds, optimization_index, weakest_score)
         ##################################################################################################
 
 
