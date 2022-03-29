@@ -38,7 +38,7 @@ class UserOutputModule(object):
                                               )
 
         user_output_dict = {
-            'final_sequence: ': cds_sequence,  # str
+            'final_sequence': cds_sequence,  # str
             'optimization_score': zscore,  # int
             'score_for_weakest_pair': weakest_score, #int
         }

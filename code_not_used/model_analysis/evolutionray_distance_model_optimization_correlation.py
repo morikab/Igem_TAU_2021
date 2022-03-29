@@ -75,12 +75,7 @@ spearman_dict = {}
 for translation_function in func_options:
     opt_scores = []
     msa_scores = []
-    model_preferences = {'RE': False,  # todo: test restcition enzymes
-                         'translation': True,
-                         'transcription': False,
-                         'translation_function': translation_function
-                         # , 'single_codon_global', 'single_codon_local’, 'zscore_hill_climbing_average', 'zscore_hill_climbing_weakest_link'
-                         }
+
     tic = time.time()
     for org1 in final_tested_org:
         for org2 in final_tested_org:
@@ -99,12 +94,12 @@ for translation_function in func_options:
             software_dict = {
                 'sequence': cds,
                 'tuning_param': 0.5,
-                'organisms': {}
+                'organisms': {},
                 }
             software_dict['organisms'][org1] = org_dict[org1]
             software_dict['organisms'][org2] = org_dict[org2]
             inner_tic = time.time()
-            final_cds, optimization_index, weakest_score = unit1(software_dict, model_preferences)
+            final_cds, optimization_index, weakest_score = unit1(software_dict)
             print('TIME: ', time.time()-inner_tic)
             # alignment_score = pairwise2.align.globalxx(
             #     ribosomal_dict[org1], ribosomal_dict[org2], score_only=True)

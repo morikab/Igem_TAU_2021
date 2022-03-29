@@ -1,3 +1,5 @@
+import typing
+
 from modules.logger_factory import LoggerFactory
 from modules import models
 from modules.ORF.optimization import optimize_sequence
@@ -12,19 +14,20 @@ logger = LoggerFactory.create_logger("ORF")
 
 class ORFModule(object):
     @staticmethod
-    def run_module(user_input: models.UserInput,
-                   cai_or_tai: str,
-                   optimization_type: models.TranslationFunction =
-                   models.TranslationFunction.zscore_hill_climbing_average,
-                   max_iter = 50,
-                   ):
+    def run_module(
+            user_input: models.UserInput,
+            cai_or_tai: str,
+            optimization_type: typing.Optional[models.TranslationFunction],
+            max_iter=50,
+    ):
         """
         :param user_input: input from GUI parser.
-        :cai_or_tai: string indicating whether to optimize by cai or tai.
-        :optimization_type: optimization method to use.
-        :max_iter: Number of iterations for hill climbing.
+        :param cai_or_tai: string indicating whether to optimize by cai or tai.
+        :param optimization_type: optimization methodoptimization_type to use.
+        :param max_iter: Number of iterations for hill climbing.
         :return: optimized sequence (Biopython Seq)
         """
+        optimization_type = optimization_type or models.TranslationFunction.zscore_hill_climbing_average
         target_gene = user_input.sequence
         logger.info(optimization_type)
 

@@ -1,12 +1,17 @@
 import os
 import typing
+from pathlib import Path
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 from tkinter import ttk
 from ttkthemes import ThemedTk
 
+from modules.main import run_modules
 
 class CommuniqueApp(object):
+    MAX_HOSTS_COUNT = 10
+
     def __init__(self, master: Tk) -> None:
         master.title("Communique")
 
@@ -30,7 +35,7 @@ class CommuniqueApp(object):
         upload_sequence.pack(side=TOP)
         # TODO - consider another widget with white background for the path
         self.sequence_path_label = ttk.Label(self.sequence_label_frame)
-        self.sequence_path_label.pack(side=TOP)
+        self.sequence_path_label.pack(side=TOP, pady=5)
 
         #########################
         # Wanted hosts
@@ -40,7 +45,7 @@ class CommuniqueApp(object):
         upload_wanted_hosts = ttk.Button(self.wanted_hosts_frame,
                                          text="Upload .gb files",
                                          command=self.upload_wanted_hosts_files)
-        upload_wanted_hosts.pack(side=TOP)
+        upload_wanted_hosts.pack(side=TOP, pady=5)
         self.wanted_hosts_grid = Frame(self.wanted_hosts_frame)
 
         #########################
@@ -51,20 +56,21 @@ class CommuniqueApp(object):
         upload_unwanted_hosts = ttk.Button(self.unwanted_hosts_frame,
                                            text="Upload .gb files",
                                            command=self.upload_unwanted_hosts_files)
-        upload_unwanted_hosts.pack(side=TOP)
+        upload_unwanted_hosts.pack(side=TOP, pady=5)
         self.unwanted_hosts_grid = Frame(self.unwanted_hosts_frame)
 
-        # TODO - think again about the location of the buttons (right/left/center)
-        bottom_frame = ttk.Frame(self.mainframe)
-        bottom_frame.pack(side=BOTTOM, pady=20)
+        self.bottom_frame = ttk.Frame(self.mainframe)
+        self.bottom_frame.pack(side=BOTTOM, pady=20)
 
         # Advanced Options
-        self.options_button = ttk.Button(bottom_frame, text="Advanced Options", command=self.advanced_options)
+        self.options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
         self.options_button.grid(row=0, column=0)
 
         # Optimize Button
-        self.optimize_button = ttk.Button(bottom_frame, text="Optimize", command=self.optimize)
+        self.optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
         self.optimize_button.grid(row=0, column=1)
+
+        self.results_frame = None
 
         # User Input Parameters
         self.organisms = {}
@@ -72,6 +78,8 @@ class CommuniqueApp(object):
 
         self.tuning_parameter = IntVar()
         self.tuning_parameter.set(50)       # TODO - move to constant
+
+        # TODO - add option to configure the optimization method in advanced options
 
     def get_hosts_count(self, is_optimized: bool) -> int:
         return len({key: value for key, value in self.organisms.items() if value["optimized"] == is_optimized})
@@ -90,11 +98,9 @@ class CommuniqueApp(object):
         self.upload_hosts_files(grid=self.unwanted_hosts_grid, is_optimized=False)
 
     def upload_hosts_files(self, grid: Frame, is_optimized: bool) -> None:
-        # TODO - throw error if using the same file twice (same/different groups)
         hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", "*.gb")], multiple=True)
-        if len(hosts_files) > 10:   # TODO - is really necessary?
-            # TODO - convert to alert box
-            print("Cannot upload more than 10 files. Please remove some files and try again")
+        if not self.validate_uploaded_files(hosts_files):
+            return
 
         ttk.Label(grid, text="host name").grid(column=0, row=0)
         ttk.Label(grid, text="genome path").grid(column=1, row=0)
@@ -107,12 +113,12 @@ class CommuniqueApp(object):
             row = initial_row + index
 
             host_name_var = StringVar()
-            host_name_var.set(os.path.basename(genome_path))
+            host_name = Path(genome_path).stem
+            host_name_var.set(host_name)
             ttk.Entry(grid, textvariable=host_name_var).grid(column=0, row=row)
 
             genome_path_var = StringVar()
             genome_path_var.set(genome_path)
-            # TODO - make the path scrollable
             ttk.Entry(grid, textvariable=genome_path_var).grid(column=1, row=row)
             optimization_priority_var = IntVar()
             optimization_priority_var.set(50)
@@ -137,7 +143,23 @@ class CommuniqueApp(object):
             child.grid_configure(padx=5, pady=5)
         grid.pack()
 
+    def validate_uploaded_files(self, hosts_files: typing.Sequence[str]) -> bool:
+        if len(hosts_files) > self.MAX_HOSTS_COUNT:
+            messagebox.showerror(title="Error",
+                                 message=F"Please upload at most {self.MAX_HOSTS_COUNT} files.")
+            return False
+
+        for host in hosts_files:
+            if host in self.organisms.keys():
+                messagebox.showerror(title="Error",
+                                     message=F"Host file {host} already uploaded.")
+                return False
+
+        return True
+
     def upload_expression(self, event) -> None:
+        # TODO - play and fix bug when uploading a file with wanted and unwanted groups and then trying to
+        #  remove/upload on more file
         expression_file_name = filedialog.askopenfilename(filetypes=[("csv", "*.csv")])
         upload_widget = event.widget
         grid = upload_widget.master
@@ -218,8 +240,67 @@ class CommuniqueApp(object):
         options_frame.pack()
 
     def optimize(self) -> None:
-        # TODO - create dict, run modules and display the final window
-        print("Optimize")
+        if not self.validate_user_input():
+            return
+
+        user_input = {
+            "sequence": self.sequence,
+            "tuning_param":  self.tuning_parameter.get() / 100,
+        }
+        input_organisms = {}
+        for organism in self.organisms.values():
+            organism_name = organism["host_name"].get()
+            input_organisms[organism_name] = {
+                "genome_path": organism["genome_path"].get(),
+                "expression_csv": organism["expression_csv"].get() if organism["expression_csv"] else None,
+                "optimized": organism["optimized"],
+                "optimization_priority": organism["optimization_priority"].get(),
+            }
+        user_input["organisms"] = input_organisms
+
+        # TODO - add option to configure optimization method (from a drop-down menu)
+        user_output, zip_file_path = run_modules(user_input_dict=user_input)
+
+        self.bottom_frame.destroy()
+
+        self.results_frame = ttk.Labelframe(self.mainframe, text="Results")
+        self.results_frame.pack(fill="both", expand="yes")
+        results_grid = ttk.Frame(self.results_frame)
+        results_grid.pack(side=TOP, pady=5)
+
+        self.bottom_frame = ttk.Frame(self.mainframe)
+        self.bottom_frame.pack(side=BOTTOM, pady=20)
+
+        # New Run
+        ttk.Label(results_grid, text="Optimized sequence:").grid(row=0, column=0)
+        optimized_sequence = Text(results_grid)
+        optimized_sequence.grid(row=0, column=1)
+        optimized_sequence.insert(END, user_output["final_sequence"])
+
+        self.new_run_botton = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
+        self.new_run_botton.grid(row=0, column=0)
+
+        # TODO - display the final window
+
+    def validate_user_input(self) -> bool:
+        if self.sequence is None:
+            messagebox.showerror(title="Error",
+                                 message=F"Please choose a sequence file for optimization.")
+            return False
+        if self.get_hosts_count(is_optimized=True) == 0:
+            messagebox.showerror(title="Error",
+                                 message=F"Please choose at least one wanted host file.")
+            return False
+        if self.get_hosts_count(is_optimized=False) == 0:
+            messagebox.showerror(title="Error",
+                                 message=F"Please choose at least one unwanted host file.")
+            return False
+
+        return True
+
+    def recreate(self) -> None:
+        # TODO - should we recreate all the params, just run again the modules (add two buttons for both?)
+        pass
 
 
 if __name__ == "__main__":

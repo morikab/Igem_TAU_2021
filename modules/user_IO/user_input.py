@@ -57,7 +57,7 @@ class UserInputModule(object):
             organisms_list.append(organism)
             organisms_names.add(organism.name)
 
-        # Normalize prioritization weights - from user's defined values (1-10) to normalized values in range (0, 1)
+        # Normalize prioritization weights - from user's defined values (1-100) to normalized values in range (0, 1)
         total_optimized_weights = sum([organism.optimization_priority for organism in organisms_list if
                                        organism.is_optimized])
         total_deoptimized_weights = sum([organism.optimization_priority for organism in organisms_list if
@@ -77,15 +77,19 @@ class UserInputModule(object):
                 orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
             except:
                 raise ValueError(
-                    f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file containing a single recored')
+                    f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file '
+                    f'containing a single recored')
         logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
         logger.info(f'containing this sequence: {orf_seq}')
 
-        tuning_parameter = user_input['tuning_param']
+        tuning_parameter = user_input["tuning_param"]
+        translation_function = models.TranslationFunction[user_input["translation_function"]] if \
+            user_input.get("translation_function") else None
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
-                                tuning_parameter=tuning_parameter)
+                                tuning_parameter=tuning_parameter,
+                                translation_function=translation_function)
 
     @staticmethod
     def _parse_single_input(organism_input):

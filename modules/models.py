@@ -49,33 +49,8 @@ class TranslationFunction(Enum):
 
 
 @dataclass
-class ModelPreferences:
-    restriction_enzymes: bool
-    translation: bool
-    translation_function: TranslationFunction = TranslationFunction.zscore_hill_climbing_average
-
-    @classmethod
-    def init_from_dictionary(cls, model_preferences_dict: typing.Dict[str, typing.Any]):
-        return ModelPreferences(
-            restriction_enzymes=model_preferences_dict["RE"],
-            translation=model_preferences_dict["translation"],
-            translation_function=TranslationFunction[model_preferences_dict["translation_function"]],
-
-        )
-
-    @classmethod
-    def init_from_config(cls):
-        config = Configuration.get_config()
-        model_preferences = config["MODEL_PREFERENCES"]
-        return ModelPreferences(
-            restriction_enzymes=model_preferences["RESTRICTION_ENZYMES"],
-            translation=model_preferences["TRANSLATION"],
-            translation_function=TranslationFunction[model_preferences["TRANSLATION_FUNCTION"]],
-        )
-
-
-@dataclass
 class UserInput:
     organisms: typing.List[Organism]
     sequence: str
     tuning_parameter: float
+    translation_function: TranslationFunction = TranslationFunction.zscore_hill_climbing_average

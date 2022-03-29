@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 import typing
 from modules.logger_factory import LoggerFactory
-from testing_for_modules import generate_testing_data
+from modules.testing_for_modules import generate_testing_data
 
 
 # Create clean artifacts directory
@@ -14,27 +14,25 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 from modules import user_IO, ORF, sequence_family
 from modules.stats.evaluation import ZscoreModule
-from modules import models
 
 logger = LoggerFactory.create_logger("main")
 
 
-def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None,
-                model_preferences_dict: typing.Optional[typing.Dict[str, str]] = None):
+def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
     user_inp_raw = user_input_dict
 
     user_input = user_IO.UserInputModule.run_module(user_inp_raw)
 
-    #no clustering
-    final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=model_preferences.translation_function)
+    # no clustering
+    final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=user_input.translation_function)
     avg_opt_index, mean_deopt_index, avg_opt_index, weakest_score = \
         ZscoreModule.run_module(final_cds, user_input, 'cai')
 
-    #with clustering
+    # with clustering
     opt_indexes = []
-    clustered_user_inputs = sequence_family.Sequence_Family_Module.run_module(user_input)
+    clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
     for input_cluster in clustered_user_inputs:
-        final_cds = ORF.ORFModule.run_module(input_cluster, 'cai', optimization_type=model_preferences.translation_function)
+        final_cds = ORF.ORFModule.run_module(input_cluster, 'cai', optimization_type=user_input.translation_function)
         c_mean_opt_index, c_mean_deopt_index, c_optimization_index, c_weakest_score = \
             ZscoreModule.run_module(final_cds, input_cluster, 'cai')
         opt_indexes.append(c_optimization_index)
@@ -44,10 +42,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     return avg_c_opt_index, avg_opt_index
 
 
-
-
 if __name__ == "__main__":
-    model_preferences = models.ModelPreferences.init_from_config()
     current_directory = Path(__file__).parent.resolve()
     base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
@@ -59,8 +54,7 @@ if __name__ == "__main__":
         default_user_inp_raw = generate_testing_data(n_organisms=n_organisms, percent_optimized=0.5)
 
         tic = time.time()
-        avg_c_opt_index, avg_opt_index = \
-            run_modules(user_input_dict=default_user_inp_raw, model_preferences_dict = model_preferences)
+        avg_c_opt_index, avg_opt_index = run_modules(user_input_dict=default_user_inp_raw)
         toc = time.time()
         modules_run_time = toc - tic
         print('Total modules run time: ', modules_run_time)

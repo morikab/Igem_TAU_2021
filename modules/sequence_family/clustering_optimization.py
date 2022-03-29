@@ -38,7 +38,7 @@ def make_distance_matrix(clustering_mat):
     return distance_matrix
 
 
-def find_best_clustering(clustering_mat, max_clus_num, c_index = 'dbi', c_method = 'alggomerative' ):
+def find_best_clustering(clustering_mat, max_clus_num, c_index='dbi', c_method = 'alggomerative' ):
     dist_metric = 'precomputed'
     scores = []
     clusters = []
@@ -47,7 +47,6 @@ def find_best_clustering(clustering_mat, max_clus_num, c_index = 'dbi', c_method
     n_samples = distance_mat.shape
     n_samples = n_samples[0]
     for n_clus in range(2, min(n_samples, max_clus_num)):
-
         ##### clustering options ######
         # if c_method == 'kmeans':
         #     clustering = KMeans(n_clusters=n_clus).fit(clustering_mat)
