@@ -21,15 +21,29 @@ class CommuniqueApp(object):
     REMOVE_HOST_COLUMN_INDEX = 4
 
     def __init__(self, master: tk.Tk) -> None:
+        self.organisms = {}
+        self.sequence = None
+        self.tuning_parameter = None
+
+        # Widgets
         self.master = master
+        self.mainframe = None
+        self.sequence_path_label = None
+        self.wanted_hosts_frame = None
+        self.wanted_hosts_grid = None
+        self.unwanted_hosts_frame = None
+        self.unwanted_hosts_grid = None
+        self.bottom_frame = None
+        self.results_frame = None
+
+        self.initialize_master_widget()
+        self.prepare_for_new_run()
+
+    def initialize_master_widget(self) -> None:
         self.master.title("Communique")
         self.master.geometry(F"{self.INITIAL_WIDTH}x{self.INITIAL_HEIGHT}")
 
-        self.mainframe = None
-        self.sequence_label_frame = None    # TODO - check what needs to be property and what not
-        self.initialize_for_new_run()
-
-    def initialize_for_new_run(self) -> None:
+    def prepare_for_new_run(self) -> None:
         canvas = tk.Canvas(self.master, width=self.INITIAL_WIDTH, height=self.INITIAL_HEIGHT)
         scrollbar = ttk.Scrollbar(self.master, orient="vertical", command=canvas.yview)
         canvas.configure(yscrollcommand=scrollbar.set)
@@ -46,11 +60,11 @@ class CommuniqueApp(object):
         #########################
         # Sequence to optimize
         #########################
-        self.sequence_label_frame = ttk.Labelframe(self.mainframe, text="Sequence to Optimize")
-        self.sequence_label_frame.pack(fill="both", expand="yes")
-        upload_sequence = ttk.Button(self.sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
+        sequence_label_frame = ttk.Labelframe(self.mainframe, text="Sequence to Optimize")
+        sequence_label_frame.pack(fill="both", expand="yes")
+        upload_sequence = ttk.Button(sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
         upload_sequence.pack(side=tk.TOP)
-        self.sequence_path_label = ttk.Label(self.sequence_label_frame)
+        self.sequence_path_label = ttk.Label(sequence_label_frame)
         self.sequence_path_label.pack(side=tk.TOP, pady=5)
 
         #########################
@@ -81,15 +95,16 @@ class CommuniqueApp(object):
         self.bottom_frame = ttk.Frame(self.mainframe)
         self.bottom_frame.pack(side=tk.BOTTOM, pady=20)
         # Advanced Options
-        self.options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
-        self.options_button.grid(row=0, column=0)
+        options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
+        options_button.grid(row=0, column=0)
         # Optimize Button
-        self.optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
-        self.optimize_button.grid(row=0, column=1)
-
-        self.results_frame = None
+        optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
+        optimize_button.grid(row=0, column=1)
 
         # User Input Parameters
+        self.initialize_user_input_parameters()
+
+    def initialize_user_input_parameters(self) -> None:
         self.organisms = {}
         self.sequence = None
         self.tuning_parameter = tk.IntVar()
@@ -99,8 +114,7 @@ class CommuniqueApp(object):
         return len({key: value for key, value in self.organisms.items() if value["optimized"] == is_optimized})
 
     def upload_sequence(self) -> None:
-        # TODO - add *.fasta files
-        sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", "*.fa",)])
+        sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", ".fa .fasta")])
         self.sequence_path_label.config(text=sequence_file_name)
         self.sequence = sequence_file_name
 
@@ -111,7 +125,7 @@ class CommuniqueApp(object):
         self.upload_hosts_files(grid=self.unwanted_hosts_grid, is_optimized=False)
 
     def upload_hosts_files(self, grid: tk.Frame, is_optimized: bool) -> None:
-        hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", "*.gb")], multiple=True)
+        hosts_files = filedialog.askopenfilename(filetypes=[("Genebank files", ".gb")], multiple=True)
         if not self.validate_uploaded_files(hosts_files):
             return
 
@@ -175,10 +189,10 @@ class CommuniqueApp(object):
 
         return True
 
-    def upload_expression(self, event) -> None:
+    def upload_host_expression_file(self, event) -> None:
         # TODO - play and fix bug when uploading a file with wanted and unwanted groups and then trying to
         #  remove/upload on more file
-        expression_file_name = filedialog.askopenfilename(filetypes=[("csv", "*.csv")])
+        expression_file_name = filedialog.askopenfilename(filetypes=[("csv", " .csv")])
         upload_widget = event.widget
         grid = upload_widget.master
         host_row = grid.grid_info()["row"]
@@ -196,7 +210,7 @@ class CommuniqueApp(object):
         expression_frame.grid(row=row, column=self.EXPRESSION_LEVEL_COLUMN_INDEX)
 
         expression_level_button = ttk.Button(expression_frame, text="upload")
-        expression_level_button.bind("<Button-1>", self.upload_expression)
+        expression_level_button.bind("<Button-1>", self.upload_host_expression_file)
         expression_level_button.pack()
 
         if expression_file_name is not None:
@@ -322,7 +336,7 @@ class CommuniqueApp(object):
         # TODO - should we recreate all the params, just run again the modules (add two buttons for both?)
         for widget in self.master.winfo_children():
             widget.destroy()
-        self.initialize_for_new_run()
+        self.prepare_for_new_run()
 
 
 if __name__ == "__main__":
