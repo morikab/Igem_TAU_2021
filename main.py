@@ -64,7 +64,7 @@ class CommuniqueApp(object):
         #########################
         sequence_label_frame = ttk.Labelframe(self.mainframe, text="Sequence to Optimize")
         sequence_label_frame.pack(fill="both", expand="yes")
-        upload_sequence = ttk.Button(sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
+        upload_sequence = ttk.Button(sequence_label_frame, text="Upload sequence", command=self.upload_sequence)
         upload_sequence.pack(side=tk.TOP)
         self.sequence_path_label = ttk.Label(sequence_label_frame)
         self.sequence_path_label.pack(side=tk.TOP, pady=5)
@@ -281,13 +281,15 @@ class CommuniqueApp(object):
             return
 
         user_input = self.generate_user_input()
-
-        # TODO - alert on errors (if there are any)
         user_output, zip_file_path = run_modules(user_input_dict=user_input)
+        if user_output.get("error_message") is not None:
+            messagebox.showerror(title="Error",
+                                 message=user_output["error_message"])
+            return
 
-        #########################
-        # Results widgets
-        #########################
+        self.create_results_widgets(user_output)
+
+    def create_results_widgets(self, user_output: typing.Dict) -> None:
         self.bottom_frame.destroy()
 
         self.results_frame = ttk.Labelframe(self.mainframe, text="Results")
@@ -305,9 +307,9 @@ class CommuniqueApp(object):
         optimized_sequence.insert(tk.END, user_output["final_sequence"])
 
         rerun_button = ttk.Button(self.bottom_frame, text="Run again", command=self.optimize)
-        rerun_button.grid(row=0, column=1)
+        rerun_button.grid(row=0, column=0)
         new_run_button = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
-        new_run_button.grid(row=0, column=0)
+        new_run_button.grid(row=0, column=1)
 
     def generate_user_input(self) -> typing.Dict:
         user_input = {
