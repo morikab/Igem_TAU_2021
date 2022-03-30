@@ -32,7 +32,7 @@ def make_distance_matrix(clustering_mat):
         sample_i = clustering_mat[i,:]
         for k in range(n_samples):
             sample_k = clustering_mat[k,:]
-            distance_matrix[i,k]= 1-spearmanr(sample_k, sample_i)[0] # using -1 for distance instead of similarity
+            distance_matrix[i,k] = 1-spearmanr(sample_k, sample_i)[0] # using -1 for distance instead of similarity
     return distance_matrix
 
 

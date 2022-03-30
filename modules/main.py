@@ -44,21 +44,19 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             final_cds, optimization_index, weakest_score = unit1(input_cluster)
         ##################################################################################################
         # TODO - get zip_directory from the user
-        # TODO - change the user output to remove unneeded parameters
-        final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                                          zscore=optimization_index,
-                                                                          weakest_score=weakest_score,
-                                                                          zip_directory=str(artifacts_directory))
-        logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
+        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
+                                                           zscore=optimization_index,
+                                                           weakest_score=weakest_score,
+                                                           zip_directory=str(artifacts_directory))
+        logger.info("Final output: %s", final_output)
     except Exception as e:
         exception_str = traceback.format_exc()
         final_output = {
-            'error_message': exception_str,
+            "error_message": exception_str,
         }
-        zip_file_path = None
         logger.error("Encountered unknown error when running modules. Error message: %s", exception_str)
 
-    return final_output, zip_file_path
+    return final_output
 
 
 def unit1(user_input: models.UserInput):

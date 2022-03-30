@@ -34,16 +34,16 @@ class UserOutputModule(object):
 
         #todo: no need to zip the results anymore
         zip_file_path = cls._create_final_zip(zip_directory=zip_directory,
-                                              cds_sequence=cds_sequence,
-                                              )
+                                              cds_sequence=cds_sequence)
 
         user_output_dict = {
             'final_sequence': cds_sequence,  # str
             'optimization_score': zscore,  # int
-            'score_for_weakest_pair': weakest_score, #int
+            'score_for_weakest_pair': weakest_score,    # int
+            'zip_file_path': zip_file_path,
         }
 
-        return user_output_dict, zip_file_path
+        return user_output_dict
 
     @classmethod
     def _create_final_zip(cls,
