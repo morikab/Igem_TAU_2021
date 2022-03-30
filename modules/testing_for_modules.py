@@ -16,7 +16,8 @@ def generate_testing_data(n_organisms=15, percent_optimized=0.5, genome_patH=gen
     inp_dict = {
             'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
             'tuning_param': 0.75,
-            'organisms': {}
+            'organisms': {},
+            'clusters_num': 2,
     }
     genome_list = [f for f in listdir(genome_path) if isfile(join(genome_path, f))]
     if n_organisms>len(genome_list):

@@ -12,10 +12,8 @@ logger = LoggerFactory.create_logger("user_input") #todo: is there anything here
 # TODO: try different clustering methods, and cluster eval methods- DBI, Silhouette- find min val
 # TODO: write efficiently
 
-
-
 def dict_to_cluster_np_array(user_input: models.UserInput): #todo: make this work on tai as well
-    clustering_mat=[]
+    clustering_mat = []
     opt_org_list = []
     for organism in user_input.organisms:
         if organism.is_optimized:
@@ -38,9 +36,7 @@ def make_distance_matrix(clustering_mat):
     return distance_matrix
 
 
-
-
-def create_n_clusters(clustering_mat, n_clus ):
+def create_n_clusters(clustering_mat, n_clus):
     dist_metric = 'precomputed'
     distance_mat = make_distance_matrix(clustering_mat)
     clustering = AgglomerativeClustering(n_clusters=n_clus,
@@ -93,10 +89,11 @@ def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserI
     for c_opt_org_list in opt_org_clusters:
         opt_and_deopt = c_opt_org_list+deopt_org_list
         new_user_input = models.UserInput(organisms=[],
-                                sequence=user_input.sequence,
-                                tuning_parameter=user_input.tuning_parameter)
+                                          sequence=user_input.sequence,
+                                          tuning_parameter=user_input.tuning_parameter,
+                                          clusters_count=user_input.clusters_count)
 
-        new_user_input.organisms =  [user_input.organisms[i] for i in range(len(opt_org_list+deopt_org_list))
+        new_user_input.organisms = [user_input.organisms[i] for i in range(len(opt_org_list+deopt_org_list))
                                     if user_input.organisms[i].name in opt_and_deopt]
         inp_obj_list.append(new_user_input)
     return inp_obj_list

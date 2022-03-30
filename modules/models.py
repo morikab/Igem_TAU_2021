@@ -53,4 +53,5 @@ class UserInput:
     organisms: typing.List[Organism]
     sequence: str
     tuning_parameter: float
+    clusters_count: int
     translation_function: TranslationFunction = TranslationFunction.zscore_hill_climbing_average

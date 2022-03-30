@@ -28,21 +28,22 @@ class UserInputModule(object):
     def _parse_input(cls, user_input):
         """
         :param user_input: in the following format
-        {
-            'ecoli': {'genome_path': '.gb' - mandatory
-                        'genes_HE': '.csv'
-                        'optimized': True - mandatory
-                      }
-             'bacillus': {'genome_path': '.gb'
-                        'genes_HE': '.csv'
-                        'optimized': False
-                        }
+        {   'tuning_param': 0.5,
+            'translation_function': 'zscore_hill_climbing_average',
+            'clustering_num': 3,
+            'organisms: {
+                'ecoli': {
+                    'genome_path': '.gb',
+                    'genes_HE': '.csv', ==> Optional
+                    'optimized': True,
+                },
+                'bacillus': {
+                    'genome_path': '.gb',
+                    'genes_HE': '.csv', ==> Optional
+                    'optimized': False,
+                }, ...
+            }
         }
-        :return: an extended dictionary with the following items:
-            @selected_prom : final used list of promoters for MAST
-            @sequence : the ORF to optimize
-            @organism: contains the org names as keys, and for each organism- the key is the scientific organism name,
-            and the value is _parse_single_input for the organism's input
         """
         organisms_list = []
         organisms_names = set()
@@ -85,11 +86,13 @@ class UserInputModule(object):
         tuning_parameter = user_input["tuning_param"]
         translation_function = models.TranslationFunction[user_input["translation_function"]] if \
             user_input.get("translation_function") else None
+        clusters_count = user_input["clusters_count"]
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter,
-                                translation_function=translation_function)
+                                translation_function=translation_function,
+                                clusters_count=clusters_count)
 
     @staticmethod
     def _parse_single_input(organism_input):

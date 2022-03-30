@@ -13,6 +13,7 @@ class CommuniqueApp(object):
     INITIAL_WIDTH = 700
     INITIAL_HEIGHT = 1000
     DEFAULT_TUNING_PARAMETER_VALUE = 50
+    DEFAULT_CLUSTERS_COUNT_VALUE = 2
     DEFAULT_PRIORITY_VALUE = 50
     HOST_NAME_COLUMN_INDEX = 0
     GENOME_PATH_COLUMN_INDEX = 1
@@ -24,6 +25,7 @@ class CommuniqueApp(object):
         self.organisms = {}
         self.sequence = None
         self.tuning_parameter = None
+        self.clusters_count = None
 
         # Widgets
         self.master = master
@@ -109,6 +111,8 @@ class CommuniqueApp(object):
         self.sequence = None
         self.tuning_parameter = tk.IntVar()
         self.tuning_parameter.set(self.DEFAULT_TUNING_PARAMETER_VALUE)
+        self.clusters_count = tk.IntVar()
+        self.clusters_count.set(self.DEFAULT_CLUSTERS_COUNT_VALUE)
 
     def get_hosts_count(self, is_optimized: bool) -> int:
         return len({key: value for key, value in self.organisms.items() if value["optimized"] == is_optimized})
@@ -190,12 +194,10 @@ class CommuniqueApp(object):
         return True
 
     def upload_host_expression_file(self, event) -> None:
-        # TODO - play and fix bug when uploading a file with wanted and unwanted groups and then trying to
-        #  remove/upload on more file
         expression_file_name = filedialog.askopenfilename(filetypes=[("csv", " .csv")])
         upload_widget = event.widget
-        grid = upload_widget.master
-        host_row = grid.grid_info()["row"]
+        grid = upload_widget.master.master
+        host_row = upload_widget.master.grid_info()["row"]
 
         upload_widget.master.destroy()
         self.create_upload_expression_frame(grid=grid, row=host_row, expression_file_name=expression_file_name)
@@ -241,7 +243,8 @@ class CommuniqueApp(object):
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
             # TODO - check using destroy instead
-            grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
+            grid.grid_slaves(row=row_to_remove, column=j)[0].destroy()
+            # grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
 
         for i in range(row_to_remove+1, self.get_hosts_count(is_optimized)+1):
             for j in range(number_of_columns):
@@ -262,12 +265,17 @@ class CommuniqueApp(object):
         options_window.title("Advanced Options")
         options_window.geometry("300x200")
 
-        options_frame = ttk.Frame(options_window, padding="3 3 12 12")
+        options_frame = ttk.Frame(options_window, padding="5 5 12 12")
         ttk.Label(options_frame, text="Tuning Parameter: ").grid(row=0, column=0)
         ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=1)
-        # TODO - add clustering params?
+
+        ttk.Label(options_frame, text="Clusters Count: ").grid(row=1, column=0)
+        # TODO - what is the max clusters count?
+        ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=1)
         # TODO - add option to configure the optimization method in advanced options
 
+        for child in options_frame.winfo_children():
+            child.grid_configure(padx=5, pady=5)
         options_frame.pack()
 
     def optimize(self) -> None:
@@ -275,6 +283,8 @@ class CommuniqueApp(object):
             return
 
         user_input = self.generate_user_input()
+
+        # TODO - alert on errors (if there are any)
         user_output, zip_file_path = run_modules(user_input_dict=user_input)
 
         #########################
@@ -303,6 +313,7 @@ class CommuniqueApp(object):
         user_input = {
             "sequence": self.sequence,
             "tuning_param": self.tuning_parameter.get() / 100,
+            "clusters_count": self.clusters_count.get(),
         }
         input_organisms = {}
         for organism in self.organisms.values():

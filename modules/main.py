@@ -33,29 +33,17 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
 
-        # #######################################family of sequences #####################################
-        # in this part, user input is split into different inputs according to the sequence family theory-
-        n_clus = 2 #TODO: add this to the use rinput
-
-        clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input, n_clus=n_clus)
-        for input_cluster in clustered_user_inputs:
-            final_cds, optimization_index, weakest_score = unit1(input_cluster)
-            # logger.info(final_cds, optimization_index, weakest_score)
-        ##################################################################################################
-
-
-        # ############################################ unit 1 ############################################
-        final_cds = None #todo: why is this trio here?
+        # ####################################### family of sequences #####################################
+        # in this part, user input is split into different inputs according to the sequence family theory
+        clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
+        final_cds = None
         optimization_index = None
         weakest_score = None
-
-        # TODO - fix this...
-        # final_cds, optimization_index, weakest_score = unit1(user_input)
-        # logger.info(final_cds, optimization_index, weakest_score)
+        for input_cluster in clustered_user_inputs:
+            # TODO - what do we want to display for each run? We should store the results differently
+            final_cds, optimization_index, weakest_score = unit1(input_cluster)
         ##################################################################################################
-
         # TODO - get zip_directory from the user
-
         # TODO - change the user output to remove unneeded parameters
         final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                                           zscore=optimization_index,
@@ -120,7 +108,6 @@ def unit1(user_input: models.UserInput):
         final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=optimization_func)
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
             ZscoreModule.run_module(final_cds, user_input, 'cai')
-
 
     logger.info(f'Sequence:\n{final_cds}')
     logger.info(f'Optimized sequences score: {mean_opt_index}, deoptimized sequence score: {mean_deopt_index}')
