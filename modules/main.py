@@ -118,7 +118,8 @@ def unit1(user_input: models.UserInput):
 
 if __name__ == "__main__":
     tic = time.time()
-    default_user_inp_raw = generate_testing_data(n_organisms=7, percent_optimized=0.7)
+    default_user_inp_raw = generate_testing_data(n_organisms=4, percent_optimized=0.7,
+                                                 clusters_num = 1, tuning_param= 0.5)
     run_modules()
     toc = time.time()
     modules_run_time = toc - tic
