@@ -86,13 +86,13 @@ class UserInputModule(object):
         tuning_parameter = user_input["tuning_param"]
         translation_function = models.TranslationFunction[user_input["translation_function"]] if \
             user_input.get("translation_function") else None
-        clusters_num = user_input["clusters_num"]
+        clusters_count = user_input["clusters_count"]
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter,
                                 translation_function=translation_function,
-                                clusters_count=clusters_num)
+                                clusters_count=clusters_count)
 
     @staticmethod
     def _parse_single_input(organism_input):

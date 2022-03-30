@@ -13,7 +13,7 @@ class CommuniqueApp(object):
     INITIAL_WIDTH = 700
     INITIAL_HEIGHT = 1000
     DEFAULT_TUNING_PARAMETER_VALUE = 50
-    DEFAULT_CLUSTERS_COUNT_VALUE = 2
+    DEFAULT_CLUSTERS_COUNT_VALUE = 1
     DEFAULT_PRIORITY_VALUE = 50
     HOST_NAME_COLUMN_INDEX = 0
     GENOME_PATH_COLUMN_INDEX = 1
@@ -242,9 +242,7 @@ class CommuniqueApp(object):
         genome_path = grid.grid_slaves(row=row_to_remove, column=self.GENOME_PATH_COLUMN_INDEX)[-1].get()
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
-            # TODO - check using destroy instead
             grid.grid_slaves(row=row_to_remove, column=j)[0].destroy()
-            # grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
 
         for i in range(row_to_remove+1, self.get_hosts_count(is_optimized)+1):
             for j in range(number_of_columns):
@@ -306,6 +304,8 @@ class CommuniqueApp(object):
         optimized_sequence.grid(row=0, column=1)
         optimized_sequence.insert(tk.END, user_output["final_sequence"])
 
+        rerun_button = ttk.Button(self.bottom_frame, text="Run again", command=self.optimize)
+        rerun_button.grid(row=0, column=1)
         new_run_button = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
         new_run_button.grid(row=0, column=0)
 
@@ -344,7 +344,6 @@ class CommuniqueApp(object):
         return True
 
     def recreate(self) -> None:
-        # TODO - should we recreate all the params, just run again the modules (add two buttons for both?)
         for widget in self.master.winfo_children():
             widget.destroy()
         self.prepare_for_new_run()

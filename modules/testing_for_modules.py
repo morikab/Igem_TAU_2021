@@ -11,13 +11,17 @@ base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data
 genome_path = os.path.join(base_path, 'arabidopsis_microbiome')
 
 
-def generate_testing_data(n_organisms=15, percent_optimized=0.5, clusters_num = 2, tuning_param = 0.5, genome_patH=genome_path):
+def generate_testing_data(n_organisms=15,
+                          percent_optimized=0.5,
+                          clusters_count= 2,
+                          tuning_param=0.5,
+                          genome_patH=genome_path):
 
     inp_dict = {
             'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
             'tuning_param': tuning_param,
             'organisms': {},
-            'clusters_num': clusters_num,
+            'clusters_count': clusters_count,
     }
     genome_list = [f for f in listdir(genome_path) if isfile(join(genome_path, f))]
     if n_organisms>len(genome_list):
