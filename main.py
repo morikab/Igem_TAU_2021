@@ -354,7 +354,8 @@ class CommuniqueApp(object):
 
         return True
 
-    def zip_redirect(self, zip_file_path: str) -> None:
+    @staticmethod
+    def zip_redirect(zip_file_path: str) -> None:
         zip_directory = Path(zip_file_path).parent
         os.startfile(zip_directory)
 
