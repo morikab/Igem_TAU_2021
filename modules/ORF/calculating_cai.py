@@ -1,5 +1,4 @@
 from itertools import chain
-import Bio.Data.CodonTable as ct
 from scipy.stats import gmean
 from collections import Counter
 # get rid of Biopython warning

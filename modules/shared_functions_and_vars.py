@@ -72,3 +72,5 @@ def translate(seq, table=nt_to_aa):  # DONE
 
 def unique(list1):
     return sorted(set(list1))
+
+
