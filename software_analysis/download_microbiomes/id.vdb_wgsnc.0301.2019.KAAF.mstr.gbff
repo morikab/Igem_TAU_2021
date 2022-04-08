@@ -1,0 +1,49 @@
+LOCUS       KAAF01000000            4223 rc    DNA     linear   VRT 26-SEP-2016
+DEFINITION  TLS: Acanthorhynchus tenuirostris ultra-conserved element locus,
+            targeted locus study.
+ACCESSION   KAAF00000000
+VERSION     KAAF00000000.1  GI:1070365557
+DBLINK      BioProject: PRJNA304409
+            BioSample: SAMN04301697
+KEYWORDS    TLS; Targeted Locus Study.
+SOURCE      Acanthorhynchus tenuirostris
+  ORGANISM  Acanthorhynchus tenuirostris
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Archosauria; Dinosauria; Saurischia; Theropoda;
+            Coelurosauria; Aves; Neognathae; Passeriformes; Meliphagides;
+            Meliphagidae; Acanthorhynchus.
+REFERENCE   1  (bases 1 to 4223)
+  AUTHORS   Moyle,R.G., Oliveros,C.H., Andersen,M.J., Hosner,P.A., Benz,B.W.,
+            Manthey,J.D., Travers,S.L., Brown,R.M. and Faircloth,B.C.
+  TITLE     Tectonic collision and uplift of Wallacea triggered the global
+            songbird radiation
+  JOURNAL   Nat Commun 7, 12709 (2016)
+   PUBMED   27575437
+  REMARK    Publication Status: Online-Only
+REFERENCE   2  (bases 1 to 4223)
+  AUTHORS   Moyle,R.G., Oliveros,C.H., Andersen,M.J., Hosner,P.A., Benz,B.W.,
+            Manthey,J.D., Travers,S.L., Brown,R.M. and Faircloth,B.C.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (08-JAN-2016) Department of Biological Sciences,
+            Louisiana State University, 287 Life Sciences Building, Baton
+            Rouge, LA 70803, USA
+COMMENT     The Acanthorhynchus tenuirostris targeted locus study (TLS) project
+            has the project accession KAAF00000000.  This version of the
+            project (01) has the accession number KAAF01000000, and consists of
+            sequences KAAF01000001-KAAF01004223.
+            We identified thousands of ultra-conserved elements (UCEs) in 106
+            birds to examine songbird diversification.  All of the UCEs from
+            one bird are included in a single TLS project.
+            
+            ##Assembly-Data-START##
+            Assembly Method       :: Trinity ver. r2013.08.14
+            Sequencing Technology :: Illumina HiSeq
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..4223
+                     /organism="Acanthorhynchus tenuirostris"
+                     /mol_type="genomic DNA"
+                     /specimen_voucher="KU:10667"
+                     /db_xref="taxon:266336"
+TLS         KAAF01000001-KAAF01004223
+//
