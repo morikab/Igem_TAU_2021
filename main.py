@@ -273,14 +273,16 @@ class CommuniqueApp(object):
         options_frame = ttk.Frame(options_window, padding="5 5 12 12")
 
         ttk.Label(options_frame, text="Tuning Parameter: ").grid(row=0, column=0)
-        ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=1)
+        ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=2)
 
         ttk.Label(options_frame, text="Clusters Count: ").grid(row=1, column=0)
         # TODO - what is the max clusters count?
-        ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=1)
+        ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=2)
 
         ttk.Label(options_frame, text="Optimization Method: ").grid(row=2, column=0)
-        tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=1)
+        tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=2)
+
+        ttk.Button(options_frame, text="Close", command=options_window.withdraw).grid(row=3, column=1)
 
         self.format_grid(options_frame)
         options_frame.pack()
