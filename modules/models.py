@@ -45,7 +45,6 @@ class OptimizationMethod(Enum):
     single_codon_global = "single_codon_global"
     single_codon_local = "single_codon_local"
     hill_climbing_average = "hill_climbing_average"
-    hill_climbing_median = "hill_climbing_median"
     hill_climbing_weakest_link = "hill_climbing_weakest_link"
 
 

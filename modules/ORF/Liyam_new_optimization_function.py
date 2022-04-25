@@ -17,7 +17,7 @@ def change_all_codons_of_aa(seq: str, selected_codon: str):
     return ''.join(new_split_seq)
 
 
-# in each round - check all single synonymous codon changes and calculate the Zscore - take the best one
+# in each round - check all single synonymous codon changes and calculate optimization score - take the best one
 def hill_climbing_optimize_by_zscore(seq: str,
                                      user_input: models.UserInput,
                                      cai_or_tai: str,
@@ -36,28 +36,31 @@ def hill_climbing_optimize_by_zscore(seq: str,
     """
 
     seq_options = {}
-    mean_opt_index, mean_deopt_index, zscore, weakest_score = OptimizationModule.run_module(seq, user_input, cai_or_tai)
-    # FIXME - should we check this against the optimization_type parameter?
-    if 'average' in cai_or_tai:
-        seq_options[seq] = zscore
-    else:
-        seq_options[seq] = weakest_score
+    score = OptimizationModule.run_module(
+        final_seq=seq,
+        user_input=user_input,
+        cai_or_tai=cai_or_tai,
+        optimization_method=optimization_method,
+    )
+    seq_options[seq] = score
     for run in range(max_iter):
         # TODO - we change in each iteration a single codon. We may consider changing at most X codons at a time to
         #  reduce risk of falling to a local maxima.
         for codon in nt_to_aa.keys():
             tested_seq = change_all_codons_of_aa(seq, codon)
 
-            mean_opt_index, mean_deopt_index, zscore, weakest_score = \
-                OptimizationModule.run_module(tested_seq, user_input, cai_or_tai)
-            if optimization_method == models.OptimizationMethod.hill_climbing_average:
-                seq_options[tested_seq] = zscore
-            else:
-                seq_options[tested_seq] = weakest_score
+            score = OptimizationModule.run_module(
+                final_seq=tested_seq,
+                user_input=user_input,
+                cai_or_tai=cai_or_tai,
+                optimization_method=optimization_method,
+            )
+            seq_options[tested_seq] = score
 
         new_seq = max(seq_options, key=seq_options.get)
         if new_seq == seq:
             break
         else:
             seq = new_seq
+
     return seq

@@ -23,7 +23,7 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
-    OPTIMIZATION_METHODS = ["hill_climbing_average", "hill_climbing_median", "hill_climbing_weakest_link"]
+    OPTIMIZATION_METHODS = ["hill_climbing_average", "hill_climbing_weakest_link"]
     DEFAULT_OPTIMIZATION_METHOD = "hill_climbing_average"
 
     def __init__(self, master: tk.Tk) -> None:
