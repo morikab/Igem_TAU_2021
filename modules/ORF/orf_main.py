@@ -17,27 +17,27 @@ class ORFModule(object):
     def run_module(
             user_input: models.UserInput,
             cai_or_tai: str,
-            optimization_type: typing.Optional[models.TranslationFunction],
+            optimization_method: typing.Optional[models.OptimizationMethod],
             max_iter=50,
     ):
         """
         :param user_input: input from GUI parser.
         :param cai_or_tai: string indicating whether to optimize by cai or tai.
-        :param optimization_type: optimization methodoptimization_type to use.
+        :param optimization_method: optimization method to use.
         :param max_iter: Number of iterations for hill climbing.
         :return: optimized sequence (Biopython Seq)
         """
-        optimization_type = optimization_type or models.TranslationFunction.zscore_hill_climbing_average
+        optimization_method = optimization_method or models.OptimizationMethod.hill_climbing_average
         target_gene = user_input.sequence
-        logger.info(optimization_type)
+        logger.info(optimization_method)
 
-        if optimization_type in (models.TranslationFunction.zscore_hill_climbing_average,
-                                 models.TranslationFunction.zscore_hill_climbing_weakest_link):
+        if optimization_method in (models.OptimizationMethod.hill_climbing_average,
+                                   models.OptimizationMethod.hill_climbing_weakest_link):
             return hill_climbing_optimize_by_zscore(seq=target_gene,
                                                     user_input=user_input,
                                                     cai_or_tai='cai',
                                                     max_iter=max_iter,
-                                                    optimization_type=optimization_type)
+                                                    optimization_method=optimization_method)
         input_organisms = user_input.organisms
         # TODO - remove old organism object / remove the method entirely?
         high_expression_organisms = [
@@ -52,17 +52,17 @@ class ORFModule(object):
             for organism in input_organisms if not organism.is_optimized
         ]
 
-        if optimization_type == models.TranslationFunction.single_codon_global:
+        if optimization_method == models.OptimizationMethod.single_codon_global:
             return optimize_sequence(target_gene=target_gene,
                                      high_expression_organisms=high_expression_organisms,
                                      low_expression_organisms=low_expression_organisms,
                                      tuning_param=user_input.tuning_parameter,
                                      local_maximum=False)
-        if optimization_type == models.TranslationFunction.single_codon_local:
+        if optimization_method == models.OptimizationMethod.single_codon_local:
             return optimize_sequence(target_gene=target_gene,
                                      high_expression_organisms=high_expression_organisms,
                                      low_expression_organisms=low_expression_organisms,
                                      tuning_param=user_input.tuning_parameter,
                                      local_maximum=True)
 
-        raise ValueError('optimization type invalid')
+        raise ValueError('optimization method is invalid')

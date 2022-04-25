@@ -29,7 +29,7 @@ class UserInputModule(object):
         """
         :param user_input: in the following format
         {   'tuning_param': 0.5,
-            'translation_function': 'zscore_hill_climbing_average',
+            'optimization_method': 'hill_climbing_average',
             'clustering_num': 3,
             'organisms: {
                 'ecoli': {
@@ -84,14 +84,14 @@ class UserInputModule(object):
         logger.info(f'containing this sequence: {orf_seq}')
 
         tuning_parameter = user_input["tuning_param"]
-        translation_function = models.TranslationFunction[user_input["translation_function"]] if \
-            user_input.get("translation_function") else None
+        optimization_method = models.OptimizationMethod[user_input["optimization_method"]] if \
+            user_input.get("optimization_method") else None
         clusters_count = user_input["clusters_count"]
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter,
-                                translation_function=translation_function,
+                                optimization_method=optimization_method,
                                 clusters_count=clusters_count)
 
     @staticmethod

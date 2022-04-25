@@ -60,11 +60,11 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
 
 def unit1(user_input: models.UserInput):
-    optimization_func = user_input.translation_function
+    optimization_method = user_input.optimization_method
     try:
         # both CAI and tAI, select the one with the best optimization index tai optimization
         logger.info('tAI information:')
-        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_func)
+        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
 
         tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
@@ -76,7 +76,7 @@ def unit1(user_input: models.UserInput):
 
         # cai optimization
         logger.info('CAI information:')
-        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_func)
+        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_method)
 
         cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
@@ -103,7 +103,7 @@ def unit1(user_input: models.UserInput):
 
     except:
         logger.info('CAI information:')
-        final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=optimization_func)
+        final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_method=optimization_method)
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
             ZscoreModule.run_module(final_cds, user_input, 'cai')
 

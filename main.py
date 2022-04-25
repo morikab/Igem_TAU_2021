@@ -23,11 +23,15 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
+    OPTIMIZATION_METHODS = ["hill_climbing_average", "hill_climbing_median", "hill_climbing_weakest_link"]
+    DEFAULT_OPTIMIZATION_METHOD = "hill_climbing_average"
+
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
         self.sequence = None
         self.tuning_parameter = None
         self.clusters_count = None
+        self.optimization_method = None
 
         # Widgets
         self.master = master
@@ -117,6 +121,8 @@ class CommuniqueApp(object):
         self.tuning_parameter.set(self.DEFAULT_TUNING_PARAMETER_VALUE)
         self.clusters_count = tk.IntVar()
         self.clusters_count.set(self.DEFAULT_CLUSTERS_COUNT_VALUE)
+        self.optimization_method = tk.StringVar()
+        self.optimization_method.set(self.DEFAULT_OPTIMIZATION_METHOD)
 
     @staticmethod
     def format_grid(grid: tk.Frame) -> None:
@@ -264,15 +270,17 @@ class CommuniqueApp(object):
         options_window = tk.Toplevel(self.mainframe)
         options_window.title("Advanced Options")
         options_window.geometry("300x200")
-
         options_frame = ttk.Frame(options_window, padding="5 5 12 12")
+
         ttk.Label(options_frame, text="Tuning Parameter: ").grid(row=0, column=0)
         ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=1)
 
         ttk.Label(options_frame, text="Clusters Count: ").grid(row=1, column=0)
         # TODO - what is the max clusters count?
         ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=1)
-        # TODO - add option to configure the optimization method in advanced options
+
+        ttk.Label(options_frame, text="Optimization Method: ").grid(row=2, column=0)
+        tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=1)
 
         self.format_grid(options_frame)
         options_frame.pack()
@@ -325,6 +333,7 @@ class CommuniqueApp(object):
             "sequence": self.sequence,
             "tuning_param": self.tuning_parameter.get() / 100,
             "clusters_count": self.clusters_count.get(),
+            "optimization_method": self.optimization_method.get(),
         }
         input_organisms = {}
         for organism in self.organisms.values():

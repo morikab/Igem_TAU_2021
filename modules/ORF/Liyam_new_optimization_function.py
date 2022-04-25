@@ -22,7 +22,7 @@ def hill_climbing_optimize_by_zscore(seq: str,
                                      user_input: models.UserInput,
                                      cai_or_tai: str,
                                      max_iter: int,
-                                     optimization_type: models.TranslationFunction):
+                                     optimization_method: models.OptimizationMethod):
     """
     hill climbing function for performing codon optimization
     in each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
@@ -43,15 +43,14 @@ def hill_climbing_optimize_by_zscore(seq: str,
     else:
         seq_options[seq] = weakest_score
     for run in range(max_iter):
-        # TODO - we change in each iteration a single codon. We may consider changing at most X codoons at a time to
+        # TODO - we change in each iteration a single codon. We may consider changing at most X codons at a time to
         #  reduce risk of falling to a local maxima.
         for codon in nt_to_aa.keys():
             tested_seq = change_all_codons_of_aa(seq, codon)
 
             mean_opt_index, mean_deopt_index, zscore, weakest_score = \
                 OptimizationModule.run_module(tested_seq, user_input, cai_or_tai)
-            # print(F"zscore: {zscore}")
-            if optimization_type == models.TranslationFunction.zscore_hill_climbing_average:
+            if optimization_method == models.OptimizationMethod.hill_climbing_average:
                 seq_options[tested_seq] = zscore
             else:
                 seq_options[tested_seq] = weakest_score
