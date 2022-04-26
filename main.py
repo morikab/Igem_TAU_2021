@@ -5,8 +5,10 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import scrolledtext
 from tkinter import ttk
 
+from logger_factory import logger_factory
 from modules.main import run_modules
 
 
@@ -33,6 +35,7 @@ class CommuniqueApp(object):
         self.tuning_parameter = None
         self.clusters_count = None
         self.optimization_method = None
+        self.log_text = None
 
         # Widgets
         self.master = master
@@ -45,6 +48,7 @@ class CommuniqueApp(object):
         self.unwanted_hosts_grid = None
         self.bottom_frame = None
         self.results_frame = None
+        self.log_frame = None
 
         self.initialize_master_widget()
         self.prepare_for_new_run()
@@ -108,6 +112,21 @@ class CommuniqueApp(object):
                                            command=self.upload_unwanted_hosts_files)
         upload_unwanted_hosts.pack(side=tk.TOP, pady=5)
         self.unwanted_hosts_grid = tk.Frame(self.unwanted_hosts_frame)
+
+        #########################
+        # Log Frame
+        #########################
+        self.log_frame = ttk.Labelframe(self.mainframe, text="Log")
+        self.log_frame.pack(fill="both", expand="yes")
+        self.log_text = scrolledtext.ScrolledText(self.log_frame, width=70, height=10, state="disabled")
+        self.log_text.pack()
+
+        logger = logger_factory.LoggerFactory.create_logger(log_file_name=logger_factory.APP_LOGGER_NAME,
+                                                            text=self.log_text)
+        logger.info("This is the start!")
+        # TODO - think of a way to fix the initialization of all the handlers.
+        # TODO - make a way to make the text appear in real time (perhaps run the modules logic in a different thread)?
+        # TODO - CONTINUE FROM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         #########################
         # Bottom Frame

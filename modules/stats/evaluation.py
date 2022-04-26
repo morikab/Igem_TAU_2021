@@ -1,7 +1,6 @@
 from numpy import average
 from modules import models
 from modules.ORF.calculating_cai import general_geomean
-from statistics import mean
 
 
 # TODO - Add additional stats (% optimized, % deoptimized, etc.)

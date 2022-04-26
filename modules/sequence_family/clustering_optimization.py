@@ -3,10 +3,7 @@ import numpy as np
 from modules import models
 from sklearn.metrics import silhouette_score, davies_bouldin_score
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from modules.logger_factory import LoggerFactory
 
-
-logger = LoggerFactory.create_logger("user_input") #todo: is there anything here we want ot add to the logger?
 
 
 # TODO: try different clustering methods, and cluster eval methods- DBI, Silhouette- find min val

@@ -4,7 +4,8 @@ import time
 import traceback
 from pathlib import Path
 import typing
-from modules.logger_factory import LoggerFactory
+
+from logger_factory.logger_factory import LoggerFactory
 from modules.testing_for_modules import generate_testing_data
 
 
@@ -17,10 +18,10 @@ from modules import user_IO, ORF, sequence_family
 from modules.stats.evaluation import ZscoreModule
 from modules import models
 
-logger = LoggerFactory.create_logger("main")
-
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
+
+logger = LoggerFactory.create_logger("main")
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):

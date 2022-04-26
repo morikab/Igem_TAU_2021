@@ -1,6 +1,6 @@
 import typing
 
-from modules.logger_factory import LoggerFactory
+from logger_factory.logger_factory import LoggerFactory
 from modules import models
 from modules.ORF.optimization import optimize_sequence
 from modules.ORF.organism import Organism

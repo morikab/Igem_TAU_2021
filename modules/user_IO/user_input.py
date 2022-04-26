@@ -1,18 +1,15 @@
 import typing
 
-from Bio import SeqIO
-
+from logger_factory.logger_factory import LoggerFactory
 from modules import models
 from modules.user_IO.input_functions import *
 from modules.ORF.TAI import TAI
 from modules.ORF.calculating_cai import general_geomean
-from modules.logger_factory import LoggerFactory
-
-# initialize the logger object
-logger = LoggerFactory.create_logger("user_input")
 
 
 class UserInputModule(object):
+    logger = LoggerFactory.create_logger("user_input")
+
     @staticmethod
     def get_name() -> str:
         return "User Input"

@@ -3,7 +3,7 @@ from pathlib import Path
 import typing
 from zipfile import ZipFile
 
-from modules.logger_factory import LoggerFactory
+from logger_factory.logger_factory import LoggerFactory
 from modules.shared_functions_and_vars import write_fasta
 
 # initialize the logger object
