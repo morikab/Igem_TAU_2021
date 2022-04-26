@@ -11,7 +11,7 @@ logger = LoggerFactory.create_logger("user_output")
 
 
 class UserOutputModule(object):
-    _ZIP_FILE_NAME = "results.zip"
+    _ZIP_FILE_NAME = "communique_results.zip"
     _LOGS_SUBDIRECTORY = "logs"
     _FINAL_OPTIMIZED_SEQUENCE_FILE_NAME = "orf_sequence"
     _FASTA_SUFFIX = ".fasta"
@@ -37,10 +37,10 @@ class UserOutputModule(object):
                                               cds_sequence=cds_sequence)
 
         user_output_dict = {
-            'final_sequence': cds_sequence,  # str
-            'optimization_score': zscore,  # int
-            'score_for_weakest_pair': weakest_score,    # int
-            'zip_file_path': zip_file_path,
+            "final_sequence": cds_sequence,  # str
+            "optimization_score": zscore,
+            "score_for_weakest_pair": weakest_score,
+            "zip_file_path": zip_file_path,
         }
 
         return user_output_dict

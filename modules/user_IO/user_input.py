@@ -87,12 +87,14 @@ class UserInputModule(object):
         optimization_method = models.OptimizationMethod[user_input["optimization_method"]] if \
             user_input.get("optimization_method") else None
         clusters_count = user_input["clusters_count"]
+        zip_directory = user_input.get("output_path")
 
         return models.UserInput(organisms=organisms_list,
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter,
                                 optimization_method=optimization_method,
-                                clusters_count=clusters_count)
+                                clusters_count=clusters_count,
+                                zip_directory=zip_directory)
 
     @staticmethod
     def _parse_single_input(organism_input):

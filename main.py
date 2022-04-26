@@ -29,6 +29,7 @@ class CommuniqueApp(object):
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
         self.sequence = None
+        self.output_path = None
         self.tuning_parameter = None
         self.clusters_count = None
         self.optimization_method = None
@@ -37,6 +38,7 @@ class CommuniqueApp(object):
         self.master = master
         self.mainframe = None
         self.sequence_path_label = None
+        self.output_path_label = None
         self.wanted_hosts_frame = None
         self.wanted_hosts_grid = None
         self.unwanted_hosts_frame = None
@@ -75,7 +77,15 @@ class CommuniqueApp(object):
         self.sequence_path_label = ttk.Label(sequence_label_frame)
         self.sequence_path_label.pack(side=tk.TOP, pady=5)
 
-        # TODO - add option to choose directory for the zip file
+        #########################
+        # Output directory
+        #########################
+        output_path_frame = ttk.Labelframe(self.mainframe, text="Output Path")
+        output_path_frame.pack(fill="both", expand="yes")
+        output_path = ttk.Button(output_path_frame, text="Choose directory", command=self.choose_output_path)
+        output_path.pack(side=tk.TOP)
+        self.output_path_label = ttk.Label(output_path_frame)
+        self.output_path_label.pack(side=tk.TOP, pady=5)
 
         #########################
         # Wanted hosts
@@ -136,6 +146,11 @@ class CommuniqueApp(object):
         sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", ".fa .fasta")])
         self.sequence_path_label.config(text=sequence_file_name)
         self.sequence = sequence_file_name
+
+    def choose_output_path(self) -> None:
+        output_path = filedialog.askdirectory()
+        self.output_path_label.config(text=output_path)
+        self.output_path = output_path
 
     def upload_wanted_hosts_files(self) -> None:
         self.upload_hosts_files(grid=self.wanted_hosts_grid, is_optimized=True)
@@ -276,13 +291,12 @@ class CommuniqueApp(object):
         ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=2)
 
         ttk.Label(options_frame, text="Clusters Count: ").grid(row=1, column=0)
-        # TODO - what is the max clusters count?
         ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=2)
 
         ttk.Label(options_frame, text="Optimization Method: ").grid(row=2, column=0)
         tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=2)
 
-        ttk.Button(options_frame, text="Close", command=options_window.withdraw).grid(row=3, column=1)
+        ttk.Button(options_frame, text="Save", command=options_window.withdraw).grid(row=3, column=1)
 
         self.format_grid(options_frame)
         options_frame.pack()
@@ -320,7 +334,7 @@ class CommuniqueApp(object):
 
         self.format_grid(results_grid)
         zip_button = ttk.Button(self.results_frame,
-                                text="Results as zip file",
+                                text="Open communique_results.zip directory",
                                 command=partial(self.zip_redirect, zip_file_path=user_output["zip_file_path"]))
         zip_button.pack(padx=5, pady=5)
 
@@ -333,6 +347,7 @@ class CommuniqueApp(object):
     def generate_user_input(self) -> typing.Dict:
         user_input = {
             "sequence": self.sequence,
+            "output_path": self.output_path,
             "tuning_param": self.tuning_parameter.get() / 100,
             "clusters_count": self.clusters_count.get(),
             "optimization_method": self.optimization_method.get(),
@@ -352,15 +367,19 @@ class CommuniqueApp(object):
     def validate_user_input(self) -> bool:
         if self.sequence is None:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose a sequence file for optimization.")
+                                 message="Please choose a sequence file for optimization.")
+            return False
+        if self.output_path is None:
+            messagebox.showerror(title="Error",
+                                 message="Please choose an output path.")
             return False
         if self.get_hosts_count(is_optimized=True) == 0:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose at least one wanted host file.")
+                                 message="Please choose at least one wanted host file.")
             return False
         if self.get_hosts_count(is_optimized=False) == 0:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose at least one unwanted host file.")
+                                 message="Please choose at least one unwanted host file.")
             return False
 
         return True

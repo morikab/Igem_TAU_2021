@@ -52,6 +52,7 @@ class OptimizationMethod(Enum):
 class UserInput:
     organisms: typing.List[Organism]
     sequence: str
+    zip_directory: str
     tuning_parameter: float
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_average

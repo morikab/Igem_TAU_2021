@@ -43,11 +43,11 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             # TODO - what do we want to display for each run? We should store the results differently
             final_cds, optimization_index, weakest_score = unit1(input_cluster)
         ##################################################################################################
-        # TODO - get zip_directory from the user
+        zip_directory = user_input.zip_directory or str(artifacts_directory)
         final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
                                                            zscore=optimization_index,
                                                            weakest_score=weakest_score,
-                                                           zip_directory=str(artifacts_directory))
+                                                           zip_directory=zip_directory)
         logger.info("Final output: %s", final_output)
     except Exception as e:
         exception_str = traceback.format_exc()
