@@ -21,7 +21,7 @@ from modules import models
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
-logger = LoggerFactory.create_logger("main")
+logger = LoggerFactory.get_logger()
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
@@ -124,4 +124,4 @@ if __name__ == "__main__":
     run_modules()
     toc = time.time()
     modules_run_time = toc - tic
-    print('Total modules run time: ', modules_run_time)
+    logger.info("Total modules run time: ", modules_run_time)

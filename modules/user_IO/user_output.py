@@ -7,7 +7,7 @@ from logger_factory.logger_factory import LoggerFactory
 from modules.shared_functions_and_vars import write_fasta
 
 # initialize the logger object
-logger = LoggerFactory.create_logger("user_output")
+logger = LoggerFactory.get_logger()
 
 
 class UserOutputModule(object):
@@ -48,27 +48,22 @@ class UserOutputModule(object):
     @classmethod
     def _create_final_zip(cls,
                           zip_directory: typing.Optional[str],
-                          cds_sequence: str,
-                          ) -> str:
+                          cds_sequence: str) -> str:
         zip_directory = zip_directory if zip_directory else "."
         # Create a ZipFile Object
         zip_file_path = os.path.join(zip_directory, cls._ZIP_FILE_NAME)
-        # Add multiple files to the zi
+        # Add multiple files to the zip
         with ZipFile(zip_file_path, 'w') as zip_object:
-            # Add Fasta files
+            # Add Fasta file
             cls._add_sequence_fasta(zip_object=zip_object, cds_sequence=cds_sequence)
-
-            # Add MEME files
-
-            # Add log files
-            cls._write_log_file(zip_object=zip_object, log_file_name="user_input.log")
-            cls._write_log_file(zip_object=zip_object, log_file_name="ORF.log")
-            cls._write_log_file(zip_object=zip_object, log_file_name="user_output.log")
+            # Add log file
+            cls._write_log_file(zip_object=zip_object)
 
         return zip_file_path
 
     @classmethod
-    def _write_log_file(cls, zip_object, log_file_name):
+    def _write_log_file(cls, zip_object) -> None:
+        log_file_name = LoggerFactory.LOG_FILE_NAME
         zip_object.write(filename=os.path.join(LoggerFactory.LOG_DIRECTORY, log_file_name),
                          arcname=os.path.join(cls._LOGS_SUBDIRECTORY, log_file_name))
 

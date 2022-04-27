@@ -14,7 +14,7 @@ from logger_factory import logger_factory
 from modules.main import run_modules
 
 
-logger = logger_factory.LoggerFactory.create_logger("main_app")
+logger = logger_factory.LoggerFactory.get_logger()
 
 
 class CommuniqueApp(object):
@@ -123,10 +123,13 @@ class CommuniqueApp(object):
         #########################
         self.log_frame = ttk.Labelframe(self.mainframe, text="Log")
         self.log_frame.pack(fill="both", expand="yes")
-        self.log_text = scrolledtext.ScrolledText(self.log_frame, width=70, height=10, state="disabled")
+        self.log_text = scrolledtext.ScrolledText(self.log_frame, width=100, height=10, state="disabled")
         self.log_text.pack()
 
-        logger.info("This is the start!")
+        logger.info('###########################')
+        logger.info('# START #')
+        logger.info('###########################')
+        logger.info("Here you can track the progress of your run!")
         # Poll log every 100 ms
         self.master.after(100, self.poll_log_queue)
 
@@ -383,7 +386,7 @@ class CommuniqueApp(object):
         zip_button.pack(padx=5, pady=5)
 
         # Bottom widgets
-        rerun_button = ttk.Button(self.bottom_frame, text="Run again", command=self.optimize)
+        rerun_button = ttk.Button(self.bottom_frame, text="Run again", command=self.start_optimize_thread)
         rerun_button.grid(row=0, column=0)
         new_run_button = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
         new_run_button.grid(row=0, column=1)

@@ -6,7 +6,7 @@ from modules.ORF.optimization import optimize_sequence
 from modules.ORF.organism import Organism
 from modules.ORF.Liyam_new_optimization_function import hill_climbing_optimize_by_zscore
 
-logger = LoggerFactory.create_logger("ORF")
+logger = LoggerFactory.get_logger()
 
 # todo: add a statistical analysis of how close the organisms are- like what is the best codon for eah AA
 # and are they close
@@ -27,6 +27,10 @@ class ORFModule(object):
         :param max_iter: Number of iterations for hill climbing.
         :return: optimized sequence (Biopython Seq)
         """
+        logger.info('##########################')
+        logger.info('# ORF #')
+        logger.info('##########################')
+
         optimization_method = optimization_method or models.OptimizationMethod.hill_climbing_average
         target_gene = user_input.sequence
         logger.info(optimization_method)

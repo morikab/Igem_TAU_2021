@@ -16,20 +16,17 @@ class QueueHandler(logging.Handler):
 
 class LoggerFactory(object):
     LOG_DIRECTORY = str(os.path.join(Path(__file__).parent.resolve(), "artifacts", "logs"))
-    _LOG_SUFFIX = "log"
+    LOG_FILE_NAME = "log.txt"
     _QUEUE_HANDLER_NAME = "queue_handler"
 
     @classmethod
-    def _create_logger(
-            cls,
-            log_file_name: str,
-    ) -> logging.Logger:
-        # logger = logging.getLogger(log_file_name)
+    def _create_logger(cls) -> logging.Logger:
         logger = logging.getLogger()
         if logger.hasHandlers():
             # Handler is already initialized
             return logger
         logger.setLevel(logging.INFO)
+        log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         # -------------
         # Stream Handler
         # -------------
@@ -39,6 +36,7 @@ class LoggerFactory(object):
         # Queue Handler
         # -------------
         queue_handler = QueueHandler()
+        queue_handler.setFormatter(logging.Formatter(log_format))
         queue_handler.name = cls._QUEUE_HANDLER_NAME
         logger.addHandler(queue_handler)
         # -------------
@@ -47,21 +45,19 @@ class LoggerFactory(object):
         # Make sure logs directory exists
         Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
         # Generate log file
-        # TODO - Create a single log file instead of multiple file (use a single logger)
-        log_file_path = os.path.join(cls.LOG_DIRECTORY, log_file_name + "." + cls._LOG_SUFFIX)
+        log_file_path = os.path.join(cls.LOG_DIRECTORY, cls.LOG_FILE_NAME)
         log_file_handler = logging.FileHandler(log_file_path, mode="w")
-        log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         log_file_handler.setFormatter(logging.Formatter(log_format))
         logger.addHandler(log_file_handler)
         return logger
 
     @staticmethod
-    def create_logger(log_file_name: str) -> logging.Logger:
+    def get_logger() -> logging.Logger:
         """
         A static method called by other modules to initialize logger in
         their own module
         """
-        logger = LoggerFactory._create_logger(log_file_name)
+        logger = LoggerFactory._create_logger()
         return logger
 
     @classmethod

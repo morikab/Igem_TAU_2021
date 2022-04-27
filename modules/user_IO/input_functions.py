@@ -10,7 +10,7 @@ from modules.ORF.TAI import TAI
 from modules.shared_functions_and_vars import *
 
 
-logger = LoggerFactory.create_logger("user_input")
+logger = LoggerFactory.get_logger()
 
 
 # RE model
