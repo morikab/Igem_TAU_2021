@@ -1,5 +1,7 @@
 import os
+import threading
 import typing
+import queue
 from functools import partial
 from pathlib import Path
 import tkinter as tk
@@ -10,6 +12,9 @@ from tkinter import ttk
 
 from logger_factory import logger_factory
 from modules.main import run_modules
+
+
+logger = logger_factory.LoggerFactory.create_logger("main_app")
 
 
 class CommuniqueApp(object):
@@ -121,12 +126,9 @@ class CommuniqueApp(object):
         self.log_text = scrolledtext.ScrolledText(self.log_frame, width=70, height=10, state="disabled")
         self.log_text.pack()
 
-        logger = logger_factory.LoggerFactory.create_logger(log_file_name=logger_factory.APP_LOGGER_NAME,
-                                                            text=self.log_text)
         logger.info("This is the start!")
-        # TODO - think of a way to fix the initialization of all the handlers.
-        # TODO - make a way to make the text appear in real time (perhaps run the modules logic in a different thread)?
-        # TODO - CONTINUE FROM HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Poll log every 100 ms
+        self.master.after(100, self.poll_log_queue)
 
         #########################
         # Bottom Frame
@@ -137,11 +139,29 @@ class CommuniqueApp(object):
         options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
         options_button.grid(row=0, column=0)
         # Optimize Button
-        optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
+        optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.start_optimize_thread)
         optimize_button.grid(row=0, column=1)
 
         # User Input Parameters
         self.initialize_user_input_parameters()
+
+    def poll_log_queue(self) -> None:
+        # Check every 100ms if there is a new message in the queue to display
+        queue_handler = logger_factory.LoggerFactory.get_queue_handler(logger)
+        while True:
+            try:
+                record = queue_handler.log_queue.get(block=False)
+            except queue.Empty:
+                break
+            else:
+                self.display_log_text(record=queue_handler.format(record))
+        self.master.after(100, self.poll_log_queue)
+
+    def display_log_text(self, record: str) -> None:
+        self.log_text.configure(state="normal")
+        self.log_text.insert(tk.END, record + '\n')
+        self.log_text.configure(state="disabled")
+        self.log_text.yview(tk.END)
 
     def initialize_user_input_parameters(self) -> None:
         self.organisms = {}
@@ -320,11 +340,16 @@ class CommuniqueApp(object):
         self.format_grid(options_frame)
         options_frame.pack()
 
+    def start_optimize_thread(self) -> None:
+        optimize_thread = threading.Thread(target=self.optimize)
+        optimize_thread.start()
+
     def optimize(self) -> None:
         if not self.validate_user_input():
             return
 
         user_input = self.generate_user_input()
+
         user_output = run_modules(user_input_dict=user_input)
         if user_output.get("error_message") is not None:
             messagebox.showerror(title="Error",

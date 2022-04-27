@@ -2,57 +2,52 @@ import logging
 import os
 import typing
 from pathlib import Path
-
-import tkinter as tk
-from tkinter import scrolledtext
-
-APP_LOGGER_NAME = "app"
+from queue import Queue
 
 
-class TextHandler(logging.Handler):
-    def __init__(self, text: typing.Union[tk.Text, scrolledtext.ScrolledText]):
-        logging.Handler.__init__(self)
-        self.text = text
+class QueueHandler(logging.Handler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_queue = Queue()
 
     def emit(self, record: str) -> None:
-        msg = self.format(record)
-
-        def append() -> None:
-            self.text.configure(state="normal")
-            self.text.insert(tk.END, msg + '\n')
-            self.text.configure(state="disabled")
-            # Auto-scroll to the bottom
-            self.text.yview(tk.END)
-
-        self.text.after(0, append)
+        self.log_queue.put(record)
 
 
 class LoggerFactory(object):
     LOG_DIRECTORY = str(os.path.join(Path(__file__).parent.resolve(), "artifacts", "logs"))
     _LOG_SUFFIX = "log"
+    _QUEUE_HANDLER_NAME = "queue_handler"
 
     @classmethod
     def _create_logger(
             cls,
             log_file_name: str,
-            text: typing.Optional[typing.Union[tk.Text, scrolledtext.ScrolledText]] = None,
     ) -> logging.Logger:
-        """
-        A private method that interacts with the python
-        logging module
-        """
-        # TODO - try to run without adding the file_name..? Do we always get the same logger that way?
-        logger = logging.getLogger(log_file_name)
-        if logger.handlers:
-            # If we already set the handlers for the logger, just return the initialized logger.
+        # logger = logging.getLogger(log_file_name)
+        logger = logging.getLogger()
+        if logger.hasHandlers():
+            # Handler is already initialized
             return logger
         logger.setLevel(logging.INFO)
-        logger.addHandler(logging.StreamHandler())    # TODO - un-comment if running only modules.
-        if text is not None:
-            logger.addHandler(TextHandler(text))
+        # -------------
+        # Stream Handler
+        # -------------
+        # TODO - un-comment if running only modules.
+        logger.addHandler(logging.StreamHandler())
+        # -------------
+        # Queue Handler
+        # -------------
+        queue_handler = QueueHandler()
+        queue_handler.name = cls._QUEUE_HANDLER_NAME
+        logger.addHandler(queue_handler)
+        # -------------
+        # File Handler
+        # -------------
         # Make sure logs directory exists
         Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
         # Generate log file
+        # TODO - Create a single log file instead of multiple file (use a single logger)
         log_file_path = os.path.join(cls.LOG_DIRECTORY, log_file_name + "." + cls._LOG_SUFFIX)
         log_file_handler = logging.FileHandler(log_file_path, mode="w")
         log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -61,19 +56,17 @@ class LoggerFactory(object):
         return logger
 
     @staticmethod
-    def create_logger(log_file_name: str,
-                      text: typing.Optional[typing.Union[tk.Text, scrolledtext.ScrolledText]] = None) -> logging.Logger:
+    def create_logger(log_file_name: str) -> logging.Logger:
         """
         A static method called by other modules to initialize logger in
         their own module
         """
-        logger = LoggerFactory._create_logger(log_file_name, text)
-
-        # Add TextHandler
-        app_logger = logging.getLogger(APP_LOGGER_NAME)
-        for handle in app_logger.handlers:
-            if isinstance(handle, TextHandler):
-                logger.addHandler(handle)
-                break
-
+        logger = LoggerFactory._create_logger(log_file_name)
         return logger
+
+    @classmethod
+    def get_queue_handler(cls, logger: logging.Logger) -> typing.Optional[QueueHandler]:
+        for handler in logger.handlers:
+            if handler.name == cls._QUEUE_HANDLER_NAME:
+                return handler
+        return None
