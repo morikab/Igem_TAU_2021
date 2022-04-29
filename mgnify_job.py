@@ -42,7 +42,7 @@ def download_files():
 
         page_count += 1
 
-        url = genomes_json["next"]
+        url = genomes_json["links"]["next"]
 
 
 if __name__ == "__main__":
