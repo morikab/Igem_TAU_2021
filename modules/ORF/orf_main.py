@@ -2,9 +2,9 @@ import typing
 
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
+from modules.ORF import Liyam_new_optimization_function
 from modules.ORF.optimization import optimize_sequence
 from modules.ORF.organism import Organism
-from modules.ORF.Liyam_new_optimization_function import hill_climbing_optimize_by_zscore
 
 logger = LoggerFactory.get_logger()
 
@@ -37,11 +37,23 @@ class ORFModule(object):
 
         if optimization_method in (models.OptimizationMethod.hill_climbing_average,
                                    models.OptimizationMethod.hill_climbing_weakest_link):
-            return hill_climbing_optimize_by_zscore(seq=target_gene,
-                                                    user_input=user_input,
-                                                    cai_or_tai='cai',
-                                                    max_iter=max_iter,
-                                                    optimization_method=optimization_method)
+            return Liyam_new_optimization_function.hill_climbing_optimize_by_zscore(
+                seq=target_gene,
+                user_input=user_input,
+                cai_or_tai=cai_or_tai,
+                max_iter=max_iter,
+                optimization_method=optimization_method,
+            )
+
+        if optimization_method == models.OptimizationMethod.hill_climbing_bulk_aa_average:
+            return Liyam_new_optimization_function.hill_climbing_optimize_aa_bulk_by_zscore(
+                seq=target_gene,
+                user_input=user_input,
+                cai_or_tai=cai_or_tai,
+                max_iter=max_iter,
+                optimization_method=optimization_method,
+            )
+
         input_organisms = user_input.organisms
         # TODO - remove old organism object / remove the method entirely?
         high_expression_organisms = [

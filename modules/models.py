@@ -45,6 +45,7 @@ class OptimizationMethod(Enum):
     single_codon_global = "single_codon_global"
     single_codon_local = "single_codon_local"
     hill_climbing_average = "hill_climbing_average"
+    hill_climbing_bulk_aa_average = "hill_climbing_bulk_aa_average"
     hill_climbing_weakest_link = "hill_climbing_weakest_link"
 
 
@@ -55,4 +56,4 @@ class UserInput:
     zip_directory: str
     tuning_parameter: float
     clusters_count: int
-    optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_average
+    optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_bulk_aa_average
