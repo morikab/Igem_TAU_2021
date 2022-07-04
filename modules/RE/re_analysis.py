@@ -60,16 +60,23 @@ def single_run(org_list, n_org, percent_opt, cds_nt):
     opt_sites = multi_org_final_found_sites(optimized_RE_dict, cds_nt)
     deopt_sites = multi_org_final_found_sites(deoptimized_RE_dict, final_cds_nt)
 
-    return sum(list(opt_sites.values())), sum(list(deopt_sites.values()))
+
+    n_opt_sites = sum(list(opt_sites.values()))
+    n_opt_org = sum([1 for i in opt_sites.values() if i>0 ])
+    n_deopt_sites = sum(list(deopt_sites.values()))
+    n_deopt_org = sum([1  for i in deopt_sites.values() if i>0 ])
+    return n_opt_sites, n_deopt_sites, n_opt_org, n_deopt_org
 
 
 
 
 
 
-with open('C:\\Users\\labuser\\Documents\\Liyam\\tamir projects\\igem article\\Igem_TAU_2021\\model_analysis\\data_for_analysis\\org_name_to_dict.json') as f:
+with open(r'C:\Users\97252\Documents\work\Igem_TAU_2021\model_analysis\data_for_analysis\org_name_to_dict.json') as f:
     org_dict = json.load(f)
-gene = read('C:\\Users\\labuser\\Documents\\Liyam\\tamir projects\\igem article\\Igem_TAU_2021\\model_analysis\\zorA anti-phage defense.fasta', 'fasta')
+
+with open(r'C:\Users\97252\Documents\work\Igem_TAU_2021\model_analysis\zorA anti-phage defense.fasta') as fasta:
+    gene = read(fasta, 'fasta')
 cds_nt = str(gene.seq)
 
 n_unknown = 0
@@ -84,28 +91,54 @@ RE_org_list = unique(RE_org_ind)
 print('total number of organisms: ', len(RE_org_list))
 print('total number of organisms unknown organisms: ', len([i for i in RE_org_list if 'Unidentified bacterium' in i]))
 
+def different_sizes ():
+    avg_runs = {}
+    n_runs = 10
+    for n_org in range(55, 100, 5):
+        opt_list  = []
+        deopt_list = []
+        opt_org = []
+        deopt_org = []
+        for i in range(n_runs):
+            n_opt_sites, n_deopt_sites, n_opt_org, n_deopt_org = single_run(org_list= RE_org_list, n_org=n_org, percent_opt=0.5, cds_nt=cds_nt)
+            opt_list.append(n_opt_sites)
+            deopt_list.append(n_deopt_sites)
+            opt_org.append(n_opt_org)
+            deopt_org.append(n_deopt_org)
 
-avg_runs = {}
-n_runs = 10
-for n_org in range(10,1000, 10):
-    opt_list  = []
-    deopt_list = []
-    for i in range(n_runs):
-        n_sites_from_opt, n_sites_from_deopt = single_run(org_list= RE_org_list, n_org=n_org, percent_opt=0.5, cds_nt=cds_nt)
-        opt_list.append(n_sites_from_opt)
-        deopt_list.append(n_sites_from_deopt)
+        avg_runs[n_org] = [sum(i)/n_runs for i in [opt_list, deopt_list, opt_org, deopt_org]]
+        print(n_org, avg_runs[n_org])
 
-    avg_runs[n_org] = [sum(opt_list)/n_runs, sum(deopt_list)/n_runs]
-    print(n_org, [sum(opt_list)/n_runs, sum(deopt_list)/n_runs])
-
-runs_df = pd.DataFrame.from_dict(avg_runs, orient='index', columns=['sites from wanted', 'sites from unwanted'])
-print(runs_df)
-runs_df.to_csv('RE_analysis_results.csv', index_label='')
+    runs_df = pd.DataFrame.from_dict(avg_runs, orient='index', columns=['sites from wanted', 'sites from unwanted', 'org from wanted', 'org from unwanted'])
+    print(runs_df)
+    runs_df.to_csv('different sizes.csv', index_label='')
+    return None
 
 
+def different_ratios ():
+    avg_runs = {}
+    n_runs = 10
+    for percent_opt in [5, 90, 95]:
+        percent_opt = percent_opt/100
+        opt_list  = []
+        deopt_list = []
+        opt_org = []
+        deopt_org = []
+        for i in range(n_runs):
+            n_opt_sites, n_deopt_sites, n_opt_org, n_deopt_org = single_run(org_list= RE_org_list, n_org=30, percent_opt=percent_opt, cds_nt=cds_nt)
+            opt_list.append(n_opt_sites)
+            deopt_list.append(n_deopt_sites)
+            opt_org.append(n_opt_org)
+            deopt_org.append(n_deopt_org)
 
+        avg_runs[percent_opt] = [sum(i)/n_runs for i in [opt_list, deopt_list, opt_org, deopt_org]]
+        print(percent_opt, avg_runs[percent_opt])
 
+    runs_df = pd.DataFrame.from_dict(avg_runs, orient='index', columns=['sites from wanted', 'sites from unwanted', 'org from wanted', 'org from unwanted'])
+    print(runs_df)
+    runs_df.to_csv('analysis_results/different_ratios.csv', index_label='')
 
+different_ratios ()
 
 #
 # ##### tests from the arabidopsis microbiome ####################################33
