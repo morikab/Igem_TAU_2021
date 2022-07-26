@@ -2,7 +2,7 @@
 import codecs
 import subprocess
 
-destination_dir = '/../../data/genbank_tls'
+destination_dir = '../../data/genbank_tls'
 index_file = codecs.open("tls_index.html", 'r')
 
 
