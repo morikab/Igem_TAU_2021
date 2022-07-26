@@ -28,7 +28,7 @@ def download_files():
         print(line)
         if "fsa_nt.gz" in line or ".mstr.gbff.gz" in line:
             f_name = line.split('"')[1]
-            run_cmd(f'wget -P {destination_dir} https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/{f_name} --no-check-certificate &')
+            run_cmd("wget -P " + destination_dir + "https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
             destination_file = destination_dir + '/' + f_name
             run_cmd(f'gzip -d {destination_file}')
 
