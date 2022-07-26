@@ -20,20 +20,20 @@ def download_files():
         file_names = cds_file.readlines()
         for file_name in file_names:
             cds_destination_file = destination_dir+'ncbi_genome_cds'
-            command = "wget" +  file_name.strip() + " ‐P " + cds_destination_file
+            command = 'wget' +  file_name.strip() + ' ‐P ' + cds_destination_file
             run_cmd(command)
             print(command)
-            command = "gzip -d" +  cds_destination_file
+            command = 'gzip -d' +  cds_destination_file
             run_cmd(command)
 
     with open("rna_files.txt", "r") as rna_files:
         file_names = rna_files.readlines()
         for file_name in file_names:
             rna_destination_file = destination_dir+'ncbi_genome_rna'
-            command = "wget " +  file_name.strip() + " ‐P " + rna_destination_file
+            command = 'wget ' +  file_name.strip() + ' ‐P ' + rna_destination_file
             run_cmd(command)
             print(command)
-            command = "gzip -d" +  rna_destination_file
+            command = 'gzip -d' +  rna_destination_file
             run_cmd(command)
 
 
