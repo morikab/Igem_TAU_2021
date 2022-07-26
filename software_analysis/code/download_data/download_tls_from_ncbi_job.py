@@ -30,7 +30,7 @@ def download_files():
             f_name = line.split('"')[1]
             run_cmd("wget -P " + destination_dir + "https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
             destination_file = destination_dir + '/' + f_name
-            run_cmd(f'gzip -d {destination_file}')
+            run_cmd("gzip -d" +  destination_file)
 
 
 if __name__ == "__main__":
