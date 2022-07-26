@@ -27,7 +27,7 @@ ui = FlaskUI(app, width=500, height=500, idle_interval=IDLE_INTERVAL_SEC, host="
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("tls_index.html")
 
 
 @app.route('/success', methods=['POST', 'GET'])
