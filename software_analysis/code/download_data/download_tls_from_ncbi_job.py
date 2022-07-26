@@ -19,23 +19,28 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 
 
 def download_files():
+    commands = []
     Lines = index_file.readlines()
 
 
     count = 0
-    print('cd '+ destination_dir)
-    run_cmd('cd '+ destination_dir )
+    commands.append('cd '+ destination_dir)
+    # run_cmd('cd '+ destination_dir )
     for line in Lines:
         count += 1
         line = line.strip()
         if "fsa_nt.gz" in line or ".mstr.gbff.gz" in line:
             f_name = line.split('"')[1]
             command = 'wget  https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/' +f_name +' --no-check-certificate'
-            run_cmd(command)
-            print(command)
+            # run_cmd(command)
+            # print(command)
+            commands.append(command)
             # destination_file = destination_dir + '/' + f_name
             command = 'gzip -d' +  f_name
-            run_cmd(command)
+            commands.append(command)
+            # run_cmd(command)
+    for command in commands:
+        run_cmd(command)
 
 
 if __name__ == "__main__":
