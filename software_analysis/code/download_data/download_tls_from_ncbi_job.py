@@ -25,7 +25,6 @@ def download_files():
     for line in Lines:
         count += 1
         line = line.strip()
-        print(line)
         if "fsa_nt.gz" in line or ".mstr.gbff.gz" in line:
             f_name = line.split('"')[1]
             run_cmd("wget -P " + destination_dir + "https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
