@@ -1,11 +1,20 @@
+import os
+import threading
 import typing
+import queue
+from functools import partial
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import scrolledtext
 from tkinter import ttk
 
+from logger_factory import logger_factory
 from modules.main import run_modules
+
+
+logger = logger_factory.LoggerFactory.get_logger()
 
 
 class CommuniqueApp(object):
@@ -13,7 +22,7 @@ class CommuniqueApp(object):
     INITIAL_WIDTH = 700
     INITIAL_HEIGHT = 1000
     DEFAULT_TUNING_PARAMETER_VALUE = 50
-    DEFAULT_CLUSTERS_COUNT_VALUE = 2
+    DEFAULT_CLUSTERS_COUNT_VALUE = 1
     DEFAULT_PRIORITY_VALUE = 50
     HOST_NAME_COLUMN_INDEX = 0
     GENOME_PATH_COLUMN_INDEX = 1
@@ -21,22 +30,30 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
+    OPTIMIZATION_METHODS = ["hill_climbing_bulk_aa_average", "hill_climbing_average", "hill_climbing_weakest_link"]
+    DEFAULT_OPTIMIZATION_METHOD = "hill_climbing_bulk_aa_average"
+
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
         self.sequence = None
+        self.output_path = None
         self.tuning_parameter = None
         self.clusters_count = None
+        self.optimization_method = None
+        self.log_text = None
 
         # Widgets
         self.master = master
         self.mainframe = None
         self.sequence_path_label = None
+        self.output_path_label = None
         self.wanted_hosts_frame = None
         self.wanted_hosts_grid = None
         self.unwanted_hosts_frame = None
         self.unwanted_hosts_grid = None
         self.bottom_frame = None
         self.results_frame = None
+        self.log_frame = None
 
         self.initialize_master_widget()
         self.prepare_for_new_run()
@@ -64,10 +81,20 @@ class CommuniqueApp(object):
         #########################
         sequence_label_frame = ttk.Labelframe(self.mainframe, text="Sequence to Optimize")
         sequence_label_frame.pack(fill="both", expand="yes")
-        upload_sequence = ttk.Button(sequence_label_frame, text="Upload Sequence", command=self.upload_sequence)
+        upload_sequence = ttk.Button(sequence_label_frame, text="Upload sequence", command=self.upload_sequence)
         upload_sequence.pack(side=tk.TOP)
         self.sequence_path_label = ttk.Label(sequence_label_frame)
         self.sequence_path_label.pack(side=tk.TOP, pady=5)
+
+        #########################
+        # Output directory
+        #########################
+        output_path_frame = ttk.Labelframe(self.mainframe, text="Output Path")
+        output_path_frame.pack(fill="both", expand="yes")
+        output_path = ttk.Button(output_path_frame, text="Choose directory", command=self.choose_output_path)
+        output_path.pack(side=tk.TOP)
+        self.output_path_label = ttk.Label(output_path_frame)
+        self.output_path_label.pack(side=tk.TOP, pady=5)
 
         #########################
         # Wanted hosts
@@ -92,6 +119,21 @@ class CommuniqueApp(object):
         self.unwanted_hosts_grid = tk.Frame(self.unwanted_hosts_frame)
 
         #########################
+        # Log Frame
+        #########################
+        self.log_frame = ttk.Labelframe(self.mainframe, text="Log")
+        self.log_frame.pack(fill="both", expand="yes")
+        self.log_text = scrolledtext.ScrolledText(self.log_frame, width=100, height=10, state="disabled")
+        self.log_text.pack()
+
+        logger.info('###########################')
+        logger.info('# START #')
+        logger.info('###########################')
+        logger.info("Here you can track the progress of your run!")
+        # Poll log every 100 ms
+        self.master.after(100, self.poll_log_queue)
+
+        #########################
         # Bottom Frame
         #########################
         self.bottom_frame = ttk.Frame(self.mainframe)
@@ -100,11 +142,29 @@ class CommuniqueApp(object):
         options_button = ttk.Button(self.bottom_frame, text="Advanced Options", command=self.advanced_options)
         options_button.grid(row=0, column=0)
         # Optimize Button
-        optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.optimize)
+        optimize_button = ttk.Button(self.bottom_frame, text="Optimize", command=self.start_optimize_thread)
         optimize_button.grid(row=0, column=1)
 
         # User Input Parameters
         self.initialize_user_input_parameters()
+
+    def poll_log_queue(self) -> None:
+        # Check every 100ms if there is a new message in the queue to display
+        queue_handler = logger_factory.LoggerFactory.get_queue_handler(logger)
+        while True:
+            try:
+                record = queue_handler.log_queue.get(block=False)
+            except queue.Empty:
+                break
+            else:
+                self.display_log_text(record=queue_handler.format(record))
+        self.master.after(100, self.poll_log_queue)
+
+    def display_log_text(self, record: str) -> None:
+        self.log_text.configure(state="normal")
+        self.log_text.insert(tk.END, record + '\n')
+        self.log_text.configure(state="disabled")
+        self.log_text.yview(tk.END)
 
     def initialize_user_input_parameters(self) -> None:
         self.organisms = {}
@@ -113,6 +173,13 @@ class CommuniqueApp(object):
         self.tuning_parameter.set(self.DEFAULT_TUNING_PARAMETER_VALUE)
         self.clusters_count = tk.IntVar()
         self.clusters_count.set(self.DEFAULT_CLUSTERS_COUNT_VALUE)
+        self.optimization_method = tk.StringVar()
+        self.optimization_method.set(self.DEFAULT_OPTIMIZATION_METHOD)
+
+    @staticmethod
+    def format_grid(grid: tk.Frame) -> None:
+        for child in grid.winfo_children():
+            child.grid_configure(padx=5, pady=5)
 
     def get_hosts_count(self, is_optimized: bool) -> int:
         return len({key: value for key, value in self.organisms.items() if value["optimized"] == is_optimized})
@@ -121,6 +188,11 @@ class CommuniqueApp(object):
         sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", ".fa .fasta")])
         self.sequence_path_label.config(text=sequence_file_name)
         self.sequence = sequence_file_name
+
+    def choose_output_path(self) -> None:
+        output_path = filedialog.askdirectory()
+        self.output_path_label.config(text=output_path)
+        self.output_path = output_path
 
     def upload_wanted_hosts_files(self) -> None:
         self.upload_hosts_files(grid=self.wanted_hosts_grid, is_optimized=True)
@@ -164,7 +236,7 @@ class CommuniqueApp(object):
 
             remove_button = ttk.Button(grid, text="remove")
             remove_button.grid(column=self.REMOVE_HOST_COLUMN_INDEX, row=row)
-            remove_button.bind("<Button-1>", self.remove_wanted_host if is_optimized else self.remove_unwanted_host)
+            remove_button.bind("<Button-1>", partial(self.remove_host, is_optimized=is_optimized))
 
             organism = {
                 "host_name": host_name_var,
@@ -175,8 +247,7 @@ class CommuniqueApp(object):
             }
             self.organisms[genome_path] = organism
 
-        for child in grid.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+        self.format_grid(grid)
         grid.pack()
 
     def validate_uploaded_files(self, hosts_files: typing.Sequence[str]) -> bool:
@@ -228,12 +299,6 @@ class CommuniqueApp(object):
         genome_path = grid.grid_slaves(row=row, column=self.GENOME_PATH_COLUMN_INDEX)[-1].get()
         return self.organisms[genome_path]
 
-    def remove_wanted_host(self, event) -> None:
-        self.remove_host(event=event, is_optimized=True)
-
-    def remove_unwanted_host(self, event) -> None:
-        self.remove_host(event=event, is_optimized=False)
-
     def remove_host(self, event, is_optimized: bool) -> None:
         number_of_columns = 5
         remove_widget = event.widget
@@ -242,9 +307,7 @@ class CommuniqueApp(object):
         genome_path = grid.grid_slaves(row=row_to_remove, column=self.GENOME_PATH_COLUMN_INDEX)[-1].get()
         remove_widget.grid_remove()
         for j in range(number_of_columns - 1):
-            # TODO - check using destroy instead
             grid.grid_slaves(row=row_to_remove, column=j)[0].destroy()
-            # grid.grid_slaves(row=row_to_remove, column=j)[0].grid_remove()
 
         for i in range(row_to_remove+1, self.get_hosts_count(is_optimized)+1):
             for j in range(number_of_columns):
@@ -264,19 +327,25 @@ class CommuniqueApp(object):
         options_window = tk.Toplevel(self.mainframe)
         options_window.title("Advanced Options")
         options_window.geometry("300x200")
-
         options_frame = ttk.Frame(options_window, padding="5 5 12 12")
+
         ttk.Label(options_frame, text="Tuning Parameter: ").grid(row=0, column=0)
-        ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=1)
+        ttk.Spinbox(options_frame, from_=1, to=100, textvariable=self.tuning_parameter).grid(row=0, column=2)
 
         ttk.Label(options_frame, text="Clusters Count: ").grid(row=1, column=0)
-        # TODO - what is the max clusters count?
-        ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=1)
-        # TODO - add option to configure the optimization method in advanced options
+        ttk.Spinbox(options_frame, from_=2, to=10, textvariable=self.clusters_count).grid(row=1, column=2)
 
-        for child in options_frame.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+        ttk.Label(options_frame, text="Optimization Method: ").grid(row=2, column=0)
+        tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=2)
+
+        ttk.Button(options_frame, text="Save", command=options_window.withdraw).grid(row=3, column=1)
+
+        self.format_grid(options_frame)
         options_frame.pack()
+
+    def start_optimize_thread(self) -> None:
+        optimize_thread = threading.Thread(target=self.optimize)
+        optimize_thread.start()
 
     def optimize(self) -> None:
         if not self.validate_user_input():
@@ -284,12 +353,15 @@ class CommuniqueApp(object):
 
         user_input = self.generate_user_input()
 
-        # TODO - alert on errors (if there are any)
-        user_output, zip_file_path = run_modules(user_input_dict=user_input)
+        user_output = run_modules(user_input_dict=user_input)
+        if user_output.get("error_message") is not None:
+            messagebox.showerror(title="Error",
+                                 message=user_output["error_message"])
+            return
 
-        #########################
-        # Results widgets
-        #########################
+        self.create_results_widgets(user_output)
+
+    def create_results_widgets(self, user_output: typing.Dict) -> None:
         self.bottom_frame.destroy()
 
         self.results_frame = ttk.Labelframe(self.mainframe, text="Results")
@@ -300,20 +372,32 @@ class CommuniqueApp(object):
         self.bottom_frame = ttk.Frame(self.mainframe)
         self.bottom_frame.pack(side=tk.BOTTOM, pady=20)
 
-        # New Run
-        ttk.Label(results_grid, text="Optimized sequence:").grid(row=0, column=0)
+        ttk.Label(results_grid, text="Optimized sequence: ").grid(row=0, column=0)
         optimized_sequence = tk.Text(results_grid)
         optimized_sequence.grid(row=0, column=1)
         optimized_sequence.insert(tk.END, user_output["final_sequence"])
+        ttk.Label(results_grid, text="Optimization score: ").grid(row=1, column=0)
+        ttk.Label(results_grid, text=user_output["optimization_score"]).grid(row=1, column=1)
 
+        self.format_grid(results_grid)
+        zip_button = ttk.Button(self.results_frame,
+                                text="Open communique_results.zip directory",
+                                command=partial(self.zip_redirect, zip_file_path=user_output["zip_file_path"]))
+        zip_button.pack(padx=5, pady=5)
+
+        # Bottom widgets
+        rerun_button = ttk.Button(self.bottom_frame, text="Run again", command=self.start_optimize_thread)
+        rerun_button.grid(row=0, column=0)
         new_run_button = ttk.Button(self.bottom_frame, text="New run", command=self.recreate)
-        new_run_button.grid(row=0, column=0)
+        new_run_button.grid(row=0, column=1)
 
     def generate_user_input(self) -> typing.Dict:
         user_input = {
             "sequence": self.sequence,
+            "output_path": self.output_path,
             "tuning_param": self.tuning_parameter.get() / 100,
             "clusters_count": self.clusters_count.get(),
+            "optimization_method": self.optimization_method.get(),
         }
         input_organisms = {}
         for organism in self.organisms.values():
@@ -330,21 +414,29 @@ class CommuniqueApp(object):
     def validate_user_input(self) -> bool:
         if self.sequence is None:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose a sequence file for optimization.")
+                                 message="Please choose a sequence file for optimization.")
+            return False
+        if self.output_path is None:
+            messagebox.showerror(title="Error",
+                                 message="Please choose an output path.")
             return False
         if self.get_hosts_count(is_optimized=True) == 0:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose at least one wanted host file.")
+                                 message="Please choose at least one wanted host file.")
             return False
         if self.get_hosts_count(is_optimized=False) == 0:
             messagebox.showerror(title="Error",
-                                 message=F"Please choose at least one unwanted host file.")
+                                 message="Please choose at least one unwanted host file.")
             return False
 
         return True
 
+    @staticmethod
+    def zip_redirect(zip_file_path: str) -> None:
+        zip_directory = Path(zip_file_path).parent
+        os.startfile(zip_directory)
+
     def recreate(self) -> None:
-        # TODO - should we recreate all the params, just run again the modules (add two buttons for both?)
         for widget in self.master.winfo_children():
             widget.destroy()
         self.prepare_for_new_run()

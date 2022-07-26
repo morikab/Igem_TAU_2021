@@ -1,11 +1,8 @@
-from modules.logger_factory import LoggerFactory
-from modules import models
 from modules.sequence_family.clustering_optimization import *
 
 
 class SequenceFamilyModule(object):
     @staticmethod
-
     def run_module(user_input: models.UserInput):
         object_list = []
         opt_org_list = [org.name for org in user_input.organisms if org.is_optimized]

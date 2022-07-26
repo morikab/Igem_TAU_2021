@@ -4,7 +4,8 @@ import time
 import traceback
 from pathlib import Path
 import typing
-from modules.logger_factory import LoggerFactory
+
+from logger_factory.logger_factory import LoggerFactory
 from modules.testing_for_modules import generate_testing_data
 
 
@@ -17,10 +18,10 @@ from modules import user_IO, ORF, sequence_family
 from modules.stats.evaluation import ZscoreModule
 from modules import models
 
-logger = LoggerFactory.create_logger("main")
-
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
+
+logger = LoggerFactory.get_logger()
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
@@ -43,30 +44,28 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             # TODO - what do we want to display for each run? We should store the results differently
             final_cds, optimization_index, weakest_score = unit1(input_cluster)
         ##################################################################################################
-        # TODO - get zip_directory from the user
-        # TODO - change the user output to remove unneeded parameters
-        final_output, zip_file_path = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                                          zscore=optimization_index,
-                                                                          weakest_score=weakest_score,
-                                                                          zip_directory=str(artifacts_directory))
-        logger.info("Final output: %s, zip_file_path: %s", final_output, zip_file_path)
+        zip_directory = user_input.zip_directory or str(artifacts_directory)
+        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
+                                                           zscore=optimization_index,
+                                                           weakest_score=weakest_score,
+                                                           zip_directory=zip_directory)
+        logger.info("Final output: %s", final_output)
     except Exception as e:
         exception_str = traceback.format_exc()
         final_output = {
-            'error_message': exception_str,
+            "error_message": exception_str,
         }
-        zip_file_path = None
         logger.error("Encountered unknown error when running modules. Error message: %s", exception_str)
 
-    return final_output, zip_file_path
+    return final_output
 
 
 def unit1(user_input: models.UserInput):
-    optimization_func = user_input.translation_function
+    optimization_method = user_input.optimization_method
     try:
         # both CAI and tAI, select the one with the best optimization index tai optimization
         logger.info('tAI information:')
-        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_func)
+        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
 
         tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
@@ -78,7 +77,7 @@ def unit1(user_input: models.UserInput):
 
         # cai optimization
         logger.info('CAI information:')
-        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_func)
+        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_method)
 
         cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
@@ -105,7 +104,7 @@ def unit1(user_input: models.UserInput):
 
     except:
         logger.info('CAI information:')
-        final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_type=optimization_func)
+        final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_method=optimization_method)
         mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
             ZscoreModule.run_module(final_cds, user_input, 'cai')
 
@@ -118,9 +117,11 @@ def unit1(user_input: models.UserInput):
 
 if __name__ == "__main__":
     tic = time.time()
-    default_user_inp_raw = generate_testing_data(n_organisms=4, percent_optimized=0.7,
-                                                 clusters_num = 1, tuning_param= 0.5)
+    default_user_inp_raw = generate_testing_data(n_organisms=4,
+                                                 percent_optimized=0.7,
+                                                 clusters_count=1,
+                                                 tuning_param=0.5)
     run_modules()
     toc = time.time()
     modules_run_time = toc - tic
-    print('Total modules run time: ', modules_run_time)
+    logger.info("Total modules run time: ", modules_run_time)

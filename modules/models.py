@@ -41,17 +41,19 @@ class Organism(object):
         return statistics.stdev(self._tai_scores_values)
 
 
-class TranslationFunction(Enum):
+class OptimizationMethod(Enum):
     single_codon_global = "single_codon_global"
     single_codon_local = "single_codon_local"
-    zscore_hill_climbing_average = "zscore_hill_climbing_average"
-    zscore_hill_climbing_weakest_link = "zscore_hill_climbing_weakest_link"
+    hill_climbing_average = "hill_climbing_average"
+    hill_climbing_bulk_aa_average = "hill_climbing_bulk_aa_average"
+    hill_climbing_weakest_link = "hill_climbing_weakest_link"
 
 
 @dataclass
 class UserInput:
     organisms: typing.List[Organism]
     sequence: str
+    zip_directory: str
     tuning_parameter: float
     clusters_count: int
-    translation_function: TranslationFunction = TranslationFunction.zscore_hill_climbing_average
+    optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_bulk_aa_average
