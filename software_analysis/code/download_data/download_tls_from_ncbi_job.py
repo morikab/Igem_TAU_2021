@@ -28,8 +28,8 @@ def download_files():
         line = line.strip()
         if "fsa_nt.gz" in line or ".mstr.gbff.gz" in line:
             f_name = line.split('"')[1]
-            run_cmd("wget ‐‐directory-prefix " + destination_dir + " https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
-            print("wget ‐‐directory-prefix " + destination_dir + " https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
+            run_cmd("wget ‐P " + destination_dir + " https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
+            print("wget ‐P " + destination_dir + " https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/" +f_name +" --no-check-certificate &")
             destination_file = destination_dir + '/' + f_name
             run_cmd("gzip -d" +  destination_file)
 
