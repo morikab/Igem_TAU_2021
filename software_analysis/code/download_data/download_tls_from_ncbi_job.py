@@ -23,6 +23,7 @@ def download_files():
 
 
     count = 0
+    print('cd '+ destination_dir)
     run_cmd('cd '+ destination_dir )
     for line in Lines:
         count += 1
