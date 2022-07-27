@@ -38,7 +38,9 @@ def download_files():
         print(command)
         run_cmd(command)
 
-
+# wget -P ../../data/genbank_tls https://ftp.ncbi.nlm.nih.gov/genbank/tls/K/tls.KACJ.1.fsa_nt.gz --no-check-certificate
+# gzip -d ../../data/genbank_tls/tls.KACJ.1.fsa_nt.gz
+# wget ‐P ../../data/ncbi_genome_cds https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/014/151/665/GCF_014151665.1_ASM1415166v1/GCF_014151665.1_ASM1415166v1_cds_from_genomic.fna.gz
 
 if __name__ == "__main__":
     print("Start")
