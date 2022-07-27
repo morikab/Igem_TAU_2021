@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import subprocess
 
-destination_dir = '../../data/'
+destination_dir = '../../data/genbank_genomes/'
 
 def run_cmd(cmd, verbose=False, *args, **kwargs):
     process = subprocess.Popen(
