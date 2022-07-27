@@ -33,7 +33,8 @@ def download_files():
             run_cmd(command)
             print(command)
             # destination_file = destination_dir + '/' + f_name
-            command = 'gzip -d ' +  f_name
+            command = 'gzip -d ' + destination_dir +'/' +f_name
+            print(command)
             run_cmd(command)
 
 
