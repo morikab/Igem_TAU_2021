@@ -38,7 +38,7 @@ def download_files():
 
 
 if __name__ == "__main__":
-    print("Start")
+    print("Start!")
     download_files()
     print("The end")
 
