@@ -20,7 +20,9 @@ def download_files():
         file_names = cds_file.readlines()
         for file_name in file_names:
             cds_destination_file = destination_dir+'ncbi_genome_cds'
-            command = 'wget ‐P ' + cds_destination_file + ' ' + file_name.strip()
+            # command = 'wget ‐P ' + cds_destination_file + ' ' + file_name.strip()
+            command = 'wget -P ' + cds_destination_file +  ' ' + file_name.strip() +' --no-check-certificate'
+
             run_cmd(command)
             print(command)
         command = 'gzip -d ' + cds_destination_file + '/*'
