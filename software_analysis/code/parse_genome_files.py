@@ -54,7 +54,7 @@ def cds_rna_dirs_to_cub_rrna_csv(cds_dir, rna_dir ):
     rna_suffix = '_rna_from_genomic.fna.gz'
     final_dict = {}
 
-    output_csv = open('../data/genbank_genomes/refseq_analysed.csv', 'w')
+    output_csv = open('../data/refseq_genomes/refseq_analysed.csv', 'w')
 
 
     output_csv.write('assembly, 5s, 23s, 16s, TTT, TTC, TTA, TTG, TCT, TCC, TCA, TCG, TAT, TAC, TGT, TGC, TGG, CTT, CTC, CTA, CTG, CCT, CCC, CCA, CCG, CAT, CAC, CAA, CAG, CGT, CGC, CGA, CGG, ATT, ATC, ATA, ATG, ACT, ACC, ACA, ACG, AAT, AAC, AAA, AAG, AGT, AGC, AGA, AGG, GTT, GTC, GTA, GTG, GCT, GCC, GCA, GCG, GAT, GAC, GAA, GAG, GGT, GGC, GGA, GGG, TGA, TAA, TAG\n')
@@ -80,7 +80,7 @@ def cds_rna_dirs_to_cub_rrna_csv(cds_dir, rna_dir ):
 
         csv_list = [org] + [str(i) for i in org_dict.values()]
         output_csv.write(', '.join(csv_list)+'\n')
-    with open("../data/genbank_genomes/analysed_refseq.json", 'w') as handle:
+    with open("../data/refseq_genomes/analysed_refseq.json", 'w') as handle:
         json.dump(final_dict, handle)
 
 
@@ -88,4 +88,4 @@ cds_gz = "data/GCF_003434225.1_ASM343422v1_cds_from_genomic.fna.gz"
 rna_gz = "data/GCF_003434225.1_ASM343422v1_rna_from_genomic.fna.gz"
 genomic_rna_to_rrna(rna_gz)
 
-cds_rna_dirs_to_cub_rrna_csv("../data/genbank_genomes/ncbi_genome_cds", 'ncbi_genome_rna')
+cds_rna_dirs_to_cub_rrna_csv("../data/refseq_genomes/ncbi_genome_cds", 'ncbi_genome_rna')

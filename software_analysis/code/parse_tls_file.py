@@ -1,6 +1,79 @@
 from Bio import SeqIO
+import os
 
 #in progress! just started working on this
+
+
+def intersection(a, b):
+    c = set(a).intersection(b)
+    return list(c)
+
+def filter_metadata_in_mstr(mstr_fid):
+    'finds the relevent information about tls files from the mstr files and returns it in a form of a dictionary'
+
+    mstr_file = SeqIO.read(mstr_fid, 'genbank')
+    relevant_metadata = {}
+    if '16S' in mstr_file.description or '16s' in mstr_file.description:
+        try:
+            relevant_metadata['date'] = mstr_file.annotations['date']
+        except:
+            relevant_metadata['date'] = None
+
+        try:
+            relevant_metadata['title'] = mstr_file.annotations['references'][0].title
+        except:
+            relevant_metadata['title'] = None
+
+        try:
+            relevant_metadata['Assembly Method'] = mstr_file.annotations['structured_comment']['Assembly-Data']['Assembly Method']
+        except:
+            relevant_metadata['Assembly Method'] = None
+
+        try:
+            relevant_metadata['Sequencing Technology'] = mstr_file.annotations['structured_comment']['Assembly-Data']['Sequencing Technology']
+        except:
+            relevant_metadata['Sequencing Technology'] = None
+
+        try:
+            relevant_metadata['isolation_source'] = '_'.join(mstr_file.features[0].qualifiers['isolation_source'])
+        except:
+            relevant_metadata['isolation_source'] = None
+
+        try:
+            relevant_metadata['mol_type'] = '_'.join(mstr_file.features[0].qualifiers['mol_type']) ###should be 'genomic DNA' for all
+        except:
+            relevant_metadata['mol_type'] = None
+
+        try:
+            relevant_metadata['host'] = '_'.join(mstr_file.features[0].qualifiers['host'])
+        except:
+            relevant_metadata['host'] = None
+
+    return relevant_metadata
+
+
+def fasta_mstr_files_to_use(base_fid):
+    'creates a list of dictionaries, where each dictionary contains the metadata and fid of the fastafile'
+    'if a mstr fiel has no accompanying fasta, it will be printed out to the user'
+    fasta_files = [os.path.join(base_fid, file) for file in os.listdir(base_fid) if '.1.fsa_nt' in file]
+    tls_assem = []
+    for mstr_fid in [os.path.join(base_fid, file_name)
+                     for file_name in os.listdir(base_fid) if '.mstr.gbff' in file_name]:
+        metadata = filter_metadata_in_mstr(mstr_fid)
+        if metadata:
+            fasta_fid = [file for file in fasta_files if mstr_fid[:-10] in file]
+            if fasta_fid:
+                metadata['file_id'] = fasta_fid
+                tls_assem.append(metadata)
+            else:
+                print(f'for {mstr_fid} no fasta file was found')
+        else:
+            print(f'{mstr_fid} uses a non-16S tls')
+
+    print(tls_assem)
+    return tls_assem
+
+
 
 
 def parse_tls(fid):
@@ -9,8 +82,10 @@ def parse_tls(fid):
     with open(fid, "rt") as handle:
         for record in SeqIO.parse(handle, "fasta"):
             tls_seqs[record.description] = record.seq
-            print(record.description)
+            # print(record.description)
+            # print(record.seq)
 
 
-
-parse_tls('download_microbiomes/id.vdb_wgsnc.0301.2019.KAAB.1.fsa_nt')
+fasta_mstr_files_to_use('..\\data\\genbank_tls')
+# filter_metadata_in_mstr('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.mstr.gbff')
+# parse_tls('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.1.fsa_nt')
