@@ -64,9 +64,13 @@ def fasta_mstr_files_to_use(base_fid):
     'if a mstr fiel has no accompanying fasta, it will be printed out to the user'
     fasta_files = [os.path.join(base_fid, file) for file in os.listdir(base_fid) if '.1.fsa_nt' in file]
     tls_assem = {}
-    for mstr_fid in [os.path.join(base_fid, file_name)
-                     for file_name in os.listdir(base_fid) if '.mstr.gbff' in file_name]:
+    mstr_files = [os.path.join(base_fid, file_name)
+                     for file_name in os.listdir(base_fid) if '.mstr.gbff' in file_name]
+    print(mstr_files)
+    for mstr_fid in mstr_files:
+        print('\n', mstr_fid)
         id, metadata = filter_metadata_in_mstr(mstr_fid)
+        print(id)
         if metadata:
             fasta_fid = [file for file in fasta_files if id in file]
             if fasta_fid:
