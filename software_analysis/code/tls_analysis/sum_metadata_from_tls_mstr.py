@@ -92,8 +92,8 @@ def save_data(tls_assem, output_dir):
 
 if __name__ == "__main__":
     print("Start")
-    output_dir = '../data/processed_tls'
-    tls_assem = fasta_mstr_files_to_use('../data/genbank_tls')
+    output_dir = '../../data/processed_tls'
+    tls_assem = fasta_mstr_files_to_use('../../data/genbank_tls')
     save_data(tls_assem, output_dir)
     print("The end")
 
