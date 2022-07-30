@@ -32,7 +32,7 @@ def download_files():
             f_name = line.split('"')[1]
             downloaded_files = os.listdir(destination_dir)
             if f_name in downloaded_files:
-                command = 'gzip -d ' + destination_dir + '/' + f_name
+                command = 'zcat ' + destination_dir + '/' + f_name + ' > ' + destination_dir +  '/' + f_name[:-3]
                 run_cmd(command)
                 print(command)
                 continue
