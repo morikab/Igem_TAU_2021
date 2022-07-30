@@ -1,6 +1,7 @@
 from Bio import SeqIO
 import os
-
+import json
+import pandas as pd
 #in progress! just started working on this
 
 
@@ -8,10 +9,14 @@ def intersection(a, b):
     c = set(a).intersection(b)
     return list(c)
 
+def mstr_fid_to_microbiome_id(mstr_fid):
+    return mstr_fid.split('.')[-3]
+
 def filter_metadata_in_mstr(mstr_fid):
     'finds the relevent information about tls files from the mstr files and returns it in a form of a dictionary'
 
     mstr_file = SeqIO.read(mstr_fid, 'genbank')
+    id =  mstr_fid_to_microbiome_id(mstr_fid)
     relevant_metadata = {}
     if '16S' in mstr_file.description or '16s' in mstr_file.description:
         try:
@@ -49,43 +54,60 @@ def filter_metadata_in_mstr(mstr_fid):
         except:
             relevant_metadata['host'] = None
 
-    return relevant_metadata
+    return id, relevant_metadata
 
 
 def fasta_mstr_files_to_use(base_fid):
     'creates a list of dictionaries, where each dictionary contains the metadata and fid of the fastafile'
     'if a mstr fiel has no accompanying fasta, it will be printed out to the user'
     fasta_files = [os.path.join(base_fid, file) for file in os.listdir(base_fid) if '.1.fsa_nt' in file]
-    tls_assem = []
+    tls_assem = {}
     for mstr_fid in [os.path.join(base_fid, file_name)
                      for file_name in os.listdir(base_fid) if '.mstr.gbff' in file_name]:
-        metadata = filter_metadata_in_mstr(mstr_fid)
+        id, metadata = filter_metadata_in_mstr(mstr_fid)
         if metadata:
-            fasta_fid = [file for file in fasta_files if mstr_fid[:-10] in file]
+            fasta_fid = [file for file in fasta_files if id in file]
             if fasta_fid:
-                metadata['file_id'] = fasta_fid
-                tls_assem.append(metadata)
+                metadata['fasta'] = fasta_fid
+                tls_assem[id] = metadata
             else:
-                print(f'for {mstr_fid} no fasta file was found')
+                print(f'for {id} no fasta file was found')
         else:
-            print(f'{mstr_fid} uses a non-16S tls')
-
-    print(tls_assem)
+            print(f'{id} uses a non-16S tls')
     return tls_assem
 
+def save_data(tls_assem:type(dict), output_dir):
+    'saving the files as json and csv files'
+
+    with open(os.path.join(output_dir, 'tls_assembly_metadata.json'), 'w') as handle:
+        json.dump(tls_assem, handle)
+
+    assem_csv = pd.DataFrame(tls_assem).transpose()
+    assem_csv.to_csv('tls_assembly_metadata.csv')
 
 
 
-def parse_tls(fid):
-    tls_seqs = {}
-
-    with open(fid, "rt") as handle:
-        for record in SeqIO.parse(handle, "fasta"):
-            tls_seqs[record.description] = record.seq
-            # print(record.description)
-            # print(record.seq)
 
 
-fasta_mstr_files_to_use('..\\data\\genbank_tls')
+
+
+if __name__ == "__main__":
+    print("Start")
+    output_dir = '..\\data\\processed_tls'
+    tls_assem = fasta_mstr_files_to_use('..\\data\\genbank_tls')
+    save_data(tls_assem, output_dir)
+    print("The end")
+
+# def parse_tls(fid):
+#     tls_seqs = {}
+#
+#     with open(fid, "rt") as handle:
+#         for record in SeqIO.parse(handle, "fasta"):
+#             tls_seqs[record.description] = record.seq
+#             # print(record.description)
+#             # print(record.seq)
+
+
+
 # filter_metadata_in_mstr('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.mstr.gbff')
 # parse_tls('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.1.fsa_nt')
