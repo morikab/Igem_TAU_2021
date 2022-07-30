@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from Bio import SeqIO
 import os
 import json
