@@ -35,6 +35,7 @@ def download_files():
                 command = 'gzip -d ' + destination_dir + '/' + f_name
                 run_cmd(command)
                 print(command)
+                continue
             elif f_name[:-3] in downloaded_files:
                 continue
             else:
@@ -44,6 +45,7 @@ def download_files():
                 command = 'gzip -d ' + destination_dir + '/' + f_name
                 run_cmd(command)
                 print(command)
+                continue
 
 
 
