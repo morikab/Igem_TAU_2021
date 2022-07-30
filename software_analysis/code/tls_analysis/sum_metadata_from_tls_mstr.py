@@ -76,7 +76,7 @@ def fasta_mstr_files_to_use(base_fid):
             print(id, ' uses a non-16S tls')
     return tls_assem
 
-def save_data(tls_assem:type(dict), output_dir):
+def save_data(tls_assem, output_dir):
     'saving the files as json and csv files'
 
     with open(os.path.join(output_dir, 'tls_assembly_metadata.json'), 'w') as handle:
