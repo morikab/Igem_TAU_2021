@@ -84,12 +84,19 @@ def fasta_mstr_files_to_use(base_fid):
 
 def save_data(tls_assem, output_dir):
     'saving the files as json and csv files'
+    json_file = os.path.join(output_dir, 'tls_assembly_metadata.json')
+    csv_file =  os.path.join(output_dir, 'tls_assembly_metadata.csv')
+    if not os.path.exists(json_file):
+        with open(json_file, 'w') as handle:
+            json.dump(tls_assem, handle)
+    else:
+        print('json file already exists ')
 
-    with open(os.path.join(output_dir, 'tls_assembly_metadata.json'), 'w') as handle:
-        json.dump(tls_assem, handle)
-
-    assem_csv = pd.DataFrame(tls_assem).transpose()
-    assem_csv.to_csv(os.path.join(output_dir, 'tls_assembly_metadata.csv'))
+    if not os.path.exists(csv_file):
+        assem_csv = pd.DataFrame(tls_assem).transpose()
+        assem_csv.to_csv(os.path.join(output_dir, 'tls_assembly_metadata.csv'))
+    else:
+        print('csv file already exists ')
 
 
 
@@ -102,17 +109,3 @@ if __name__ == "__main__":
     tls_assem = fasta_mstr_files_to_use('../../data/genbank_tls')
     save_data(tls_assem, output_dir)
     print("The end")
-
-# def parse_tls(fid):
-#     tls_seqs = {}
-#
-#     with open(fid, "rt") as handle:
-#         for record in SeqIO.parse(handle, "fasta"):
-#             tls_seqs[record.description] = record.seq
-#             # print(record.description)
-#             # print(record.seq)
-
-
-
-# filter_metadata_in_mstr('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.mstr.gbff')
-# parse_tls('../data/genbank_tls/id.vdb_wgsnc.0301.2019.KAAB.1.fsa_nt')

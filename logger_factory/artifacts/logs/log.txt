@@ -1,59 +1,25 @@
-2022-07-26 22:46:22,667 - root - INFO - ##########################
-2022-07-26 22:46:22,667 - root - INFO - # USER INPUT INFORMATION #
-2022-07-26 22:46:22,667 - root - INFO - ##########################
-2022-07-26 22:46:23,220 - root - INFO - 
-Information about Arthrobacter tumbae:
-2022-07-26 22:46:23,221 - root - INFO - Organism is optimized
-2022-07-26 22:46:24,491 - root - INFO - Number of genes: 3370
-2022-07-26 22:46:24,491 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2022-07-26 22:46:25,088 - root - INFO - tGCN values were not found, tAI profile was not calculated
-2022-07-26 22:46:25,181 - root - INFO - 
-Information about Rhodanobacter fulvus:
-2022-07-26 22:46:25,181 - root - INFO - Organism is optimized
-2022-07-26 22:46:25,297 - root - INFO - Number of genes: 377
-2022-07-26 22:46:25,297 - root - INFO - WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.
-All genes will be used as a reference set for CAI calculation, results may be less accurate.
-2022-07-26 22:46:25,455 - root - INFO - tGCN values were not found, tAI profile was not calculated
-2022-07-26 22:46:25,680 - root - INFO - 
-Information about Pedococcus bigeumensis:
-2022-07-26 22:46:25,680 - root - INFO - Organism is optimized
-2022-07-26 22:46:26,031 - root - INFO - Number of genes: 971
-2022-07-26 22:46:26,031 - root - INFO - WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.
-All genes will be used as a reference set for CAI calculation, results may be less accurate.
-2022-07-26 22:46:26,340 - root - INFO - tGCN values were not found, tAI profile was not calculated
-2022-07-26 22:46:26,418 - root - INFO - 
-Information about Arthrobacter pascens:
-2022-07-26 22:46:26,418 - root - INFO - Organism is deoptimized
-2022-07-26 22:46:26,614 - root - INFO - Number of genes: 518
-2022-07-26 22:46:26,614 - root - INFO - WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.
-All genes will be used as a reference set for CAI calculation, results may be less accurate.
-2022-07-26 22:46:26,780 - root - INFO - tGCN values were not found, tAI profile was not calculated
-2022-07-26 22:46:26,789 - root - INFO - Arthrobacter tumbae has weight of 0.3333333333333333
-2022-07-26 22:46:26,789 - root - INFO - Rhodanobacter fulvus has weight of 0.3333333333333333
-2022-07-26 22:46:26,789 - root - INFO - Pedococcus bigeumensis has weight of 0.3333333333333333
-2022-07-26 22:46:26,789 - root - INFO - Arthrobacter pascens has weight of 1.0
-2022-07-26 22:46:26,789 - root - INFO - 
-
-Sequence to be optimized given in the following file C:\Users\97252\Documents\Thesis work\Igem_TAU_2021\example_data\mCherry_original.fasta
-2022-07-26 22:46:26,789 - root - INFO - containing this sequence: ATGGTTTCCAAGGGCGAGGAGGATAACATGGCTATCATTAAAGAGTTCATGCGCTTCAAAGTTCACATGGAGGGTTCTGTTAACGGTCACGAGTTCGAGATCGAAGGCGAAGGCGAGGGCCGTCCGTATGAAGGCACCCAGACCGCCAAACTGAAAGTGACTAAAGGCGGCCCGCTGCCTTTTGCGTGGGACATCCTGAGCCCGCAATTTATGTACGGTTCTAAAGCGTATGTTAAACACCCAGCGGATATCCCGGACTATCTGAAGCTGTCTTTTCCGGAAGGTTTCAAGTGGGAACGCGTAATGAATTTTGAAGATGGTGGTGTCGTGACCGTCACTCAGGACTCCTCCCTGCAGGATGGCGAGTTCATCTATAAAGTTAAACTGCGTGGTACTAATTTTCCATCTGATGGCCCGGTGATGCAGAAAAAGACGATGGGTTGGGAGGCGTCTAGCGAACGCATGTATCCGGAAGATGGTGCGCTGAAAGGCGAAATTAAACAGCGCCTGAAACTGAAAGATGGCGGCCATTATGACGCTGAAGTGAAAACCACGTACAAAGCCAAGAAACCTGTGCAGCTGCCTGGCGCGTACAATGTGAATATTAAACTGGACATCACCTCTCATAATGAAGATTATACGATCGTAGAGCAATATGAGCGCGCGGAGGGTCGTCATTCTACCGGTGGCATGGATGAGCTGTACAAATAA
-2022-07-26 22:46:26,789 - root - INFO - Total input processing time: 4.122385263442993
-2022-07-26 22:46:26,789 - root - INFO - tAI information:
-2022-07-26 22:46:26,789 - root - INFO - ##########################
-2022-07-26 22:46:26,789 - root - INFO - # ORF #
-2022-07-26 22:46:26,789 - root - INFO - ##########################
-2022-07-26 22:46:26,789 - root - INFO - OptimizationMethod.hill_climbing_average
-2022-07-26 22:46:26,789 - root - INFO - CAI information:
-2022-07-26 22:46:26,789 - root - INFO - ##########################
-2022-07-26 22:46:26,789 - root - INFO - # ORF #
-2022-07-26 22:46:26,789 - root - INFO - ##########################
-2022-07-26 22:46:26,789 - root - INFO - OptimizationMethod.hill_climbing_average
-2022-07-26 22:46:44,605 - root - INFO - Sequence:
-ATGGTCTCGAAGGGTGAGGAGGACAACATGGCGATCATCAAGGAGTTCATGCGTTTCAAGGTCCACATGGAGGGTTCGGTCAACGGTCACGAGTTCGAGATCGAGGGTGAGGGTGAGGGTCGTCCGTACGAGGGTACCCAGACCGCGAAGCTGAAGGTCACCAAGGGTGGTCCGCTGCCGTTCGCGTGGGACATCCTGTCGCCGCAGTTCATGTACGGTTCGAAGGCGTACGTCAAGCACCCGGCGGACATCCCGGACTACCTGAAGCTGTCGTTCCCGGAGGGTTTCAAGTGGGAGCGTGTCATGAACTTCGAGGACGGTGGTGTCGTCACCGTCACCCAGGACTCGTCGCTGCAGGACGGTGAGTTCATCTACAAGGTCAAGCTGCGTGGTACCAACTTCCCGTCGGACGGTCCGGTCATGCAGAAGAAGACCATGGGTTGGGAGGCGTCGTCGGAGCGTATGTACCCGGAGGACGGTGCGCTGAAGGGTGAGATCAAGCAGCGTCTGAAGCTGAAGGACGGTGGTCACTACGACGCGGAGGTCAAGACCACCTACAAGGCGAAGAAGCCGGTCCAGCTGCCGGGTGCGTACAACGTCAACATCAAGCTGGACATCACCTCGCACAACGAGGACTACACCATCGTCGAGCAGTACGAGCGTGCGGAGGGTCGTCACTCGACCGGTGGTATGGACGAGCTGTACAAGTGA
-2022-07-26 22:46:44,605 - root - INFO - Optimized sequences score: 4.842735069709267, deoptimized sequence score: 2.885553740315362
-2022-07-26 22:46:44,605 - root - INFO - Weakest link score: -0.1850870133979048
-2022-07-26 22:46:44,605 - root - INFO - Final optimization score: 0.9785906646969524
-2022-07-26 22:46:44,606 - root - INFO - ###########################
-2022-07-26 22:46:44,606 - root - INFO - # USER OUTPUT INFORMATION #
-2022-07-26 22:46:44,606 - root - INFO - ###########################
-2022-07-26 22:46:44,606 - root - INFO - Output zip file directory path: C:\Users\97252\Documents\Thesis work\Igem_TAU_2021\modules\artifacts
-2022-07-26 22:46:44,613 - root - INFO - Final output: {'final_sequence': 'ATGGTCTCGAAGGGTGAGGAGGACAACATGGCGATCATCAAGGAGTTCATGCGTTTCAAGGTCCACATGGAGGGTTCGGTCAACGGTCACGAGTTCGAGATCGAGGGTGAGGGTGAGGGTCGTCCGTACGAGGGTACCCAGACCGCGAAGCTGAAGGTCACCAAGGGTGGTCCGCTGCCGTTCGCGTGGGACATCCTGTCGCCGCAGTTCATGTACGGTTCGAAGGCGTACGTCAAGCACCCGGCGGACATCCCGGACTACCTGAAGCTGTCGTTCCCGGAGGGTTTCAAGTGGGAGCGTGTCATGAACTTCGAGGACGGTGGTGTCGTCACCGTCACCCAGGACTCGTCGCTGCAGGACGGTGAGTTCATCTACAAGGTCAAGCTGCGTGGTACCAACTTCCCGTCGGACGGTCCGGTCATGCAGAAGAAGACCATGGGTTGGGAGGCGTCGTCGGAGCGTATGTACCCGGAGGACGGTGCGCTGAAGGGTGAGATCAAGCAGCGTCTGAAGCTGAAGGACGGTGGTCACTACGACGCGGAGGTCAAGACCACCTACAAGGCGAAGAAGCCGGTCCAGCTGCCGGGTGCGTACAACGTCAACATCAAGCTGGACATCACCTCGCACAACGAGGACTACACCATCGTCGAGCAGTACGAGCGTGCGGAGGGTCGTCACTCGACCGGTGGTATGGACGAGCTGTACAAGTGA', 'optimization_score': 0.9785906646969524, 'score_for_weakest_pair': -0.1850870133979048, 'zip_file_path': 'C:\\Users\\97252\\Documents\\Thesis work\\Igem_TAU_2021\\modules\\artifacts\\communique_results.zip'}
+2022-07-30 21:00:06,365 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:09,518 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:11,113 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:11,841 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:16,924 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:18,417 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:21,736 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:23,560 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:24,548 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:28,164 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:33,272 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:35,035 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:37,661 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:39,394 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:41,311 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:44,680 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:48,307 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:50,419 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:54,343 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:56,148 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:00:58,280 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:01:02,208 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:01:04,430 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:01:06,094 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-30 21:01:09,532 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
