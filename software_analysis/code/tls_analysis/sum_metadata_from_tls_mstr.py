@@ -71,9 +71,9 @@ def fasta_mstr_files_to_use(base_fid):
                 metadata['fasta'] = fasta_fid
                 tls_assem[id] = metadata
             else:
-                print(f'for {id} no fasta file was found')
+                print(id, ' no fasta file was found')
         else:
-            print(f'{id} uses a non-16S tls')
+            print(id, ' uses a non-16S tls')
     return tls_assem
 
 def save_data(tls_assem:type(dict), output_dir):
@@ -83,8 +83,7 @@ def save_data(tls_assem:type(dict), output_dir):
         json.dump(tls_assem, handle)
 
     assem_csv = pd.DataFrame(tls_assem).transpose()
-    assem_csv.to_csv('tls_assembly_metadata.csv')
-
+    assem_csv.to_csv(os.path.join(output_dir, 'tls_assembly_metadata.csv'))
 
 
 
@@ -93,7 +92,7 @@ def save_data(tls_assem:type(dict), output_dir):
 
 if __name__ == "__main__":
     print("Start")
-    output_dir = '../../data/processed_tls'
+    output_dir = '..\\data\\processed_tls'
     tls_assem = fasta_mstr_files_to_use('..\\data\\genbank_tls')
     save_data(tls_assem, output_dir)
     print("The end")
