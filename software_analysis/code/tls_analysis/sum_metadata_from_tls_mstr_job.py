@@ -61,7 +61,7 @@ def filter_metadata_in_mstr(mstr_fid):
 
 def fasta_mstr_files_to_use(base_fid):
     'creates a list of dictionaries, where each dictionary contains the metadata and fid of the fastafile'
-    'if a mstr fiel has no accompanying fasta, it will be printed out to the user'
+    'if a mstr file has no accompanying fasta, it will be printed out to the user'
     fasta_files = [os.path.join(base_fid, file) for file in os.listdir(base_fid) if '.1.fsa_nt' in file]
     tls_assem = {}
     mstr_files = [os.path.join(base_fid, file_name)
