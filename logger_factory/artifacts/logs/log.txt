@@ -1,4 +1,3 @@
-2022-07-31 08:00:03,845 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2022-07-31 08:00:09,035 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2022-07-31 08:00:10,958 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
-2022-07-31 08:00:14,951 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-31 10:58:00,265 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-31 10:58:02,210 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
+2022-07-31 10:58:03,880 - root - INFO - CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression
