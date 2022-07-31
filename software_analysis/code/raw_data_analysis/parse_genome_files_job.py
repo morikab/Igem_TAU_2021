@@ -4,9 +4,10 @@ import numpy as np
 import os
 import json
 import sys
-sys.path.insert(1, '../../../modules/')
-from user_IO.input_functions import calculate_cai_weights_for_input
-from ORF.calculating_cai import general_geomean
+sys.path.insert(1, '../../../modules/user_IO')
+sys.path.insert(1, '../../../modules/ORF')
+from input_functions import calculate_cai_weights_for_input
+from calculating_cai import general_geomean
 
 
 def mean(data):
