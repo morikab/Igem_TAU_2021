@@ -53,6 +53,8 @@ def data_for_every_org(cds_dir, rna_dir):
     print('the number of cds files is: ', len(cds_dir_org),
           '\nthe number of rna files is: ', len(rna_dir_org),
           '\nthe number of genomes containing both a cds and a rna file is: ', len(org_list))
+    print('files not in cds but in rna: ', [i for i in rna_dir_org if i not in cds_dir_org],
+          '\nfiles not in rna but in cds: ', [i for i in cds_dir_org if i not in rna_dir_org])
 
     for org in org_list:
         org_dict = {}
