@@ -1,12 +1,15 @@
-import gzip
-
 import pandas as pd
 from Bio import SeqIO
 from modules.ORF.calculating_cai import general_geomean
-from modules.user_IO.input_functions import calculate_cai_weights_for_input
 import numpy as np
 import os
 import json
+# some_file.py
+import sys
+# insert at 1, 0 is the script path (or '' in REPL)
+sys.path.insert(1, '../../../modules/user_IO/')
+from input_functions import calculate_cai_weights_for_input
+
 
 def mean(data):
   n = len(data)
