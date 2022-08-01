@@ -7,45 +7,45 @@ import pandas as pd
 
 
 organisms_runs_to_test = {
-    'E new CAI, wo exp': {
-        'E. coli':{'genome_path': '..\example_data\Bacillus subtilis.gb',
+    'B new CAI, wo exp': {
+            'B. subtilis':{'genome_path': '../example_data/data_for_experiment/Bacillus subtilis.gb',
                     'optimized': True,
                     'expression_csv': None,
                     'optimization_priority': DEFAULT_ORGANISM_PRIORITY},
-        'B. subtilis': {'genome_path': '../example_data/Escherichia coli.gb',
+        'E. coli': {'genome_path': '../example_data/data_for_experiment/Escherichia coli.gb',
                         'optimized': False,
                         'expression_csv': None,
                         'optimization_priority': DEFAULT_ORGANISM_PRIORITY}
     },
 
-    'B new CAI, wo exp': {
-        'E. coli': {'genome_path': '..\example_data\Bacillus subtilis.gb',
+    'E new CAI, wo exp': {
+        'B. subtilis': {'genome_path': '../example_data/data_for_experiment/Bacillus subtilis.gb',
                     'optimized': False,
                     'expression_csv': None,
                     'optimization_priority': DEFAULT_ORGANISM_PRIORITY},
-        'B. subtilis': {'genome_path': '../example_data/Escherichia coli.gb',
+        'E. coli': {'genome_path': '../example_data/data_for_experiment/Escherichia coli.gb',
                         'optimized': True,
-                        'expression_csv': '../example_data/bacillus_mrna_level.csv',
-                        'optimization_priority': DEFAULT_ORGANISM_PRIORITY}
-    },
-
-    'E new CAI, w exp': {
-        'E. coli': {'genome_path': '..\example_data\Bacillus subtilis.gb',
-                    'optimized': True,
-                    'expression_csv': '../example_data/ecoli_mrna_level.csv',
-                    'optimization_priority': DEFAULT_ORGANISM_PRIORITY},
-        'B. subtilis': {'genome_path': '../example_data/Escherichia coli.gb',
-                        'optimized': False,
-                        'expression_csv': '../example_data/bacillus_mrna_level.csv',
+                        'expression_csv': '../example_data/data_for_experiment/bacillus_mrna_level.csv',
                         'optimization_priority': DEFAULT_ORGANISM_PRIORITY}
     },
 
     'B new CAI, w exp': {
-        'E. coli': {'genome_path': '..\example_data\Bacillus subtilis.gb',
-                    'optimized': False,
-                    'expression_csv': '../example_data/ecoli_mrna_level.csv',
+        'B. subtilis': {'genome_path': '../example_data/data_for_experiment/Bacillus subtilis.gb',
+                    'optimized': True,
+                    'expression_csv': '../example_data/data_for_experiment/ecoli_mrna_level.csv',
                     'optimization_priority': DEFAULT_ORGANISM_PRIORITY},
-        'B. subtilis': {'genome_path': '../example_data/Escherichia coli.gb',
+        'E. coli': {'genome_path': '../example_data//data_for_experiment/Escherichia coli.gb',
+                        'optimized': False,
+                        'expression_csv': '../example_data/data_for_experiment/bacillus_mrna_level.csv',
+                        'optimization_priority': DEFAULT_ORGANISM_PRIORITY}
+    },
+
+    'E new CAI, w exp': {
+        'B. subtilis': {'genome_path': '../example_data/data_for_experiment/Bacillus subtilis.gb',
+                    'optimized': False,
+                    'expression_csv': '../example_data/data_for_experiment/ecoli_mrna_level.csv',
+                    'optimization_priority': DEFAULT_ORGANISM_PRIORITY},
+        'E. coli': {'genome_path': '../example_data/data_for_experiment/Escherichia coli.gb',
                         'optimized': True,
                         'expression_csv': None,
                         'optimization_priority': DEFAULT_ORGANISM_PRIORITY}
