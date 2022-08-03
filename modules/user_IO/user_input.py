@@ -45,6 +45,7 @@ class UserInputModule(object):
         organisms_names = set()
 
         for key, val in user_input['organisms'].items():
+            print(user_input)
             try:
                 organism = cls._parse_single_input(val)
             except:
@@ -94,6 +95,7 @@ class UserInputModule(object):
 
     @staticmethod
     def _parse_single_input(organism_input):
+        print(organism_input)
         """
         create the relevant information for each organism
         :param organism_input: the dictionary supplied for every organism:
@@ -114,6 +116,7 @@ class UserInputModule(object):
         organism_name = find_org_name(gb_file)
         logger.info(f'\nInformation about {organism_name}:')
         is_optimized = organism_input["optimized"]
+        print(organism_input)
         if is_optimized:
             logger.info("Organism is optimized")
         else:

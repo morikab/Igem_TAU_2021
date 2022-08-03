@@ -166,12 +166,11 @@ def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code='genetic_code
         weights[codon] = RSCUs[codon] / max(
             (RSCUs[_codon] for _codon in synonymous_codons[codon])
         )
-
+    # print(weights)
     return weights
 
 
 def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
-
     cai_scores = []
     for sequence in sequence_lst:
         sequence = sequence.upper()
