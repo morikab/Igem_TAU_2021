@@ -82,14 +82,14 @@ def write_fasta(fid, list_seq, list_name):
 
 def save_data(final_dict, out_dir):
     print(final_dict)
-    with open(out_dir + "cai_and_16s_for_genomes.json", 'w') as handle:
+    with open(out_dir + "cai_and_16s_for_genomes2.json", 'w') as handle:
         json.dump(final_dict, handle)
 
     csv_data = pd.DataFrame(final_dict).transpose()
-    csv_data.to_csv(out_dir+ "cai_and_16s_for_genomes.csv")
+    csv_data.to_csv(out_dir+ "cai_and_16s_for_genomes2.csv")
 
     fasta_dict = {key: value['16s'] for key, value in final_dict.items()}
-    write_fasta(out_dir+ "cai_and_16s_for_genomes.fasta",
+    write_fasta(out_dir+ "cai_and_16s_for_genomes2.fasta",
                 list(fasta_dict.values()),
                 list(fasta_dict.keys()))
 
