@@ -59,7 +59,9 @@ def data_for_every_org(cds_dir, rna_dir):
     print('files not in cds but in rna: ', [i for i in rna_dir_org if i not in cds_dir_org],
           '\nfiles not in rna but in cds: ', [i for i in cds_dir_org if i not in rna_dir_org])
 
+
     for org in org_list:
+        print(org)
         org_dict = {}
         cds_path = os.path.join(cds_dir + org+cds_suffix)
         rna_path = os.path.join(rna_dir+ org+rna_suffix)
@@ -82,14 +84,14 @@ def write_fasta(fid, list_seq, list_name):
 
 def save_data(final_dict, out_dir):
     print(final_dict)
-    with open(out_dir + "cai_and_16s_for_genomes2.json", 'w') as handle:
+    with open(out_dir + "cai_and_16s_for_genomes3.json", 'w') as handle:
         json.dump(final_dict, handle)
 
     csv_data = pd.DataFrame(final_dict).transpose()
-    csv_data.to_csv(out_dir+ "cai_and_16s_for_genomes2.csv")
+    csv_data.to_csv(out_dir+ "cai_and_16s_for_genomes3.csv")
 
     fasta_dict = {key: value['16s'] for key, value in final_dict.items()}
-    write_fasta(out_dir+ "cai_and_16s_for_genomes2.fasta",
+    write_fasta(out_dir+ "cai_and_16s_for_genomes3.fasta",
                 list(fasta_dict.values()),
                 list(fasta_dict.keys()))
 
