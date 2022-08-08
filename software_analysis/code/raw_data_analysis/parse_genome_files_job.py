@@ -9,7 +9,7 @@ sys.path.insert(1, '../../../modules/ORF')
 sys.path.insert(1, '../../../modules/')
 from input_functions import calculate_cai_weights_for_input
 from calculating_cai import general_geomean
-
+import csv
 
 def mean(data):
   n = len(data)
@@ -45,7 +45,7 @@ def genomic_rna_to_rrna(fid):
     return rrna_dict
 
 
-def data_for_every_org(cds_dir, rna_dir):
+def data_for_every_org(cds_dir, rna_dir, out_dir):
     cds_suffix = '_cds_from_genomic.fna'
     rna_suffix = '_rna_from_genomic.fna'
     final_dict = {}
@@ -58,6 +58,10 @@ def data_for_every_org(cds_dir, rna_dir):
           '\nthe number of genomes containing both a cds and a rna file is: ', len(org_list))
     print('files not in cds but in rna: ', [i for i in rna_dir_org if i not in cds_dir_org],
           '\nfiles not in rna but in cds: ', [i for i in cds_dir_org if i not in rna_dir_org])
+
+    f = open(out_dir + '/genome_parsing_second_try.csv', 'w')
+    writer = csv.writer(f)
+    writer.writerow(['5s', '16s', '23s', 'TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TGT', 'TGC', 'TGG', 'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG', 'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG', 'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG'])
 
 
     for org in org_list:
@@ -73,6 +77,11 @@ def data_for_every_org(cds_dir, rna_dir):
         org_dict.update(cai_dict)
 
         final_dict[org] = org_dict
+
+        row_to_write = list(org_dict.values())
+        row_to_write.insert(0, org)
+        writer.writerow(row_to_write)
+
     return final_dict
 
 
@@ -101,8 +110,10 @@ def save_data(final_dict, out_dir):
 if __name__ == "__main__":
     print("Start")
     output_dir = '../../data/processed_genomes/'
+
     org_dict = data_for_every_org("../../data/refseq_genomes/ncbi_genome_cds/",
-                                  "../../data/refseq_genomes/ncbi_genome_rna/")
+                                  "../../data/refseq_genomes/ncbi_genome_rna/",
+                                  out_dir = output_dir)
     save_data(org_dict, output_dir)
     print("The end")
 
