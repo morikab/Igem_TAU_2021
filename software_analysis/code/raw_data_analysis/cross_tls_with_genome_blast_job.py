@@ -38,6 +38,8 @@ def run_all_tls(metadata_fid ):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
+        if os.path.exists(tls_fid[:-6]+'csv'):
+            continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
