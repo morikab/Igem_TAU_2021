@@ -38,7 +38,7 @@ def run_all_tls(metadata_fid ):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        command, output = blastn_run(tls_fid)
+        output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
         print(output)
