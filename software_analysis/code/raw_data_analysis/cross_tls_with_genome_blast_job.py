@@ -42,6 +42,7 @@ def run_all_tls(metadata_fid ):
         command, output = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
+        print(output)
 
     tls_metadata['blast_command'] = commands
     tls_metadata['blast_csv'] = outputs
