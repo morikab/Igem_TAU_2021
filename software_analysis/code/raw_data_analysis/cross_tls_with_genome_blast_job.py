@@ -28,7 +28,7 @@ def blastn_run(tls_inp):
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
     run_cmd(command)
     print(command)
-    return command
+    return tls_output, command
 
 
 def run_all_tls(metadata_fid ):
@@ -37,9 +37,15 @@ def run_all_tls(metadata_fid ):
     print(fasta_loc_list)
 
     commands = []
+    outputs = []
     for tls_fid in fasta_loc_list:
-        tls_command = blastn_run(tls_fid)
-        commands.append(tls_command)
+        command, output = blastn_run(tls_fid)
+        commands.append(command)
+        outputs.append(output)
+
+    tls_metadata['blast_command'] = commands
+    tls_metadata['blast_csv'] = outputs
+    tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
 
 run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
 
