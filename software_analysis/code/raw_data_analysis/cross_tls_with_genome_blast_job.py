@@ -46,9 +46,9 @@ def run_all_tls(metadata_fid ):
         outputs.append(output)
         print(output)
 
-    tls_metadata['blast_command'] = commands
-    tls_metadata['blast_csv'] = outputs
-    tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
+    # tls_metadata['blast_command'] = commands
+    # tls_metadata['blast_csv'] = outputs
+    # tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
     return commands, tls_metadata
 
 # run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
