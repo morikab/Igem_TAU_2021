@@ -74,7 +74,7 @@ def fasta_mstr_files_to_use(base_fid):
         if metadata:
             fasta_fid = [file for file in fasta_files if id in file]
             if fasta_fid:
-                metadata['fasta'] = fasta_fid
+                metadata['fasta'] = fasta_fid[0]
                 tls_assem[id] = metadata
             else:
                 print(id, ' no fasta file was found')
