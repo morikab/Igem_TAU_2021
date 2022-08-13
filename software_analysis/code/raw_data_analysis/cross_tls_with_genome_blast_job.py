@@ -26,8 +26,8 @@ def blastn_run(tls_inp):
     other_preferences = ' -subject_besthit -outfmt 10 -max_target_seqs 1 -num_threads 4'
     tls_output = tls_inp[:-6]+'csv'
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
-    run_cmd(command)
-    print(command)
+    # run_cmd(command)
+    # print(command)
     return tls_output, command
 
 
@@ -46,15 +46,22 @@ def run_all_tls(metadata_fid ):
     tls_metadata['blast_command'] = commands
     tls_metadata['blast_csv'] = outputs
     tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
-    return tls_metadata
+    return commands, tls_metadata
 
 # run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
 
 
 
+
+
 if __name__ == "__main__":
     print('Start')
-    run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+    command_list, df = run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+    for command in command_list:
+        proc = subprocess.Popen(command, shell=True,
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        out, err = proc.communicate()
+        print("{} : {}".format(command, out.decode()))
     print("The end")
 
 
