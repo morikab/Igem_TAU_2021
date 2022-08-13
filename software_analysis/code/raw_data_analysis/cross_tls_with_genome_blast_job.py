@@ -34,7 +34,6 @@ def blastn_run(tls_inp):
 def run_all_tls(metadata_fid ):
     tls_metadata = pd.read_csv(metadata_fid)
     fasta_loc_list = tls_metadata['fasta'].to_list()
-    print(fasta_loc_list)
 
     commands = []
     outputs = []
@@ -47,8 +46,17 @@ def run_all_tls(metadata_fid ):
     tls_metadata['blast_command'] = commands
     tls_metadata['blast_csv'] = outputs
     tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
+    return tls_metadata
 
-run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+# run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+
+
+
+if __name__ == "__main__":
+    print('Start')
+    run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+    print("The end")
+
 
 
 
