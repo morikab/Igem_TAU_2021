@@ -2,6 +2,7 @@
 import os
 import subprocess
 import pandas as pd
+from pathlib import Path
 
 destination_dir = '../../data/refseq_genomes/'
 
@@ -38,7 +39,7 @@ def run_all_tls(metadata_fid ):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        if os.path.exists(tls_fid[:-6]+'csv'):
+        if Path(tls_fid[:-6]+'csv').is_file():
             continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
