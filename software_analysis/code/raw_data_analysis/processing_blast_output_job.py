@@ -1,21 +1,7 @@
 # -*- coding: utf-8 -*-
-import os
-import subprocess
 import pandas as pd
-from pathlib import Path
 import json
 destination_dir = '../../data/refseq_genomes/'
-
-def run_cmd(cmd, verbose=False, *args, **kwargs):
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True
-    )
-    std_out, std_err = process.communicate()
-    if verbose:
-        print(std_out.strip(), std_err)
 
 
 
@@ -35,14 +21,12 @@ def check_all_blast_res(genomes_df, tls_new_metadata_df):
 
     blast_results_dict = {}
     for idx, blast_csv in enumerate(tls_new_metadata_df['blast_csv'].to_list()):
-        # if idx>2:
-        #     break
         tls_dict = tls_new_metadata_df.iloc[idx, :].to_dict()
         cai_weights, genomes_df = blastn_run(tls_csv=blast_csv, genomes_df=genomes_df)
         tls_dict['cai'] = cai_weights
         entry_name = blast_csv.split('.')[-3]
         blast_results_dict[entry_name] = tls_dict
-
+        print(idx)
     return blast_results_dict, genomes_df
 
 
