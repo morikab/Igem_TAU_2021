@@ -68,7 +68,7 @@ def filename_to_sent_job(sh_file):
     send_suffix = ' -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
-    line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix
+    line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
     return line
 
 
