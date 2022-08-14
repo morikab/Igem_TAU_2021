@@ -17,6 +17,8 @@ bacillus_exp = '../example_data/data_for_experiment/ecoli_mrna_level.csv'
 bacillus_cds_dict, estimated_expression = extract_gene_data(bacillus_genome_fid, bacillus_exp)
 bacillus_cai_weights = calculate_cai_weights_for_input(bacillus_cds_dict, estimated_expression, None)
 
+
+
 cai_weights = {}
 cai_weights['ecoli'] = ecoli_cai_weights
 cai_weights['bacillus'] = bacillus_cai_weights

@@ -86,12 +86,12 @@ def RSCU(sequences, genetic_code='genetic_code'):
     # ensure all input sequences are divisible by three
     sequences_new = []
     for sequence in sequences:
-        if len(sequence) % 3 == 0:
+        if not sequence:
+            print('used empty sequence as input')
+        elif len(sequence) % 3 == 0:
             sequences_new.append(sequence)
         else:
             print(sequence)
-        if not sequence:
-            raise ValueError("Input sequence cannot be empty")
     sequences = sequences_new
 
     # count the number of each codon in the sequences

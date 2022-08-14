@@ -42,7 +42,6 @@ if __name__ == "__main__":
     out_fid = '../../data/tls_genome_match/'
     blast_results_dict, genomes_df = check_all_blast_res(genomes_df, tls_new_metadata_df)
     save_data(blast_results_dict, genomes_df, out_fid)
-        # print(blast_results_dict)
 
 
 
