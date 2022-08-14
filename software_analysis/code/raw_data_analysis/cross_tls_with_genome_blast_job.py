@@ -69,13 +69,13 @@ def filename_to_sent_job(sh_file):
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
+    print(line)
     return line
 
 
 if __name__ == "__main__":
     print('Start')
     command_list, df = run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
-
     job_files = []
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
