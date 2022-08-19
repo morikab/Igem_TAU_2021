@@ -11,6 +11,12 @@ from input_functions import calculate_cai_weights_for_input
 from calculating_cai import general_geomean
 import csv
 
+
+'''
+calculate CAI and extract the rrna sequences from the refseq downloaded genomes
+'''
+
+
 def mean(data):
   n = len(data)
   mean = sum(data) / n

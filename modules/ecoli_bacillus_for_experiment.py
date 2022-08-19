@@ -95,7 +95,7 @@ if __name__ == "__main__":
         tested_dict['organisms'] = run_dict
         run_output = run_modules(user_input_dict = tested_dict)
         final_output[run_name] = run_output
-    print(final_output)
+    #print(final_output)
 
     csv_data = pd.DataFrame(final_output).transpose()
     fasta_dict = {key: value['final_sequence'] for key, value in final_output.items()}
@@ -105,5 +105,4 @@ if __name__ == "__main__":
     # write_fasta('../example_data/sequences_for_exp.fasta',
     #             list(fasta_dict.values()),
     #             list(fasta_dict.keys()))
-    print(fasta_dict)
-
+    # print(fasta_dict)

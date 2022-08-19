@@ -16,7 +16,7 @@ cai_new_values['B. subtilis w exp'] = b_w_exp
 cai_new_values['E. coli w exp'] = e_w_exp
 cai_new_values['B. subtilis wo exp'] = b_wo_exp
 cai_new_values['E. coli wo exp'] = e_wo_exp
-pd.DataFrame(cai_new_values).to_csv('calculated_cai_values.csv')
+pd.DataFrame(cai_new_values).to_csv('cai_calculation_files/calculated_cai_values.csv')
 
 
 sequences = SeqIO.parse('only_cai_sequences', 'fasta')
