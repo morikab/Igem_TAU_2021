@@ -7,6 +7,7 @@ import typing
 
 from logger_factory.logger_factory import LoggerFactory
 from modules.testing_for_modules import generate_testing_data
+from modules.testing_for_modules import generate_testing_data_for_comparing_with_previous_algorithm
 
 
 # Create clean artifacts directory
@@ -117,11 +118,17 @@ def unit1(user_input: models.UserInput):
 
 if __name__ == "__main__":
     tic = time.time()
-    default_user_inp_raw = generate_testing_data(n_organisms=4,
-                                                 percent_optimized=0.7,
-                                                 clusters_count=1,
-                                                 tuning_param=0.5)
+    # default_user_inp_raw = generate_testing_data(n_organisms=4,
+    #                                              percent_optimized=0.7,
+    #                                              clusters_count=1,
+    #                                              tuning_param=0.5)
+    default_user_inp_raw = generate_testing_data_for_comparing_with_previous_algorithm(
+        optimization_method="hill_climbing_bulk_aa_average",
+        clusters_count=1,
+        tuning_param=0.5,
+        is_ecoli_optimized=False,
+    )
     run_modules()
     toc = time.time()
     modules_run_time = toc - tic
-    logger.info("Total modules run time: ", modules_run_time)
+    logger.info(F"Total modules run time: {modules_run_time}")

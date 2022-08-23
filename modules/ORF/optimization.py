@@ -71,7 +71,6 @@ def calc_diff(expression_organisms, low_expression_organisms, codons):
 # --------------------------------------------------------------
 def loss_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum):
     """
-
     :param high_expression_organisms: list of expression organisms
     :param low_expression_organisms: list of no_expression organisms
     :param codons: list of codons to calculate the loss for
@@ -113,13 +112,12 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
     for feature_name in [feature.index_name for feature in organisms[0].features]:
         max_value = find_max_value_per_feature(organisms, feature_name, codons)
         for organism in organisms:
-
             feature = [feature for feature in organism.features if feature.index_name == feature_name]
             f = feature[0]
 
             for codon in codons:
                 loss[codon] = 0
-                try: # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
+                try:    # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
                     # optimized organisms should have small loss
                     if high_expression:
                         loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
@@ -131,7 +129,6 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
                     continue
 
     return loss
-
 # --------------------------------------------------------------
 
 

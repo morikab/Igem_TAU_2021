@@ -42,7 +42,7 @@ synonymous_codons = {
     "Y": ["TAT", "TAC"],
 }
 
-DEFAULT_ORGANISM_PRIORITY = 5
+DEFAULT_ORGANISM_PRIORITY = 50
 
 
 def write_fasta(fid, list_seq, list_name):
