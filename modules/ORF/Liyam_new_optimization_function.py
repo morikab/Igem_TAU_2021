@@ -95,6 +95,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
     """
     optimization_method = models.OptimizationMethod.hill_climbing_average
     seq_options = {}
+    original_seq = seq
     score = OptimizationModule.run_module(
         final_seq=seq,
         user_input=user_input,
@@ -123,6 +124,8 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
             selected_aa_codon = find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa], seq_to_change=seq)
             aa_to_selected_codon[aa] = selected_aa_codon
 
+        logger.info(F"aa_to_selected_codon in iteration {run} is: {aa_to_selected_codon}")
+
         # create new seq by replacing all synonymous codons
         new_seq = seq
         for aa in aa_to_selected_codon:
@@ -142,5 +145,16 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
             break
         else:
             seq = new_seq
+
+    logger.info(F"Original score is: {seq_options[original_seq]}")
+    for aa in aa_to_selected_codon:
+        new_seq = change_all_codons_of_aa(original_seq, aa_to_selected_codon[aa])
+        score = OptimizationModule.run_module(
+            final_seq=new_seq,
+            user_input=user_input,
+            cai_or_tai=cai_or_tai,
+            optimization_method=optimization_method,
+        )
+        logger.info(F"z-score after changing codon {aa_to_selected_codon[aa]} of AA {aa} is: {score}")
 
     return seq

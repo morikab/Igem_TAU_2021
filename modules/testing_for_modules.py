@@ -56,7 +56,6 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method,
         clusters_count=2,
         tuning_param=0.5,
-        genome_path=genome_path,
         is_ecoli_optimized=False,
 ):
     if is_ecoli_optimized:

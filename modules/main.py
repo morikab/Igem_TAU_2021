@@ -31,6 +31,13 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     try:
         before_parsing_input = time.time()
         user_input = user_IO.UserInputModule.run_module(user_inp_raw)
+
+        # Log CAI scores for organisms
+        for organism in user_input.organisms:
+            logger.info(organism.name)
+            logger.info("CAI weights when using mrna levels:")
+            logger.info(organism.cai_profile)
+
         after_parsing_input = time.time()
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
