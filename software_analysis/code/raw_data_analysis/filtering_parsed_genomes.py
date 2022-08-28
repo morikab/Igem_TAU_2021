@@ -19,7 +19,6 @@ only_str_16s = []
 for org_dict in cai_dict.values():
     try:
         if len(org_dict['16s']) >1000:
-            print(len(org_dict['16s']))
             only_str_16s.append(org_dict['16s'])
     except:
         continue
@@ -33,13 +32,24 @@ std_for_plt = []
 for seq, count in rrna_counts_dict.items():
     for org, org_dict in cai_dict.items():
         try:
+            # print('#')
             if org_dict["16s"] == seq:
-                filtered_org_dict[org] = org_dict
+                seqid = org.split('.')[0]
+                if len (str(seqid))>50:
+                    print(org)
+                    print(seqid)
+                # else:
+                # print(seqid)
+                filtered_org_dict[seqid] = org_dict
                 break
         except:
+            # print('%')
             continue
 
 print(len(filtered_org_dict))
+print(len(sorted(set(list(filtered_org_dict.keys())))))
+print(filtered_org_dict)
+
 
 out_dir = '../../data/processed_genomes/'
 with open(out_dir + "cai_and_16s_for_genomes_filtered.json", 'w') as handle:
@@ -47,6 +57,9 @@ with open(out_dir + "cai_and_16s_for_genomes_filtered.json", 'w') as handle:
 
 csv_data = pd.DataFrame(filtered_org_dict).transpose()
 csv_data.to_csv(out_dir + "cai_and_16s_for_genomes_filtered.csv")
+
+
+
 
 fasta_dict = {key: value['16s'] for key, value in filtered_org_dict.items()}
 write_fasta(out_dir + "cai_and_16s_for_genomes_filtered.fasta",

@@ -65,7 +65,7 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
     print('files not in cds but in rna: ', [i for i in rna_dir_org if i not in cds_dir_org],
           '\nfiles not in rna but in cds: ', [i for i in cds_dir_org if i not in rna_dir_org])
 
-    f = open(out_dir + '/genome_parsing_second_try.csv', 'w')
+    f = open(out_dir + '/cai_and_16s_for_genomes.csv', 'w')
     writer = csv.writer(f)
     writer.writerow(['5s', '16s', '23s', 'TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TGT', 'TGC', 'TGG', 'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG', 'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG', 'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG'])
 
