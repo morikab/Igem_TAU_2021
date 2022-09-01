@@ -1,4 +1,8 @@
+from collections import defaultdict
+from logger_factory.logger_factory import LoggerFactory
 from modules.shared_functions_and_vars import translate, synonymous_codons
+
+logger = LoggerFactory.get_logger()
 
 # --------------------------------------------------------------
 
@@ -110,23 +114,36 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
     """
 
     for feature_name in [feature.index_name for feature in organisms[0].features]:
+        new_loss = defaultdict(int)
         max_value = find_max_value_per_feature(organisms, feature_name, codons)
+        logger.info(F"Max feature value is: {max_value}")
         for organism in organisms:
             feature = [feature for feature in organism.features if feature.index_name == feature_name]
             f = feature[0]
+            logger.info(F"Feature ratio is: {f.ratio}")
 
             for codon in codons:
-                loss[codon] = 0
+                # Changed in order not to override the codon loss score in each iteration with the value of the low expression codons
+                # loss[codon] = 0
                 try:    # todo: temporal change. When synonymous codons dict is done, erase 'try-except'
                     # optimized organisms should have small loss
                     if high_expression:
-                        loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
-                        # print(organism.name)
-                        # print(organism.std)
+                        # loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
+                        new_loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
+                        logger.info(F"high expression loss for codon: {codon} is: {(tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))}")
                     else:
-                        loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
+                        # loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
+                        new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
+                        logger.info(F"low expression loss for codon: {codon} is: {(1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)}")
+
                 except:
                     continue
+
+        for codon in new_loss.keys():
+            if codon in loss:
+                loss[codon] += new_loss[codon]
+            else:
+                loss[codon] = new_loss[codon]
 
     return loss
 # --------------------------------------------------------------
@@ -161,10 +178,11 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, tun
 
     for aa, codons in synonymous_codons.items():
         loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum=local_maximum)
+        logger.info(F"Loss dict is: {loss}")
         optimal_codons[aa] = min(loss, key=loss.get)
+        logger.info(F"optimal codon for {aa} is: {optimal_codons[aa]}")
 
     return optimal_codons
-
 
 
 # --------------------------------------------------------------
