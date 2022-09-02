@@ -42,9 +42,9 @@ def run_all_tls(metadata_fid ):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        # if Path(tls_fid[:-6]+'csv').is_file():
-        #     print(tls_fid)
-        #     continue
+        if Path(tls_fid[:-6]+'csv').is_file():
+            print(tls_fid)
+            continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
     f = open('tls_to_16s_blast_jobs/mstr_job.sh', 'w')
     f.write(
-        '#!/bin/sh \n')
+        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_jobs\n')
     for line in master_commands:
         f.write(line + '\n')
     f.close()
