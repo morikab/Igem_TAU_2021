@@ -20,10 +20,13 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 
 
 #/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn -db processed_genomes/blast_db/16s_genomes -query genbank_tls/tls.KDSB.1.fsa_nt -out processed_genomes/out_file3.csv -subject_besthit -outfmt 10 -max_target_seqs 1 -num_threads 4
+# -db  -query /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/genbank_tls/tls.KELP.1.fsa_nt -out ./tls.KELP_full_blast.1.csv -max_target_seqs 5 -num_threads 4 -outfmt 10
+
+
 
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
-    db_loc = '../../data/processed_genomes/blast_db/16s_genomes'
+    db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
     other_preferences = ' -subject_besthit -outfmt 10 -max_target_seqs 1 -num_threads 1'
     tls_output = tls_inp[:-6]+'csv'
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
@@ -65,7 +68,7 @@ def write_job(lines, job_fid):
 
 def filename_to_sent_job(sh_file):
     send_prefix = 'qsub -q TullerNano -r y '
-    send_suffix = ' -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
+    send_suffix = ' -l cput=08:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
         job_files.append(filename)
-        write_job([command], 'jobs/' + filename)
+        write_job([command], 'tls_to_16s_blast_jobs/' + filename)
 
 
     master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
