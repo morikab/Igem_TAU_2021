@@ -42,12 +42,14 @@ def run_all_tls(metadata_fid ):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        if Path(tls_fid[:-6]+'csv').is_file():
-            continue
+        # if Path(tls_fid[:-6]+'csv').is_file():
+        #     print(tls_fid)
+        #     continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
-        print(output)
+        # print(output)
+
 
     # tls_metadata['blast_command'] = commands
     # tls_metadata['blast_csv'] = outputs
@@ -72,13 +74,14 @@ def filename_to_sent_job(sh_file):
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
-    print(line)
+    # print(line)
     return line
 
 
 if __name__ == "__main__":
     print('Start')
     command_list, df = run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+    print(len(command_list))
     job_files = []
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
@@ -87,7 +90,7 @@ if __name__ == "__main__":
 
 
     master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
-    f = open('jobs/mstr_job.sh', 'w')
+    f = open('tls_to_16s_blast_jobs/mstr_job.sh', 'w')
     f.write(
         '#!/bin/sh \n')
     for line in master_commands:
