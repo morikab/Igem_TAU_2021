@@ -8,10 +8,12 @@ destination_dir = '../../data/refseq_genomes/'
 
 def blastn_run(tls_csv, genomes_df):
     tls_df = pd.read_csv(tls_csv)
-    found_genomes = [ i[1] for i in tls_df. iloc[:, 0:2].values.tolist()]
+    found_genomes = [ i[1] for i in tls_df.iloc[:, 0:2].values.tolist()]
     unique_found_genomes = sorted(set(found_genomes))
+    found_genome_dict = {col_name: (col_name.split('.')[0] in unique_found_genomes) for col_name in genomes_df.columns()}
+    print(found_genome_dict)
     genomes_df[tls_csv] = [i in unique_found_genomes for i in range(len(genomes_df))]
-    cai_weights = genomes_df.iloc[unique_found_genomes, list(range(4,68))].transpose().to_dict()
+    # cai_weights = genomes_df.iloc[unique_found_genomes, list(range(4,68))].transpose().to_dict()
     return cai_weights, genomes_df
 
 
