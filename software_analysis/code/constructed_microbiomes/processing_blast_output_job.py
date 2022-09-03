@@ -51,6 +51,7 @@ def tls_sequencing_info(tls_fasta):
         sequencing_content = fp.readlines()
         n_seqs = round(len(sequencing_content)/2)
         amplicon_len = len(sequencing_content[1])
+        fp.close()
 
     return n_seqs, amplicon_len
 
