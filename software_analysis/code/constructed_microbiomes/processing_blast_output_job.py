@@ -92,8 +92,6 @@ def save_data(blast_results_dict, genomes_df, out_fid):
 
 if __name__ == "__main__":
     print('Start')
-    tls_sequencing_info(
-        'C:\\Users\\97252\\Documents\\Thesis work\\Igem_TAU_2021\\software_analysis\\data\\genbank_tls\\id.vdb_wgsnc.0301.2019.KAAD.1.fsa_nt')
 
     genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv')
     genomes_df.set_index('Unnamed: 0', inplace=True, drop=True,)
