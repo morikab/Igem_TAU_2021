@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import json
+from Bio import SeqIO
 destination_dir = '../../data/refseq_genomes/'
 
 def refseq_to_blast_name(refseq_name):
@@ -50,8 +51,14 @@ def tls_sequencing_info(tls_fasta):
     with open(tls_fasta, 'r') as fp:
         sequencing_content = fp.readlines()
         n_seqs = round(len(sequencing_content)/2)
-        amplicon_len = len(sequencing_content[1])
         fp.close()
+
+    fasta_sequences = SeqIO.parse(open(tls_fasta), 'fasta')
+    for fasta in fasta_sequences:
+        name, sequence = fasta.id, str(fasta.seq)
+        amplicon_len = len(sequence)
+        break
+
 
     return n_seqs, amplicon_len
 
@@ -69,7 +76,7 @@ def check_all_blast_res(genomes_df, tls_new_metadata_df):
 
         blast_dict, cai_weights, genomes_df = blastn_run(blast_csv, genomes_df)
         tls_dict['cai'] = cai_weights
-        tls_dict['alignment_score'] = blast_dict
+        tls_dict['found_genomes'] = blast_dict
 
         entry_name = blast_csv.split('.')[-3]
         blast_results_dict[entry_name] = tls_dict
@@ -79,12 +86,14 @@ def check_all_blast_res(genomes_df, tls_new_metadata_df):
 
 
 def save_data(blast_results_dict, genomes_df, out_fid):
-    genomes_df.to_csv(out_fid + 'tls_genome_matches.csv')
-    with open(out_fid + 'tls_genome_matches.json', "w") as outfile:
+    genomes_df.to_csv(out_fid + 'tls_genome_matches_new.csv')
+    with open(out_fid + 'tls_genome_matches_new.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":
     print('Start')
+    tls_sequencing_info(
+        'C:\\Users\\97252\\Documents\\Thesis work\\Igem_TAU_2021\\software_analysis\\data\\genbank_tls\\id.vdb_wgsnc.0301.2019.KAAD.1.fsa_nt')
 
     genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv')
     genomes_df.set_index('Unnamed: 0', inplace=True, drop=True,)
