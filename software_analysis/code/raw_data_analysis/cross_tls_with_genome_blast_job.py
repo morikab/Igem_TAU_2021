@@ -27,8 +27,8 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
     db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
-    other_preferences = ' -subject_besthit -outfmt 10 -max_target_seqs 1 -num_threads 1'
-    tls_output = tls_inp[:-6]+'csv'
+    other_preferences = ' - -max_target_seqs 5 -outfmt 10 -num_threads 1'
+    tls_output = tls_inp[:-7]+'_5_hits.csv'
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
     # run_cmd(command)
     # print(command)
@@ -86,11 +86,11 @@ if __name__ == "__main__":
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
         job_files.append(filename)
-        write_job([command], 'tls_to_16s_blast_jobs/' + filename)
+        write_job([command], 'tls_to_16s_blast_5_hits/' + filename)
 
 
     master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
-    f = open('tls_to_16s_blast_jobs/mstr_job.sh', 'w')
+    f = open('tls_to_16s_blast_5_hits/mstr_job.sh', 'w')
     f.write(
         '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_jobs\n')
     for line in master_commands:
