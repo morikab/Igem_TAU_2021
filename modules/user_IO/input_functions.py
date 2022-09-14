@@ -3,7 +3,7 @@ import os
 import operator
 from Bio import SeqIO
 import pandas as pd
-
+import json
 from logger_factory.logger_factory import LoggerFactory
 from modules.ORF.calculating_cai import relative_adaptiveness
 from modules.ORF.TAI import TAI
@@ -52,6 +52,8 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
     ends = []
     strands = []
     estimated_expression = {}
+
+    #dict_to_delete = {}
 
     if expression_csv_fid is not None:
         try:
@@ -104,6 +106,13 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
                             try:
                                 mrna_level = [mrna_levels[index] for index in range(len(mrna_names)) if mrna_names[index] == name.lower()][0]
                                 estimated_expression[name + '|'+function] = mrna_level
+                                #dict_to_delete[name] = {
+                                #    'function': function,
+                                #    'mrna_level' : mrna_level,
+                                #    'sequence' : cds
+                                #}
+
+
                             except:
                                 continue
 
@@ -113,6 +122,10 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
 
     # return prom200_dict, cds_dict, intergenic_dict, estimated_expression
+
+    # name_to_delete = genbank_path.split('/')[-1].split('.')[0]
+    # with open(f'results_for_rachel_{name_to_delete}.json', 'w') as fp:
+    #     json.dump(dict_to_delete, fp)
     return cds_dict, estimated_expression
 
 
@@ -122,25 +135,26 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
     30% most highly expressed genes will be used as reference set.
     in any other case, ribosomal genes will be used
     """
-    ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
+    # ribosomal_proteins = [cds for description, cds in cds_dict.items() if 'ribosom' in description]
+    #
+    # if len(ribosomal_proteins) < 10:
+    #     logger.info('WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.\n'
+    #                 'All genes will be used as a reference set for CAI calculation, results may be less accurate.')
+    #     cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
+    # else:
+    #     if len(estimated_expression) < len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+    #         cai_weights = relative_adaptiveness(ribosomal_proteins)
+    #         if expression_csv_fid is not None:
+    #             logger.info(
+    #                 f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
+    #         logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
 
-    if len(ribosomal_proteins) < 10:
-        logger.info('WARNING: less than 10 ribosomal genes were found, this annotation is likely to be of low quality.\n'
-                    'All genes will be used as a reference set for CAI calculation, results may be less accurate.')
-        cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
-    else:
-        if len(estimated_expression) < len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
-            cai_weights = relative_adaptiveness(ribosomal_proteins)
-            if expression_csv_fid is not None:
-                logger.info(
-                    f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
-            logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
+        # else:
+    sorted_estimated_expression = dict(
+        sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
+    highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
+    highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
+    cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
+    logger.info(f'Expression levels were found for {len(estimated_expression)}')
 
-        else:
-            sorted_estimated_expression = dict(
-                sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
-            highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
-            highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
-            cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
-            logger.info(f'Expression levels were found for {len(estimated_expression)}')
     return cai_weights

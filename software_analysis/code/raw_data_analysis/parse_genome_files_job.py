@@ -115,7 +115,7 @@ def save_data(final_dict, out_dir):
 
 if __name__ == "__main__":
     print("Start")
-    output_dir = '../../data/processed_genomes/'
+    output_dir = '../../data/processed_genomes_new/'
 
     org_dict = data_for_every_org("../../data/refseq_genomes/ncbi_genome_cds/",
                                   "../../data/refseq_genomes/ncbi_genome_rna/",
