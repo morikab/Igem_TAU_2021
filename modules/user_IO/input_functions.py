@@ -150,11 +150,11 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
     #         logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
 
         # else:
-    sorted_estimated_expression = dict(
-        sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
-    highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
-    highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
-    cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
-    logger.info(f'Expression levels were found for {len(estimated_expression)}')
-
+            # sorted_estimated_expression = dict(
+            #     sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
+            # highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]
+            # highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in highly_expressed_names]
+            # cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
+            # logger.info(f'Expression levels were found for {len(estimated_expression)}')
+    cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
     return cai_weights
