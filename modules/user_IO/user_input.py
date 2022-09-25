@@ -144,4 +144,5 @@ class UserInputModule(object):
                                           is_optimized=is_optimized,
                                           optimization_priority=optimization_priority)
 
+        logger.info(F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
         return organism_object

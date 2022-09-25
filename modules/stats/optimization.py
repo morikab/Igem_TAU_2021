@@ -1,8 +1,12 @@
 import typing
 
+from logger_factory.logger_factory import LoggerFactory
 from numpy import average
 from modules import models
 from modules.ORF.calculating_cai import general_geomean
+
+
+logger = LoggerFactory.get_logger()
 
 
 class OptimizationModule(object):
@@ -29,6 +33,7 @@ class OptimizationModule(object):
             index = general_geomean([user_input.sequence, final_seq], weights=profile)
             final_score = index[1]
             organism_score = (final_score - miu) / sigma
+            logger.info(F"{organism.name}, miu: {miu}, sigma: {sigma}, organism_score: {organism_score}")
             if organism.is_optimized:
                 optimized_organisms_scores.append(organism_score)
                 optimized_organisms_weights.append(organism.optimization_priority)

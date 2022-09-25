@@ -137,6 +137,7 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
             logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
 
         else:
+            logger.info("Using estimated expression for calculating CAI scores")
             sorted_estimated_expression = dict(
                 sorted(estimated_expression.items(), key=operator.itemgetter(1), reverse=True))
             highly_expressed_names = list(sorted_estimated_expression.keys())[:round(len(sorted_estimated_expression)* 0.3 )]

@@ -72,16 +72,17 @@ def unit1(user_input: models.UserInput):
     optimization_method = user_input.optimization_method
     try:
         # both CAI and tAI, select the one with the best optimization index tai optimization
-        logger.info('tAI information:')
-        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
-
-        tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
-            ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
-
-        logger.info(f'Sequence:\n{cds_nt_final_tai}')
-        logger.info(f'Optimized sequences score: {tai_mean_opt_index}, '
-                    f'deoptimized sequence score: {tai_mean_deopt_index}')
-        logger.info(f'Final optimization score: {tai_optimization_index}')
+        # TODO - un-comment tAI logic
+        # logger.info('tAI information:')
+        # cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
+        #
+        # tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
+        #     ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
+        #
+        # logger.info(f'Sequence:\n{cds_nt_final_tai}')
+        # logger.info(f'Optimized sequences score: {tai_mean_opt_index}, '
+        #             f'deoptimized sequence score: {tai_mean_deopt_index}')
+        # logger.info(f'Final optimization score: {tai_optimization_index}')
 
         # cai optimization
         logger.info('CAI information:')
@@ -94,6 +95,10 @@ def unit1(user_input: models.UserInput):
         logger.info(f'Optimized sequences score: {cai_mean_opt_index}, '
                     f'deoptimized sequence score: {cai_mean_deopt_index}')
         logger.info(f'Final optimization score: {cai_optimization_index}')
+
+        logger.info("The end")
+        return cds_nt_final_cai, cai_optimization_index, cai_weakest_score
+
 
         if cai_optimization_index > tai_optimization_index:
             logger.info('CAI sequence was selected')
@@ -134,7 +139,7 @@ if __name__ == "__main__":
         optimization_method="hill_climbing_bulk_aa_average",
         clusters_count=1,
         tuning_param=0.5,
-        is_ecoli_optimized=False,
+        is_ecoli_optimized=True,
     )
     run_modules()
     toc = time.time()
