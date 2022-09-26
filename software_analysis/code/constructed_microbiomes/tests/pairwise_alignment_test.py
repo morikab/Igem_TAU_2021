@@ -42,7 +42,7 @@ def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
     for genomes_fid in genomes_files:
         job_name = 'test_dynamic_prog_jobs/' + genomes_fid.split('/')[-1] + '_job.sh'
         print(job_name)
-        command = f'python -c from pairwise_alignment_test import align_seq_to_fasta;  pairwise_alignment_test.align_seq_to_fasta{seq_fasta, genomes_fid}'
+        command = f"python -c 'from pairwise_alignment_test import align_seq_to_fasta;  pairwise_alignment_test.align_seq_to_fasta{seq_fasta, genomes_fid}'"
         write_job([command], job_fid = job_name )
         print(command)
 

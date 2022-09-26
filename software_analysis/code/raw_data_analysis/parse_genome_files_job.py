@@ -37,7 +37,8 @@ def genomic_cds_to_cub(fid):
     cai_final_dict.update(cai_weights)
     cai_final_dict['std'] = np.std(cai_scores)
     cai_final_dict['avg'] = np.mean(cai_scores)
-    return cai_weights
+    cai_final_dict['n_proteins'] = len(cai_scores)
+    return cai_final_dict
 
 def genomic_rna_to_rrna(fid):
     rrna_dict= {}
@@ -67,7 +68,11 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
 
     f = open(out_dir + '/cai_and_16s_for_genomes.csv', 'w')
     writer = csv.writer(f)
-    writer.writerow(['5s', '16s', '23s', 'TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TGT', 'TGC', 'TGG', 'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG', 'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG', 'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG'])
+    writer.writerow([' ', '5s', '16s', '23s', 'TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TGT',
+                     'TGC', 'TGG', 'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG',
+                     'CGT', 'CGC', 'CGA', 'CGG', 'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC',
+                     'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG',
+                     'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG', 'std', 'avg', 'n_proteins'])
 
 
     for org in org_list:
