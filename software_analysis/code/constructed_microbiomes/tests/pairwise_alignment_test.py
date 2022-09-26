@@ -42,16 +42,16 @@ def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
     for genomes_fid in genomes_files:
         job_name = 'test_dynamic_prog_jobs/' + genomes_fid.split('/')[-1] + '_job.sh'
         print(job_name)
-        command = f"python -c 'from pairwise_alignment_test import align_seq_to_fasta;  pairwise_alignment_test.align_seq_to_fasta{seq_fasta, genomes_fid}'"
+        command = 'python -c "from pairwise_alignment_test import align_seq_to_fasta; ' +   f'pairwise_alignment_test.align_seq_to_fasta{seq_fasta, genomes_fid}' + '"'
         write_job([command], job_fid = job_name )
         print(command)
 
 
-metagenome = {name: str(i.seq) for name, i in
-              SeqIO.index("../../../data/tested_results/KDVY_example_metagenome/tls.KDVY.1.fsa_nt",
-                          "fasta").items()}
-
-seq = metagenome[list(metagenome.keys())[0]]
-seq_fasta = "../../../data/tested_results/KDVY_example_metagenome/KDVY_first_entry_KDVY01000001.1.fasta"
-create_alignment_jobs(seq_fasta=seq_fasta, split_genomes_dir=output_fid)
+# metagenome = {name: str(i.seq) for name, i in
+#               SeqIO.index("../../../data/tested_results/KDVY_example_metagenome/tls.KDVY.1.fsa_nt",
+#                           "fasta").items()}
+#
+# seq = metagenome[list(metagenome.keys())[0]]
+# seq_fasta = "../../../data/tested_results/KDVY_example_metagenome/KDVY_first_entry_KDVY01000001.1.fasta"
+# create_alignment_jobs(seq_fasta=seq_fasta, split_genomes_dir=output_fid)
 
