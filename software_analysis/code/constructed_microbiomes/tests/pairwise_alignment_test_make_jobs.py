@@ -5,10 +5,11 @@ from Bio import pairwise2, SeqIO
 
 # python -c 'from cross_tls_with_genome_blast_job.py import filename_to_sent_job; filename_to_sent_job.filename_to_sent_job('vvv')'
 def write_job(seq_fasta, genomes_fid, job_fid):
-    f = open(job_fid, 'w')
+    exec_fname = job_fid + '_exec.py'
+    exec_file = open(exec_fname, 'w')
 
     out_dir = '../../../../data/tested_results/KDVY_example_metagenome/sliced_alignment_first_entry/'
-    f.write(
+    exec_file.write(
         '#!/powerapps/share/centos7/miniconda/miniconda3-4.7.12-environmentally/envs/Python3.9Plus/bin/python\n'
         'import sys\n'
         "sys.path.insert(1, '../')\n"
@@ -18,9 +19,15 @@ def write_job(seq_fasta, genomes_fid, job_fid):
         f"OUT_DIR = '../{out_dir}'\n"
         'align_seq_to_fasta(METAGENOME_SEQ, GENOME_SLICE, OUT_DIR)\n'
     )
-    f.close()
 
+    exec_file.close()
 
+    sh_file = open(job_fid + '_job.sh', 'w')
+    sh_file.write(
+        '# !/bin/sh\n'
+        f'{exec_fname}\n'
+    )
+    sh_file.close()
 
 def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
     genomes_files = [os.path.join(split_genomes_dir, i)
@@ -28,7 +35,7 @@ def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
 
     job_names  = []
     for genomes_fid in genomes_files:
-        job_name = 'test_local_align_KDVY_first_entry/' + genomes_fid.split('/')[-1] + '_exec.py'
+        job_name = 'test_local_align_KDVY_first_entry/' + genomes_fid.split('/')[-1]
         write_job(seq_fasta, genomes_fid, job_fid = job_name)
         job_names.append(job_name)
     return job_names
@@ -43,7 +50,7 @@ def make_mstr_job(mstr_fid, job_names):
     )
 
     for idx, job in enumerate(job_names):
-        job = job.split('/')[-1]
+        job = job.split('/')[-1][:-6] + '_job.sh'
         f.write(f'qsub -q TullerNano -r y  -e {idx}_job_error.txt -o {idx}_output.txt -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb {job}\n')
 
     f.close()
