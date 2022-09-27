@@ -38,6 +38,8 @@ def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
         job_name = 'test_local_align_KDVY_first_entry/' + genomes_fid.split('/')[-1][:-6]
         write_job(seq_fasta, genomes_fid, job_fid = job_name)
         job_names.append(job_name)
+
+
     return job_names
 
 def make_mstr_job(mstr_fid, job_names):
