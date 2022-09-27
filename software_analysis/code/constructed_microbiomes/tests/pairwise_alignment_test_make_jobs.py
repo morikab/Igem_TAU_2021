@@ -35,7 +35,7 @@ def create_alignment_jobs(seq_fasta, split_genomes_dir=output_fid):
 
     job_names  = []
     for genomes_fid in genomes_files:
-        job_name = 'test_local_align_KDVY_first_entry/' + genomes_fid.split('/')[-1]
+        job_name = 'test_local_align_KDVY_first_entry/' + genomes_fid.split('/')[-1][:-6]
         write_job(seq_fasta, genomes_fid, job_fid = job_name)
         job_names.append(job_name)
     return job_names
@@ -50,7 +50,7 @@ def make_mstr_job(mstr_fid, job_names):
     )
 
     for idx, job in enumerate(job_names):
-        job = job.split('/')[-1][:-6] + '_job.sh'
+        job = job.split('/')[-1] + '_job.sh'
         f.write(f'qsub -q TullerNano -r y  -e {idx}_job_error.txt -o {idx}_output.txt -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb {job}\n')
 
     f.close()
@@ -66,4 +66,5 @@ metagenome = {name: str(i.seq) for name, i in
 seq = metagenome[list(metagenome.keys())[0]]
 seq_fasta = "../../../data/tested_results/KDVY_example_metagenome/KDVY_first_entry_KDVY01000001.1.fasta"
 job_names = create_alignment_jobs(seq_fasta=seq_fasta, split_genomes_dir=output_fid)
+print(job_names)
 make_mstr_job('local_alignment_fist_entry_mstr.sh', job_names)
