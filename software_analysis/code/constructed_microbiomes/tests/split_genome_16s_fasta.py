@@ -25,7 +25,7 @@ def write_fasta(fid, list_seq, list_name):
 fasta_files = {}
 for idx, split in enumerate(split_idxs):
     start, end = split
-    fasta_name = f'{idx}_start={start}_end={end}'
+    fasta_name = f'{idx}_start_{start}_end_{end}'
     fasta_dict = dict(list(genomes.items())[start:end])
     fasta_files[fasta_name] = fasta_dict
     write_fasta(fid = output_fid + fasta_name,
