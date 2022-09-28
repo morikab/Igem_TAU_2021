@@ -75,8 +75,14 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
                      'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG', 'std', 'avg', 'n_proteins'])
 
 
-    for org in org_list:
+    for idx, org in enumerate(org_list):
+
+        ### todo: delete this!!!
+        if idx<20000:
+            continue
         print(org)
+        ##################
+
         org_dict = {}
         cds_path = os.path.join(cds_dir + org+cds_suffix)
         rna_path = os.path.join(rna_dir+ org+rna_suffix)
@@ -120,7 +126,7 @@ def save_data(final_dict, out_dir):
 
 if __name__ == "__main__":
     print("Start")
-    output_dir = '../../data/processed_genomes_new/'
+    output_dir = '../../data/processed_genomes_new/completion/'
 
     org_dict = data_for_every_org("../../data/refseq_genomes/ncbi_genome_cds/",
                                   "../../data/refseq_genomes/ncbi_genome_rna/",
