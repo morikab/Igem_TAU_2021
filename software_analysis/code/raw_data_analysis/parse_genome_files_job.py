@@ -80,7 +80,7 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
         if org in found_org:
             continue
         ##################
-
+        print(idx)
         org_dict = {}
         cds_path = os.path.join(cds_dir + org+cds_suffix)
         rna_path = os.path.join(rna_dir+ org+rna_suffix)
@@ -107,7 +107,7 @@ def write_fasta(fid, list_seq, list_name):
     ofile.close()
 
 def save_data(final_dict, out_dir):
-    print(final_dict)
+    # print(final_dict)
     with open(out_dir + "cai_and_16s_for_genomes3.json", 'w') as handle:
         json.dump(final_dict, handle)
 
