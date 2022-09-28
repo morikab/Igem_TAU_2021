@@ -74,13 +74,11 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
                      'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG',
                      'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG', 'std', 'avg', 'n_proteins'])
 
-
+    found_org = list(pd.read_csv('../../data/processed_genomes_new/cai_and_16s_for_genomes.csv', index_col=0).index)
     for idx, org in enumerate(org_list):
-
         ### todo: delete this!!!
-        if idx<20000:
+        if org in found_org:
             continue
-        print(org)
         ##################
 
         org_dict = {}
