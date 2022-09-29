@@ -4,5 +4,5 @@ sys.path.insert(1, '../')
 from pairwise_align_function import align_seq_to_fasta
 METAGENOME_SEQ = '../../../../data/tested_results/KDVY_example_metagenome/KDVY_first_entry_KDVY01000001.1.fasta'
 GENOME_SLICE = '../../../../data/tested_results/genomes_16s_sliced/21_start_5250_end_5500.fasta'
-OUT_DIR = '../../../../../data/tested_results/KDVY_example_metagenome/sliced_alignment_first_entry/'
+OUT_DIR = '../../../../data/tested_results/KDVY_example_metagenome/sliced_alignment_first_entry/'
 align_seq_to_fasta(METAGENOME_SEQ, GENOME_SLICE, OUT_DIR)
