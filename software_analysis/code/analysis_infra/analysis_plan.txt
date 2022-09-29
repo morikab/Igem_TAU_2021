@@ -1,0 +1,27 @@
+Analysis of Metagenomes
+In this part we will actually use the dataset created to analyze our software
+Start the infrastructure, do not run before we agree on the optimization score. (with moran)
+
+Metadata for each iteration for the analysis:
+    Runtime (from cluster)
+    Number of iterations
+    all scores, avg and std of scores
+    Optimization score (initial and final)
+    Evaluation score (initial = 0 and final)
+    Microbiome metadata (what where the wanted and unwanted- size and ids)
+    Number of clusters
+    Prioritization
+
+
+Basic iGEM inspired:
+    Size: start from a small microbiome, and add to it in each iteration for a couple of randomly selected small groups
+    Tuning param for fixed size: create random different groups and examine them against each other, with different tuning param values
+    Correlation to 16s (phylogenetic distance) for pairs: like in iGEM
+
+Advanced optimizations:
+    Prioritization
+    Ratio between wanted and unwanted for different sizes
+    Clustering (different thresholds)
+    Length of sequence (try genes of different sizes
+    Endogenous / non endogenous genes
+    Runtime performance: Number of iterations for different sizes ***this is something we should note regardless

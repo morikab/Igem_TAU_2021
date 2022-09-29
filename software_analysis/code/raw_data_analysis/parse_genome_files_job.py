@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 from Bio import SeqIO
 import numpy as np
@@ -74,13 +76,7 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
                      'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG', 'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG',
                      'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG', 'TGA', 'TAA', 'TAG', 'std', 'avg', 'n_proteins'])
 
-    found_org = list(pd.read_csv('../../data/processed_genomes_new/cai_and_16s_for_genomes.csv', index_col=0).index)
     for idx, org in enumerate(org_list):
-        ### todo: delete this!!!
-        if org in found_org:
-            continue
-        ##################
-        print(idx)
         org_dict = {}
         cds_path = os.path.join(cds_dir + org+cds_suffix)
         rna_path = os.path.join(rna_dir+ org+rna_suffix)
@@ -93,10 +89,12 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
 
         final_dict[org] = org_dict
 
+
+        tic = time.time()
         row_to_write = list(org_dict.values())
         row_to_write.insert(0, org)
         writer.writerow(row_to_write)
-
+        print(time.time() -tic)
     return final_dict
 
 
@@ -124,7 +122,7 @@ def save_data(final_dict, out_dir):
 
 if __name__ == "__main__":
     print("Start")
-    output_dir = '../../data/processed_genomes_new/completion/'
+    output_dir = '../../data/processed_genomes/'
 
     org_dict = data_for_every_org("../../data/refseq_genomes/ncbi_genome_cds/",
                                   "../../data/refseq_genomes/ncbi_genome_rna/",
