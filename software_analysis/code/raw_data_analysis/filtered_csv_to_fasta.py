@@ -2,7 +2,7 @@ from modules.shared_functions_and_vars import write_fasta
 import pandas as pd
 
 
-org_dict = pd.read_csv('../../data/processed_genomes/cai_and_16s_for_genomes.csv', index_col=0).to_dict(orient='index')
+org_dict = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_col=0).to_dict(orient='index')
 
 
 names = []

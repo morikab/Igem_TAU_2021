@@ -7,7 +7,7 @@ from Bio import pairwise2, SeqIO
 def write_job(seq_fasta, genomes_fid, job_fid):
     exec_fname = job_fid + '_exec.py'
     exec_file = open(exec_fname, 'w')
-    print('./' + exec_fname.split('/')[-1], '&')
+    print('./' + exec_fname.split('/')[-1], ' >>  ', exec_fname.split('/')[-1][:-2], 'txt')
     out_dir = '../../../data/tested_results/KDVY_example_metagenome/sliced_alignment_first_entry/'
     exec_file.write(
         '#!/powerapps/share/centos7/miniconda/miniconda3-4.7.12-environmentally/envs/Python3.9Plus/bin/python\n'
