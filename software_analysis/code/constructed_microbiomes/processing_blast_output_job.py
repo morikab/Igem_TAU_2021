@@ -98,7 +98,7 @@ if __name__ == "__main__":
     genomes_df.index.name = None
 
     tls_new_metadata_df = pd.read_csv('../../data/processed_tls/tls_assembly_metadata_with_blast.csv', index_col=None)
-    out_fid = '../../data/tls_genome_match/'
+    out_fid = '../../data/tls_genome_match_new/'
     blast_results_dict, genomes_df = check_all_blast_res(genomes_df, tls_new_metadata_df)
     save_data(blast_results_dict, genomes_df, out_fid)
 
