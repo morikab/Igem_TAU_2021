@@ -58,8 +58,7 @@ def blastn_run(blast_csv, genomes_df):
     final_data = {}
     for refseq, score in blast_dict.items():
         cai_values = cai_df.loc[refseq, :].transpose().to_dict()
-        other_values_dict = non_cai_df.loc.transpose().to_dict()
-
+        other_values_dict = non_cai_df.loc[refseq, :].transpose().to_dict()
         final_data[refseq] = {
             'align_score': score,
             'cai': cai_values
