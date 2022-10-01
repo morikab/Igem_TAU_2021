@@ -53,8 +53,8 @@ def blastn_run(blast_csv, genomes_df):
 
 
     cai_columns = list(nt_to_aa.keys())
-    cai_df = genomes_df.drop([i for i in genomes_df.columns if i not in cai_columns], inplace=False)
-    non_cai_df = genomes_df.drop(cai_columns, inplace=False)
+    cai_df = genomes_df.drop([i for i in genomes_df.columns if i not in cai_columns], inplace=False, axis = 1)
+    non_cai_df = genomes_df.drop(cai_columns, inplace=False, axis=1)
     final_data = {}
     for refseq, score in blast_dict.items():
         cai_values = cai_df[refseq, :].transpose().to_dict()
