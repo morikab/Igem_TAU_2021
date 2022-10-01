@@ -2,7 +2,26 @@
 import pandas as pd
 import json
 from Bio import SeqIO
-destination_dir = '../../data/refseq_genomes/'
+
+
+nt_to_aa = {
+    'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
+    'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
+    'AAC': 'N', 'AAT': 'N', 'AAA': 'K', 'AAG': 'K',
+    'AGC': 'S', 'AGT': 'S', 'AGA': 'R', 'AGG': 'R',
+    'CTA': 'L', 'CTC': 'L', 'CTG': 'L', 'CTT': 'L',
+    'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCT': 'P',
+    'CAC': 'H', 'CAT': 'H', 'CAA': 'Q', 'CAG': 'Q',
+    'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGT': 'R',
+    'GTA': 'V', 'GTC': 'V', 'GTG': 'V', 'GTT': 'V',
+    'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCT': 'A',
+    'GAC': 'D', 'GAT': 'D', 'GAA': 'E', 'GAG': 'E',
+    'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGT': 'G',
+    'TCA': 'S', 'TCC': 'S', 'TCG': 'S', 'TCT': 'S',
+    'TTC': 'F', 'TTT': 'F', 'TTA': 'L', 'TTG': 'L',
+    'TAC': 'Y', 'TAT': 'Y', 'TAA': '_', 'TAG': '_',
+    'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
+}
 
 def refseq_to_blast_name(refseq_name):
     blast_name = refseq_name.split('.')[0]
@@ -32,6 +51,28 @@ def blastn_run(blast_csv, genomes_df):
     full_refseq_list = genomes_df.index.to_list()
     blast_dict = blast_df_to_dict(blast_df, full_refseq_list)
 
+
+    cai_columns = list(nt_to_aa.keys())
+    cai_df = genomes_df.loc(cai_columns)
+    non_cai_df = genomes_df.drop(cai_columns, inplace=False)
+    final_data = {}
+    for refseq, score in blast_dict.items():
+        cai_values = cai_df[refseq, :].transpose().to_dict()
+        other_values_dict = non_cai_df.transpose().to_dict()
+
+        final_data[refseq] = {
+            'align_score': score,
+            'cai': cai_values
+        }
+        final_data[refseq].update(other_values_dict)
+    return final_data
+
+
+def blastn_run_previous_function(blast_csv, genomes_df):
+    blast_df = pd.read_csv(blast_csv)
+    full_refseq_list = genomes_df.index.to_list()
+    blast_dict = blast_df_to_dict(blast_df, full_refseq_list)
+
     #adding the alignment scores to the genome df
     tls_scores_for_df = []
     for refseq_name in full_refseq_list:
@@ -47,12 +88,14 @@ def blastn_run(blast_csv, genomes_df):
     return blast_dict, cai_weights, genomes_df
 
 
+
 def tls_sequencing_info(tls_fasta):
     with open(tls_fasta, 'r') as fp:
         sequencing_content = fp.readlines()
         n_seqs = round(len(sequencing_content)/2)
         fp.close()
 
+    amplicon_len = None
     fasta_sequences = SeqIO.parse(open(tls_fasta), 'fasta')
     for fasta in fasta_sequences:
         name, sequence = fasta.id, str(fasta.seq)
@@ -61,6 +104,8 @@ def tls_sequencing_info(tls_fasta):
 
 
     return n_seqs, amplicon_len
+
+
 
 
 def check_all_blast_res(genomes_df, tls_new_metadata_df):
@@ -74,32 +119,31 @@ def check_all_blast_res(genomes_df, tls_new_metadata_df):
         tls_dict['n_seqs'] = n_seqs
         tls_dict['amplicon_len'] = amplicon_len
 
-        blast_dict, cai_weights, genomes_df = blastn_run(blast_csv, genomes_df)
-        tls_dict['cai'] = cai_weights
-        tls_dict['found_genomes'] = blast_dict
+        final_results = blastn_run(blast_csv, genomes_df)
+        tls_dict['blast'] = final_results
 
         entry_name = blast_csv.split('.')[-3]
         blast_results_dict[entry_name] = tls_dict
         print(idx, n_seqs, amplicon_len)
-    return blast_results_dict, genomes_df
+    return blast_results_dict
 
 
 
 def save_data(blast_results_dict, genomes_df, out_fid):
-    genomes_df.to_csv(out_fid + 'tls_genome_matches_new.csv')
+    # genomes_df.to_csv(out_fid + 'tls_genome_matches_new.csv')
     with open(out_fid + 'tls_genome_matches_new.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":
     print('Start')
 
-    genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv')
-    genomes_df.set_index('Unnamed: 0', inplace=True, drop=True,)
-    genomes_df.index.name = None
+    genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_col=0)
+    # genomes_df.set_index('Unnamed: 0', inplace=True, drop=True,)
+    # genomes_df.index.name = None
 
     tls_new_metadata_df = pd.read_csv('../../data/processed_tls/tls_assembly_metadata_with_blast.csv', index_col=None)
     out_fid = '../../data/tls_genome_match_new/'
-    blast_results_dict, genomes_df = check_all_blast_res(genomes_df, tls_new_metadata_df)
+    blast_results_dict= check_all_blast_res(genomes_df, tls_new_metadata_df)
     save_data(blast_results_dict, genomes_df, out_fid)
 
 
