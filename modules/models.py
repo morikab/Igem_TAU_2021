@@ -2,7 +2,6 @@ import statistics
 import typing
 from dataclasses import dataclass
 from enum import Enum
-from modules.configuration import Configuration
 
 
 class Organism(object):
@@ -42,8 +41,10 @@ class Organism(object):
 
 
 class OptimizationMethod(Enum):
-    single_codon_global = "single_codon_global"
-    single_codon_local = "single_codon_local"
+    single_codon_global_ratio = "single_codon_global_ratio"
+    single_codon_local_ratio = "single_codon_local_ratio"
+    single_codon_global_diff = "single_codon_global_diff"
+    single_codon_local_diff = "single_codon_local_diff"
     hill_climbing_average = "hill_climbing_average"
     hill_climbing_bulk_aa_average = "hill_climbing_bulk_aa_average"
     hill_climbing_weakest_link = "hill_climbing_weakest_link"

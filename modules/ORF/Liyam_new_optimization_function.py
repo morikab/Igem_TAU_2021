@@ -72,6 +72,8 @@ def hill_climbing_optimize_by_zscore(seq: str,
             seq_options[tested_seq] = score
 
         new_seq = max(seq_options, key=seq_options.get)
+        logger.info(F"selected_codon in iteration {run} is: {tested_seq_to_codon[new_seq]}")
+
         if new_seq == seq:
             break
         else:
@@ -120,21 +122,21 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
             aa_seq_options = {}
             for aa_codon in codons_list:
                 option_seq, option_codon_count = change_all_codons_of_aa(seq_to_change, aa_codon)
-                logger.info(F"Number of occurrences of codon {aa_codon} in sequence is {option_codon_count}")
+                # logger.info(F"Number of occurrences of codon {aa_codon} in sequence is {option_codon_count}")
+                logger.info(F"Running for codon: {aa_codon}")
                 aa_seq_options[aa_codon] = OptimizationModule.run_module(
                     final_seq=option_seq,
                     user_input=user_input,
                     cai_or_tai=cai_or_tai,
                     optimization_method=optimization_method,
                 )
-                logger.info(F"z-score after changing codon {aa_codon} is: {aa_seq_options[aa_codon]}")
+                # logger.info(F"z-score after changing codon {aa_codon} is: {aa_seq_options[aa_codon]}")
             aa_new_seq = max(aa_seq_options, key=aa_seq_options.get)
             return aa_new_seq
         logger.info(F"zscore of sequence in run {run} is: {seq_options[seq]}")
         aa_to_selected_codon = {}
         # Find best synonymous_codon per aa
         for aa in synonymous_codons.keys():
-            logger.info(F"Choose codon for: {aa}")
             selected_aa_codon = find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa], seq_to_change=seq)
             aa_to_selected_codon[aa] = selected_aa_codon
 
@@ -161,14 +163,4 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
             seq = new_seq
 
     logger.info(F"Original score is: {seq_options[original_seq]}")
-    # for aa in aa_to_selected_codon:
-    #     new_seq = change_all_codons_of_aa(original_seq, aa_to_selected_codon[aa])
-    #     score = OptimizationModule.run_module(
-    #         final_seq=new_seq,
-    #         user_input=user_input,
-    #         cai_or_tai=cai_or_tai,
-    #         optimization_method=optimization_method,
-    #     )
-    #     logger.info(F"z-score after changing codon {aa_to_selected_codon[aa]} of AA {aa} is: {score}")
-
     return seq

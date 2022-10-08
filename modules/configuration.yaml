@@ -1,8 +1,10 @@
 ORF:
   HILL_CLIMBING_MAX_ITERATIONS: 50
   # Optional values:
-  #   * single_codon_global
-  #   * single_codon_local
+  #   * single_codon_global_ratio
+  #   * single_codon_local_ratio
+  #   * single_codon_global_diff
+  #   * single_codon_local_diff
   #   * hill_climbing_average
   #   * hill_climbing_weakest_link
   TRANSLATION_FUNCTION: hill_climbing_average

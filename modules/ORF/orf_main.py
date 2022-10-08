@@ -1,4 +1,5 @@
 import typing
+from functools import partial
 
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
@@ -68,17 +69,19 @@ class ORFModule(object):
             for organism in input_organisms if not organism.is_optimized
         ]
 
-        if optimization_method == models.OptimizationMethod.single_codon_global:
-            return optimize_sequence(target_gene=target_gene,
-                                     high_expression_organisms=high_expression_organisms,
-                                     low_expression_organisms=low_expression_organisms,
-                                     tuning_param=user_input.tuning_parameter,
-                                     local_maximum=False)
-        if optimization_method == models.OptimizationMethod.single_codon_local:
-            return optimize_sequence(target_gene=target_gene,
-                                     high_expression_organisms=high_expression_organisms,
-                                     low_expression_organisms=low_expression_organisms,
-                                     tuning_param=user_input.tuning_parameter,
-                                     local_maximum=True)
+        optimize_sequence_method = partial(optimize_sequence,
+                                           target_gene=target_gene,
+                                           high_expression_organisms=high_expression_organisms,
+                                           low_expression_organisms=low_expression_organisms,
+                                           tuning_param=user_input.tuning_parameter)
+
+        if optimization_method == models.OptimizationMethod.single_codon_global_ratio:
+            return optimize_sequence_method(local_maximum=False, is_ratio=True)
+        if optimization_method == models.OptimizationMethod.single_codon_local_ratio:
+            return optimize_sequence_method(local_maximum=True, is_ratio=True)
+        if optimization_method == models.OptimizationMethod.single_codon_global_diff:
+            return optimize_sequence_method(local_maximum=False, is_ratio=False)
+        if optimization_method == models.OptimizationMethod.single_codon_local_diff:
+            return optimize_sequence_method(local_maximum=True, is_ratio=False)
 
         raise ValueError('optimization method is invalid')

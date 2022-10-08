@@ -1,12 +1,20 @@
 from collections import defaultdict
+from functools import partial
+
 from logger_factory.logger_factory import LoggerFactory
 from modules.shared_functions_and_vars import translate, synonymous_codons
 
 logger = LoggerFactory.get_logger()
 
-# --------------------------------------------------------------
 
-def optimize_sequence(target_gene, high_expression_organisms, low_expression_organisms, local_maximum, tuning_param, n_initiation_codons=12):
+# --------------------------------------------------------------
+def optimize_sequence(target_gene,
+                      high_expression_organisms,
+                      low_expression_organisms,
+                      local_maximum,
+                      tuning_param,
+                      is_ratio,
+                      n_initiation_codons=12):
     """
 
     :param target_gene: Gene object, which is to be optimized
@@ -21,8 +29,12 @@ def optimize_sequence(target_gene, high_expression_organisms, low_expression_org
     The function calculates the difference between the features of each codon. Each feature has its own weight (ratio)
     """
     optimized_sequence = ''
-
-    optimal_codons = find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum) # optimal codons->dict(AA:codon)
+    # optimal codons->dict(AA:codon)
+    optimal_codons = find_optimal_codons(high_expression_organisms,
+                                         low_expression_organisms,
+                                         tuning_param,
+                                         local_maximum,
+                                         is_ratio=is_ratio)
 
     target_protein = translate(target_gene)
 
@@ -72,8 +84,9 @@ def calc_diff(expression_organisms, low_expression_organisms, codons):
 
     return diff
 
+
 # --------------------------------------------------------------
-def loss_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum):
+def loss_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum, is_ratio):
     """
     :param high_expression_organisms: list of expression organisms
     :param low_expression_organisms: list of no_expression organisms
@@ -83,25 +96,29 @@ def loss_function(high_expression_organisms, low_expression_organisms, codons, t
 
     The function iterates through each feature in each organism, and sums up loss for each codon
     """
-
     loss = {}
-    if local_maximum:  # high_expression is optimized, low expression is deoptimized
+    iterate_through_feature_method = partial(iterate_through_feature,
+                                             codons=codons,
+                                             loss=loss,
+                                             tuning_param=tuning_param,
+                                             is_ratio=is_ratio)
+    # high_expression is optimized, low expression is deoptimized
+    if local_maximum:
         for high_expression_organism in high_expression_organisms:
-            loss = iterate_through_feature([high_expression_organism], codons, loss, tuning_param, high_expression=True)
+            loss = iterate_through_feature_method([high_expression_organism], high_expression=True)
 
         for low_expression_organism in low_expression_organisms:
-            loss = iterate_through_feature([low_expression_organism], codons, loss, tuning_param, high_expression=False)
+            loss = iterate_through_feature_method([low_expression_organism], high_expression=False)
     else:
-        loss = iterate_through_feature(high_expression_organisms, codons, loss, tuning_param, high_expression=True)
-        loss = iterate_through_feature(low_expression_organisms, codons, loss, tuning_param, high_expression=False)
+        loss = iterate_through_feature_method(high_expression_organisms, high_expression=True)
+        loss = iterate_through_feature_method(low_expression_organisms, loss=loss, high_expression=False)
 
     return loss
 
 
 # --------------------------------------------------------------
-def iterate_through_feature(organisms, codons, loss, tuning_param, high_expression):
+def iterate_through_feature(organisms, codons, loss, tuning_param, high_expression, is_ratio):
     """
-
     :param organisms: List of organism objects for which the sequence is optimized
     :param codons: list of codons to choose from
     :param loss: loss(dict) taken from a previous iteration
@@ -129,13 +146,18 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
                     # optimized organisms should have small loss
                     if high_expression:
                         # loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
-                        new_loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
-                        logger.info(F"high expression loss for codon: {codon} is: {(tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))}")
+                        if is_ratio:
+                            new_loss[codon] += tuning_param * f.ratio * (((f.weights[codon] / max_value - 1) ** 2) ** 0.5)
+                            # new_loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
+                        else:
+                            new_loss[codon] += tuning_param * f.ratio * (max_value - f.weights[codon])
                     else:
                         # loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
-                        new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
-                        logger.info(F"low expression loss for codon: {codon} is: {(1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)}")
-
+                        if is_ratio:
+                            new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value))
+                            # new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
+                        else:
+                            new_loss[codon] += (1 - tuning_param) * f.ratio * (1 - max_value + f.weights[codon])
                 except:
                     continue
 
@@ -165,7 +187,14 @@ def find_max_value_per_feature(organisms, feature_name, codons):
 
     return max_value
 # --------------------------------------------------------------
-def find_optimal_codons(high_expression_organisms, low_expression_organisms, tuning_param, local_maximum, evaluation_function=loss_function):
+
+
+def find_optimal_codons(high_expression_organisms,
+                        low_expression_organisms,
+                        tuning_param,
+                        local_maximum,
+                        evaluation_function=loss_function,
+                        is_ratio=True):
     """
     :param high_expression_organisms: list of Organism objects. The organisms where we want to express the target gene in
     :param low_expression_organisms: list of Organism objects. The organisms where we do not want the expression in
@@ -177,7 +206,12 @@ def find_optimal_codons(high_expression_organisms, low_expression_organisms, tun
     optimal_codons = {}
 
     for aa, codons in synonymous_codons.items():
-        loss = evaluation_function(high_expression_organisms, low_expression_organisms, codons, tuning_param, local_maximum=local_maximum)
+        loss = evaluation_function(high_expression_organisms,
+                                   low_expression_organisms,
+                                   codons,
+                                   tuning_param,
+                                   local_maximum=local_maximum,
+                                   is_ratio=is_ratio)
         logger.info(F"Loss dict is: {loss}")
         optimal_codons[aa] = min(loss, key=loss.get)
         logger.info(F"optimal codon for {aa} is: {optimal_codons[aa]}")
