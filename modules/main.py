@@ -51,6 +51,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         for input_cluster in clustered_user_inputs:
             # TODO - what do we want to display for each run? We should store the results differently
             final_cds, optimization_index, weakest_score = unit1(input_cluster)
+
         ##################################################################################################
         zip_directory = user_input.zip_directory or str(artifacts_directory)
         final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
@@ -91,6 +92,7 @@ def unit1(user_input: models.UserInput):
         cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
 
+        # TODO - continue from here... Calculate the CAI score of the final sequence
         logger.info(f'Sequence:\n{cds_nt_final_cai}')
         logger.info(f'Optimized sequences score: {cai_mean_opt_index}, '
                     f'deoptimized sequence score: {cai_mean_deopt_index}')
