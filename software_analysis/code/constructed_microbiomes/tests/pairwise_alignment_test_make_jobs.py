@@ -25,7 +25,7 @@ def write_job(seq_fasta, genomes_fid, job_fid):
     sh_file = open(job_fid + '_job.sh', 'w')
     sh_file.write(
         '# !/bin/sh\n'
-        'cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/constructed_microbiomes/tests/test_local_align_KDVY_first_entry\n'
+        'cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/constructed_microbiomes/tests/\n'
         'module load Python3.9Plus\n'
         f'python {exec_fname}\n'
     )
