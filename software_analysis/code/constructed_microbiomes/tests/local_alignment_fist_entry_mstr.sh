@@ -1,5 +1,5 @@
 # !/bin/sh
- cd / tamir1 / liyamlevi / projects / communique / Igem_TAU_2021 / software_analysis / code / raw_data_analysis
+  cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/constructed_microbiomes/tests/test_local_align_KDVY_first_entry/
 chmod 777 ./*
 qsub -q TullerNano -r y  -e 0_job_error.txt -o 0_output.txt -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb 0_start_0_end_250_job.sh
 qsub -q TullerNano -r y  -e 1_job_error.txt -o 1_output.txt -l cput=01:00:00,pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb 10_start_2500_end_2750_job.sh

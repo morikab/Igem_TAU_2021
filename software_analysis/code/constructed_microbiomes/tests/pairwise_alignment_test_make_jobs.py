@@ -25,7 +25,9 @@ def write_job(seq_fasta, genomes_fid, job_fid):
     sh_file = open(job_fid + '_job.sh', 'w')
     sh_file.write(
         '# !/bin/sh\n'
-        f'{exec_fname}\n'
+        'cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/constructed_microbiomes/tests/test_local_align_KDVY_first_entry\n'
+        'module load Python3.9Plus\n'
+        f'python {exec_fname}\n'
     )
     sh_file.close()
 
@@ -47,7 +49,7 @@ def make_mstr_job(mstr_fid, job_names):
 
     f.write(
         '# !/bin/sh\n '
-        'cd / tamir1 / liyamlevi / projects / communique / Igem_TAU_2021 / software_analysis / code / raw_data_analysis\n'
+        ' cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/constructed_microbiomes/tests/test_local_align_KDVY_first_entry/\n'
         'chmod 777 ./*\n'
     )
 
@@ -61,11 +63,6 @@ def make_mstr_job(mstr_fid, job_names):
 
 
 
-metagenome = {name: str(i.seq) for name, i in
-              SeqIO.index("../../../data/tested_results/KDVY_example_metagenome/tls.KDVY.1.fsa_nt",
-                          "fasta").items()}
-
-seq = metagenome[list(metagenome.keys())[0]]
 seq_fasta = "../../../data/tested_results/KDVY_example_metagenome/KDVY_first_entry_KDVY01000001.1.fasta"
 job_names = create_alignment_jobs(seq_fasta=seq_fasta, split_genomes_dir=output_fid)
 print(job_names)
