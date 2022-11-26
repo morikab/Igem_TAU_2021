@@ -1,3 +1,8 @@
+#### WARNING ######
+# THIS CODE HAS AN ERROR IN data_for_every_org(), the rrna orders are all messed up, by flattening a dict with changing key orders to a line.
+# fix before using by either changing that or removing other rrna types. 
+
+
 import time
 
 import pandas as pd
@@ -93,7 +98,7 @@ def data_for_every_org(cds_dir, rna_dir, out_dir):
         tic = time.time()
         row_to_write = list(org_dict.values())
         row_to_write.insert(0, org)
-        writer.writerow(row_to_write)
+        writer.writerow(row_to_write) #todo: this has an error, it writes the 16s, 23s and 5s rrna in messed up orders!!!
         print(time.time() -tic)
     return final_dict
 

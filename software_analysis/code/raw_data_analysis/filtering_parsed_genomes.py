@@ -1,67 +1,52 @@
+### fixing the warning error described in parse genome files header
+### returns the fixed df, and the filtered version + unique values
+### filteres ot rows with 16s shorter than 1000bp and less than 450 proteins
 import pandas as pd
-import matplotlib.pyplot as plt
-import math
-from collections import Counter
-import operator
-import json
 from modules.shared_functions_and_vars import write_fasta
 
-'''
-filtering the data coming from the "parse_genome_files_fob.py" according to length (filtering out sqeuncing shorter than 100bp) 
-and using a randomly selected genome from sequences that have more than one 16S 
-'''
 
-with open('../../data/processed_genomes/cai_and_16s_for_genomes.json', 'r') as f:
-    cai_dict = json.load(f)
+n_protein_th = 450
+len_16s_th = 1000
+
+df = pd.read_csv('../../data/processed_genomes/cai_and_16s_for_genomes_with_errors.csv', index_col= 0)
+print(df)
 
 
-only_str_16s = []
-for org_dict in cai_dict.values():
+for index, row in df.iterrows():
+    rrna_lst = [row['16s'], row['23s'], row['5s']]
     try:
-        if len(org_dict['16s']) >1000:
-            only_str_16s.append(org_dict['16s'])
+        rrna_lst.sort(key=len)
+        df.at[index, '5s'] = rrna_lst[0]
+        df.at[index, '16s'] = rrna_lst[1]
+        n_prot = df.at[index, 'n_proteins']
+
+
+        if len(rrna_lst[1])<len_16s_th:
+            df.drop(index, axis=0, inplace=True)
+            print(f'{index} dropped because len 16s gene = {len(rrna_lst[1])}, shorter than 1000bp')
+        elif n_prot< n_protein_th:
+            df.drop(index, axis=0, inplace=True)
+            print(f'{index} dropped because n_protein = {n_prot}, smaller than 450')
+        else:
+            df.at[index, '23s'] = rrna_lst[2]
+
     except:
-        continue
-
-rrna_counts_dict = dict(Counter(only_str_16s))
-rrna_counts = list(rrna_counts_dict.values())
-
-filtered_org_dict = {}
-counts_for_plt = []
-std_for_plt = []
-for seq, count in rrna_counts_dict.items():
-    for org, org_dict in cai_dict.items():
-        try:
-            # print('#')
-            if org_dict["16s"] == seq:
-                seqid = org.split('.')[0]
-                if len (str(seqid))>50:
-                    print(org)
-                    print(seqid)
-                # else:
-                # print(seqid)
-                filtered_org_dict[seqid] = org_dict
-                break
-        except:
-            # print('%')
-            continue
-
-print(len(filtered_org_dict))
-print(len(sorted(set(list(filtered_org_dict.keys())))))
-print(filtered_org_dict)
+        print(f'{index} dropped because value type error')
+        df.drop(index, axis=0, inplace=True)
 
 
-out_dir = '../../data/processed_genomes/'
-with open(out_dir + "cai_and_16s_for_genomes_filtered.json", 'w') as handle:
-    json.dump(filtered_org_dict, handle)
+df.to_csv('../../data/processed_genomes/cai_and_16s_for_genomes.csv', index_label= ' ')
+print(df)
 
-csv_data = pd.DataFrame(filtered_org_dict).transpose()
-csv_data.to_csv(out_dir + "cai_and_16s_for_genomes_filtered.csv")
+df_filtered = df.drop_duplicates(subset=['16s'], keep='first')
+df_filtered.to_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_label= ' ')
+print(df_filtered)
 
+write_fasta('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered',
+            list(df_filtered['16s']),
+            [i.split('.')[0] for i in list(df_filtered.index)])
 
-
-
-fasta_dict = {key: value['16s'] for key, value in filtered_org_dict.items()}
-write_fasta(out_dir + "cai_and_16s_for_genomes_filtered.fasta",
-            list(fasta_dict.values()),
-            list(fasta_dict.keys()))
+# my findings are that flattening the dict mixes up the different RRNA types,
+# I'm trying to fix this and reassign the correct values to each in this code (s5 is smallest, 16s middle and 23s largest
+# this will also be used for filtering the 16s RRNA differences
+# after this, I will need to run the metagenome matching thing again (the one that uses blast) after fixing the alignment and blastdb
