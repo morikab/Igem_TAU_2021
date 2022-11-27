@@ -50,6 +50,12 @@ class OptimizationMethod(Enum):
     hill_climbing_weakest_link = "hill_climbing_weakest_link"
 
 
+class OptimizationCubScore(Enum):
+    codon_adaptation_index = "CAI"
+    trna_adaptation_index = "tAI"
+    max_codon_trna_adaptation_index = "max_CAI_tAI"
+
+
 @dataclass
 class UserInput:
     organisms: typing.List[Organism]
@@ -58,3 +64,4 @@ class UserInput:
     tuning_parameter: float
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_bulk_aa_average
+    optimization_cub_score: OptimizationCubScore = OptimizationCubScore.max_codon_trna_adaptation_index

@@ -15,13 +15,16 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 from modules import user_IO, ORF, sequence_family
-from modules.stats.evaluation import ZscoreModule
+from modules.stats import models as evaluation_models
+from modules.stats.evaluation import EvaluationModule
 from modules import models
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
 logger = LoggerFactory.get_logger()
+
+# TODO - fix analysis scripts using the changed code...
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
@@ -42,21 +45,21 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
 
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
 
-        # ####################################### family of sequences #####################################
+        # ####################################### Family of sequences #####################################
         # in this part, user input is split into different inputs according to the sequence family theory
         clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
-        final_cds = None
-        optimization_index = None
-        weakest_score = None
+        evaluation_results = []
         for input_cluster in clustered_user_inputs:
-            # TODO - what do we want to display for each run? We should store the results differently
-            final_cds, optimization_index, weakest_score = run_orf_optimization(input_cluster)
+            evaluation_result = run_orf_optimization(input_cluster)
+            evaluation_results.append(evaluation_result)
 
-        ##################################################################################################
+        # ###################################### Output Handling ##########################################
         zip_directory = user_input.zip_directory or str(artifacts_directory)
-        final_output = user_IO.UserOutputModule.run_module(cds_sequence=final_cds,
-                                                           zscore=optimization_index,
-                                                           weakest_score=weakest_score,
+        # TODO - handle multiple results in output generation module
+        evaluation_result = evaluation_results[0]
+        final_output = user_IO.UserOutputModule.run_module(cds_sequence=evaluation_result.sequence,
+                                                           zscore=evaluation_result.optimization_index,
+                                                           weakest_score=evaluation_result.weakest_score,
                                                            zip_directory=zip_directory)
     except:
         logger.error("Encountered unknown error when running modules.")
@@ -70,78 +73,70 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     return final_output
 
 
-def run_orf_optimization(user_input: models.UserInput):
+def choose_orf_optimization_result(
+        tai_evaluation_result: typing.Optional[evaluation_models.EvaluationModuleResult],
+        cai_evaluation_result: typing.Optional[evaluation_models.EvaluationModuleResult],
+) -> evaluation_models.EvaluationModuleResult:
+    if tai_evaluation_result is None:
+        return cai_evaluation_result
+    if cai_evaluation_result is None:
+        return tai_evaluation_result
+    return cai_evaluation_result if cai_evaluation_result.optimization_index > tai_evaluation_result.optimization_index\
+        else tai_evaluation_result
+
+
+def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.EvaluationModuleResult:
+    optimization_cub_score = user_input.optimization_cub_score
     optimization_method = user_input.optimization_method
-    try:
-        # TODO - define whether to use CAI or TAI optimization as a parameter to the model
-        # logger.info('tAI information:')
-        # cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
-        #
-        # tai_mean_opt_index, tai_mean_deopt_index, tai_optimization_index, tai_weakest_score = \
-        #     ZscoreModule.run_module(cds_nt_final_tai, user_input, optimization_type='tai')
-        #
-        # logger.info(f'Sequence:\n{cds_nt_final_tai}')
-        # logger.info(f'Optimized sequences score: {tai_mean_opt_index}, '
-        #             f'deoptimized sequence score: {tai_mean_deopt_index}')
-        # logger.info(f'Final optimization score: {tai_optimization_index}')
+    tai_scores = (models.OptimizationCubScore.trna_adaptation_index,
+                  models.OptimizationCubScore.max_codon_trna_adaptation_index)
+    cai_scores = (models.OptimizationCubScore.codon_adaptation_index,
+                  models.OptimizationCubScore.max_codon_trna_adaptation_index)
+    tai_evaluation_result = None
+    cai_evaluation_result = None
+    # TODO - create a stats object inside the module that will contain all the information we want to log (as json),
+    #  and use json.dumps() to store it in file for the stats results.
+    if optimization_cub_score in tai_scores:
+        logger.info("tAI information:")
+        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, "tai", optimization_method)
 
-        # cai optimization
-        logger.info('CAI information:')
-        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_method)
-        # TODO - create a stats object inside the module that will contain all the information we want to log (as json),
-        #  and use json.dumps() to store it in file for the stats results.
+        # TODO - replace "tai"/"cai" strings with the enum value
+        tai_evaluation_result = EvaluationModule.run_module(cds_nt_final_tai, user_input, optimization_type="tai")
 
-        cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
-            ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')
+        logger.info(f"Sequence:\n{cds_nt_final_tai}")
+        logger.info(f"Optimized sequences score: {tai_evaluation_result.mean_opt_index}, "
+                    f"deoptimized sequence score: {tai_evaluation_result.mean_deopt_index}")
+        logger.info(f"Final optimization score: {tai_evaluation_result.optimization_index}")
 
-        # TODO - continue from here... Calculate the CAI score of the final sequence
-        logger.info(f'Sequence:\n{cds_nt_final_cai}')
-        logger.info(f'Optimized sequences score: {cai_mean_opt_index}, '
-                    f'deoptimized sequence score: {cai_mean_deopt_index}')
-        logger.info(f'Final optimization score: {cai_optimization_index}')
+    if optimization_cub_score in cai_scores:
+        logger.info("CAI information:")
+        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, "cai", optimization_method)
+        cai_evaluation_result = EvaluationModule.run_module(cds_nt_final_cai, user_input, optimization_type="cai")
 
-        logger.info("The end")
-        return cds_nt_final_cai, cai_optimization_index, cai_weakest_score
+        logger.info(f"Sequence:\n{cds_nt_final_cai}")
+        logger.info(f"Optimized sequences score: {cai_evaluation_result.mean_opt_index}, "
+                    f"deoptimized sequence score: {cai_evaluation_result.mean_deopt_index}")
+        logger.info(f"Final optimization score: {cai_evaluation_result.optimization_index}")
 
+    evaluation_result = choose_orf_optimization_result(tai_evaluation_result=tai_evaluation_result,
+                                                       cai_evaluation_result=cai_evaluation_result)
 
-        if cai_optimization_index > tai_optimization_index:
-            logger.info('CAI sequence was selected')
-            final_cds = cds_nt_final_cai
-            optimization_index = cai_optimization_index
-            mean_opt_index = cai_mean_opt_index
-            mean_deopt_index = cai_mean_deopt_index
-            weakest_score = cai_weakest_score
-        else:
-            logger.info('tAI sequence was selected')
-            final_cds = cds_nt_final_tai
-            optimization_index = tai_optimization_index
-            mean_opt_index = tai_mean_opt_index
-            mean_deopt_index = tai_mean_deopt_index
-            weakest_score = tai_weakest_score
-
-    except:
-        logger.info('CAI information:')
-        final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_method=optimization_method)
-        mean_opt_index, mean_deopt_index, optimization_index, weakest_score =\
-            ZscoreModule.run_module(final_cds, user_input, 'cai')
-
-    logger.info(f'Sequence:\n{final_cds}')
-    logger.info(f'Optimized sequences score: {mean_opt_index}, deoptimized sequence score: {mean_deopt_index}')
-    logger.info(f'Weakest link score: {weakest_score}')
-    logger.info(f'Final optimization score: {optimization_index}')
-    return final_cds, optimization_index, weakest_score
+    logger.info(f"Sequence:\n{evaluation_result.sequence}")
+    logger.info(f"Optimized sequences score: {evaluation_result.mean_opt_index}, "
+                f"deoptimized sequence score: {evaluation_result.mean_deopt_index}")
+    logger.info(f"Weakest link score: {evaluation_result.weakest_score}")
+    logger.info(f"Final optimization score: {evaluation_result.optimization_index}")
+    return evaluation_result
 
 
 if __name__ == "__main__":
     tic = time.time()
-    # default_user_inp_raw = generate_testing_data(n_organisms=4,
-    #                                              percent_optimized=0.7,
-    #                                              clusters_count=1,
-    #                                              tuning_param=0.5)
+    # TODO - move the input dict generation to new file and fix the entry point of run_modules
     default_user_inp_raw = generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method="single_codon_global_ratio",
         # optimization_method="hill_climbing_bulk_aa_average",
         # optimization_method="hill_climbing_average",
+        optimization_cub_score="CAI",
         clusters_count=1,
         tuning_param=0.5,
         is_ecoli_optimized=False,

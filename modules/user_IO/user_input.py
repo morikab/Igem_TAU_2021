@@ -21,11 +21,12 @@ class UserInputModule(object):
         return cls._parse_input(user_inp_raw)
 
     @classmethod
-    def _parse_input(cls, user_input):
+    def _parse_input(cls, user_input: typing.Dict[str, typing.Any]) -> models.UserInput:
         """
         :param user_input: in the following format
         {   'tuning_param': 0.5,
             'optimization_method': 'hill_climbing_average',
+            'optimization_cub_score': 'CAI',
             'clustering_num': 3,
             'organisms: {
                 'ecoli': {
@@ -82,6 +83,8 @@ class UserInputModule(object):
         tuning_parameter = user_input["tuning_param"]
         optimization_method = models.OptimizationMethod[user_input["optimization_method"]] if \
             user_input.get("optimization_method") else None
+        optimization_cub_score = models.OptimizationCubScore[user_input["optimization_cub_score"]] if \
+            user_input.get("optimization_cub_score") else None
         clusters_count = user_input["clusters_count"]
         zip_directory = user_input.get("output_path")
 
@@ -89,6 +92,7 @@ class UserInputModule(object):
                                 sequence=orf_seq,
                                 tuning_parameter=tuning_parameter,
                                 optimization_method=optimization_method,
+                                optimization_cub_score=optimization_cub_score,
                                 clusters_count=clusters_count,
                                 zip_directory=zip_directory)
 

@@ -52,8 +52,10 @@ def generate_testing_data(n_organisms=15,
     return inp_dict
 
 
+# TODO - move the run configuration method to a new file - under the analysis directory of the project
 def generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method,
+        optimization_cub_score,
         clusters_count=2,
         tuning_param=0.5,
         is_ecoli_optimized=False,
@@ -70,25 +72,26 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         deopt_mrna_levels = "ecoli_mrna_level.csv"
 
     inp_dict = {
-        'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
-        'tuning_param': tuning_param,
-        'organisms': {},
-        'clusters_count': clusters_count,
+        "sequence": os.path.join(base_path, "mCherry_original.fasta"),
+        "tuning_param": tuning_param,
+        "organisms": {},
+        "clusters_count": clusters_count,
         "optimization_method": optimization_method,
+        "optimization_cub_score": optimization_cub_score,
     }
 
     inp_dict['organisms'][opt_genome[:-3]] = {
-        'genome_path': os.path.join(base_path, opt_genome),
-        'optimized': True,
-        'expression_csv': os.path.join(base_path, opt_mrna_levels),
-        'optimization_priority': DEFAULT_ORGANISM_PRIORITY,
+        "genome_path": os.path.join(base_path, opt_genome),
+        "optimized": True,
+        "expression_csv": os.path.join(base_path, opt_mrna_levels),
+        "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 
-    inp_dict['organisms'][deopt_genome[:-2]] = {
-        'genome_path': os.path.join(base_path, deopt_genome),
-        'optimized': False,
-        'expression_csv': os.path.join(base_path, deopt_mrna_levels),
-        'optimization_priority': DEFAULT_ORGANISM_PRIORITY,
+    inp_dict["organisms"][deopt_genome[:-2]] = {
+        "genome_path": os.path.join(base_path, deopt_genome),
+        "optimized": False,
+        "expression_csv": os.path.join(base_path, deopt_mrna_levels),
+        "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 
     return inp_dict
