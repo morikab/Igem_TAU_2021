@@ -6,7 +6,6 @@ from pathlib import Path
 import typing
 
 from logger_factory.logger_factory import LoggerFactory
-from modules.testing_for_modules import generate_testing_data
 from modules.testing_for_modules import generate_testing_data_for_comparing_with_previous_algorithm
 
 
@@ -27,11 +26,12 @@ logger = LoggerFactory.get_logger()
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
     user_inp_raw = user_input_dict or default_user_inp_raw
-
+    final_output = None
     try:
         before_parsing_input = time.time()
         user_input = user_IO.UserInputModule.run_module(user_inp_raw)
 
+        # TODO - convert to summarizing file
         # Log CAI scores for organisms
         for organism in user_input.organisms:
             logger.info(organism.name)
@@ -50,7 +50,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         weakest_score = None
         for input_cluster in clustered_user_inputs:
             # TODO - what do we want to display for each run? We should store the results differently
-            final_cds, optimization_index, weakest_score = unit1(input_cluster)
+            final_cds, optimization_index, weakest_score = run_orf_optimization(input_cluster)
 
         ##################################################################################################
         zip_directory = user_input.zip_directory or str(artifacts_directory)
@@ -58,22 +58,22 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
                                                            zscore=optimization_index,
                                                            weakest_score=weakest_score,
                                                            zip_directory=zip_directory)
-        logger.info("Final output: %s", final_output)
-    except Exception as e:
+    except:
+        logger.error("Encountered unknown error when running modules.")
         exception_str = traceback.format_exc()
         final_output = {
             "error_message": exception_str,
         }
-        logger.error("Encountered unknown error when running modules. Error message: %s", exception_str)
+    finally:
+        logger.info("Final output: %s", final_output)
 
     return final_output
 
 
-def unit1(user_input: models.UserInput):
+def run_orf_optimization(user_input: models.UserInput):
     optimization_method = user_input.optimization_method
     try:
-        # both CAI and tAI, select the one with the best optimization index tai optimization
-        # TODO - un-comment tAI logic
+        # TODO - define whether to use CAI or TAI optimization as a parameter to the model
         # logger.info('tAI information:')
         # cds_nt_final_tai = ORF.ORFModule.run_module(user_input, 'tai', optimization_method)
         #
@@ -88,6 +88,8 @@ def unit1(user_input: models.UserInput):
         # cai optimization
         logger.info('CAI information:')
         cds_nt_final_cai = ORF.ORFModule.run_module(user_input, 'cai', optimization_method)
+        # TODO - create a stats object inside the module that will contain all the information we want to log (as json),
+        #  and use json.dumps() to store it in file for the stats results.
 
         cai_mean_opt_index, cai_mean_deopt_index, cai_optimization_index, cai_weakest_score = \
             ZscoreModule.run_module(cds_nt_final_cai, user_input, optimization_type='cai')

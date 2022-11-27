@@ -7,7 +7,7 @@ from scipy.stats import spearmanr
 import time
 import numpy as np
 import pandas as pd
-from modules.main import unit1
+from modules.main import run_orf_optimization
 
 
 
@@ -99,7 +99,7 @@ for translation_function in func_options:
             software_dict['organisms'][org1] = org_dict[org1]
             software_dict['organisms'][org2] = org_dict[org2]
             inner_tic = time.time()
-            final_cds, optimization_index, weakest_score = unit1(software_dict)
+            final_cds, optimization_index, weakest_score = run_orf_optimization(software_dict)
             print('TIME: ', time.time()-inner_tic)
             # alignment_score = pairwise2.align.globalxx(
             #     ribosomal_dict[org1], ribosomal_dict[org2], score_only=True)

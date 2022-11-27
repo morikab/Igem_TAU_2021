@@ -147,15 +147,13 @@ def iterate_through_feature(organisms, codons, loss, tuning_param, high_expressi
                     if high_expression:
                         # loss[codon] += (tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2))
                         if is_ratio:
-                            new_loss[codon] += tuning_param * f.ratio * (((f.weights[codon] / max_value - 1) ** 2) ** 0.5)
-                            # new_loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
+                            new_loss[codon] += tuning_param * f.ratio * ((f.weights[codon] / max_value - 1) ** 2)
                         else:
                             new_loss[codon] += tuning_param * f.ratio * (max_value - f.weights[codon])
                     else:
                         # loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
                         if is_ratio:
-                            new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value))
-                            # new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
+                            new_loss[codon] += (1 - tuning_param) * f.ratio * ((f.weights[codon] / max_value) ** 2)
                         else:
                             new_loss[codon] += (1 - tuning_param) * f.ratio * (1 - max_value + f.weights[codon])
                 except:

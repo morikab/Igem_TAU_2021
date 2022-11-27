@@ -1,7 +1,7 @@
 from tax_splitting_func import format_output
 import json
 from Bio.SeqIO import read
-from modules.main import unit1
+from modules.main import run_orf_optimization
 import matplotlib.pyplot as  plt
 import time
 import numpy as np
@@ -33,7 +33,7 @@ for tax_con, color in tax_to_color.items():
         for x in range(2,len(org_dict)):
             inner_tic = time.time()
             usr_dict = format_output(initial_seq, org_dict, tax_con, x, run_times=50)
-            final_cds, optimization_index, weakest_score = unit1(usr_dict, model_preferences)
+            final_cds, optimization_index, weakest_score = run_orf_optimization(usr_dict, model_preferences)
             scores_for_x.append(optimization_index)
             print('TIME; ', time.time()-inner_tic)
         np_runs_for_tax[:,i]=scores_for_x
