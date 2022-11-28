@@ -81,9 +81,9 @@ class UserInputModule(object):
         logger.info(f'containing this sequence: {orf_seq}')
 
         tuning_parameter = user_input["tuning_param"]
-        optimization_method = models.OptimizationMethod[user_input["optimization_method"]] if \
+        optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
             user_input.get("optimization_method") else None
-        optimization_cub_score = models.OptimizationCubScore[user_input["optimization_cub_score"]] if \
+        optimization_cub_score = models.OptimizationCubScore(user_input["optimization_cub_score"]) if \
             user_input.get("optimization_cub_score") else None
         clusters_count = user_input["clusters_count"]
         zip_directory = user_input.get("output_path")
