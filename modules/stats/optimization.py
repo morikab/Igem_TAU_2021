@@ -15,11 +15,12 @@ class OptimizationModule(object):
                    final_seq: str,
                    user_input: models.UserInput,
                    optimization_method: models.OptimizationMethod,
-                   # TODO - convert cai_or_tai to enum
-                   cai_or_tai: str = 'cai'):
-        std_key = F"{cai_or_tai}_std"
-        average_key = F"{cai_or_tai}_avg"
-        weights = F"{cai_or_tai}_profile"
+                   optimization_cub_score: models.OptimizationCubScore):
+        optimization_cub_score_value = optimization_cub_score.value.tolower()
+
+        std_key = F"{optimization_cub_score_value}_std"
+        average_key = F"{optimization_cub_score_value}_avg"
+        weights = F"{optimization_cub_score_value}_profile"
 
         optimized_organisms_scores = []
         optimized_organisms_weights = []
@@ -33,9 +34,7 @@ class OptimizationModule(object):
             index = general_geomean([user_input.sequence, final_seq], weights=profile)
             final_score = index[1]
             organism_score = (final_score - miu) / sigma
-            # logger.info(F"Standarized CUB score for organism {organism.name} is: {organism_score}")
             logger.info(F"CUB score for organism {organism.name} is: {final_score}")
-            # logger.info(F"{organism.name}, miu: {miu}, sigma: {sigma}, organism_score: {organism_score}")
             if organism.is_optimized:
                 optimized_organisms_scores.append(organism_score)
                 optimized_organisms_weights.append(organism.optimization_priority)

@@ -24,11 +24,10 @@ logger = LoggerFactory.get_logger()
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
-    final_output = None
+    final_output = {}
     try:
         before_parsing_input = time.time()
         user_input = user_IO.UserInputModule.run_module(user_input_dict)
-
         # TODO - convert to summarizing file
         # Log CAI scores for organisms
         for organism in user_input.organisms:
@@ -37,7 +36,6 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             logger.info(organism.cai_profile)
 
         after_parsing_input = time.time()
-
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
 
         # ####################################### Family of sequences #####################################

@@ -27,10 +27,10 @@ def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, 
     return ''.join(new_split_seq), changed_codons_count
 
 
-# in each round - check all single synonymous codon changes and calculate optimization score - take the best one
+# In each round - check all single synonymous codon changes and calculate optimization score - take the best one
 def hill_climbing_optimize_by_zscore(seq: str,
                                      user_input: models.UserInput,
-                                     cai_or_tai: str,
+                                     optimization_cub_score: models.OptimizationCubScore,
                                      max_iter: int,
                                      optimization_method: models.OptimizationMethod):
     """
@@ -38,18 +38,14 @@ def hill_climbing_optimize_by_zscore(seq: str,
     in each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
     sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
     iteration, break. The maximum number of iterations allowed is "max_iter"
-    @seq: str, tested seq
-    @inp_dict: input dict after usr_inp code
-    @opt_type: 'cai' or 'tai'
-    @max_iter: maximal number of iterations to perform
-    return: seq, which is the optimized sequence
+    return: optimized sequence
     """
 
     seq_options = {}
     score = OptimizationModule.run_module(
         final_seq=seq,
         user_input=user_input,
-        cai_or_tai=cai_or_tai,
+        optimization_cub_score=optimization_cub_score,
         optimization_method=optimization_method,
     )
     seq_options[seq] = score
@@ -81,22 +77,16 @@ def hill_climbing_optimize_by_zscore(seq: str,
     return seq
 
 
-# in each round - check all single synonymous codon changes and calculate optimization score - take the best one
+#
 def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
                                              user_input: models.UserInput,
-                                             cai_or_tai: str,
                                              max_iter: int,
-                                             optimization_method: models.OptimizationMethod):
+                                             optimization_method: models.OptimizationMethod,
+                                             optimization_cub_score: models.OptimizationCubScore):
     """
-    hill climbing function for performing codon optimization
-    in each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
-    sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
-    iteration, break. The maximum number of iterations allowed is "max_iter"
-    @seq: str, tested seq
-    @inp_dict: input dict after usr_inp code
-    @opt_type: 'cai' or 'tai'
-    @max_iter: maximal number of iterations to perform
-    return: seq, which is the optimized sequence
+    Hill climbing function for performing codon optimization
+    in each iteration - in each round, check all single synonymous codon changes, calculate optimization score and
+    take the best one
     """
     optimization_method = models.OptimizationMethod.hill_climbing_average
     seq_options = {}
@@ -113,7 +103,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
     score = OptimizationModule.run_module(
         final_seq=seq,
         user_input=user_input,
-        cai_or_tai=cai_or_tai,
+        optimization_cub_score=optimization_cub_score,
         optimization_method=optimization_method,
     )
     seq_options[seq] = score
@@ -127,7 +117,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
                 aa_seq_options[aa_codon] = OptimizationModule.run_module(
                     final_seq=option_seq,
                     user_input=user_input,
-                    cai_or_tai=cai_or_tai,
+                    optimization_cub_score=optimization_cub_score,
                     optimization_method=optimization_method,
                 )
                 # logger.info(F"z-score after changing codon {aa_codon} is: {aa_seq_options[aa_codon]}")
@@ -135,7 +125,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
             return aa_new_seq
         logger.info(F"zscore of sequence in run {run} is: {seq_options[seq]}")
         aa_to_selected_codon = {}
-        # Find best synonymous_codon per aa
+        # Find the best synonymous_codon per aa
         for aa in synonymous_codons.keys():
             selected_aa_codon = find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa], seq_to_change=seq)
             aa_to_selected_codon[aa] = selected_aa_codon
@@ -151,7 +141,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
         score = OptimizationModule.run_module(
             final_seq=new_seq,
             user_input=user_input,
-            cai_or_tai=cai_or_tai,
+            optimization_cub_score=optimization_cub_score,
             optimization_method=optimization_method,
         )
         seq_options[new_seq] = score
