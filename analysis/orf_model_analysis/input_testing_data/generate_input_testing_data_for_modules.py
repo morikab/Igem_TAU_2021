@@ -4,18 +4,20 @@ from os import listdir
 from os.path import isfile, join
 import random
 
-from .shared_functions_and_vars import DEFAULT_ORGANISM_PRIORITY
-
 current_directory = Path(__file__).parent.resolve()
-base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
-genome_path = os.path.join(base_path, 'arabidopsis_microbiome')
+base_path = os.path.join(Path(current_directory).parent.parent.resolve(), "example_data")
+default_genome_path = os.path.join(base_path, 'arabidopsis_microbiome')
+
+DEFAULT_ORGANISM_PRIORITY = 50
+DEFAULT_CLUSTERS_COUNT = 2
+DEFAULT_TUNING_PARAM = 0.5
 
 
 def generate_testing_data(n_organisms=15,
                           percent_optimized=0.5,
-                          clusters_count=2,
-                          tuning_param=0.5,
-                          genome_path=genome_path):
+                          clusters_count=DEFAULT_CLUSTERS_COUNT,
+                          tuning_param=DEFAULT_TUNING_PARAM,
+                          genome_path=default_genome_path):
 
     inp_dict = {
             'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
@@ -52,12 +54,11 @@ def generate_testing_data(n_organisms=15,
     return inp_dict
 
 
-# TODO - move the run configuration method to a new file - under the analysis directory of the project
 def generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method,
         optimization_cub_score,
-        clusters_count=2,
-        tuning_param=0.5,
+        clusters_count=DEFAULT_CLUSTERS_COUNT,
+        tuning_param=DEFAULT_TUNING_PARAM,
         is_ecoli_optimized=False,
 ):
     if is_ecoli_optimized:

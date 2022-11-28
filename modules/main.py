@@ -6,21 +6,17 @@ from pathlib import Path
 import typing
 
 from logger_factory.logger_factory import LoggerFactory
-from modules.testing_for_modules import generate_testing_data_for_comparing_with_previous_algorithm
-
 
 # Create clean artifacts directory
 artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
 if artifacts_directory.exists() and artifacts_directory.is_dir():
     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
+
 from modules import user_IO, ORF, sequence_family
 from modules.stats import models as evaluation_models
 from modules.stats.evaluation import EvaluationModule
 from modules import models
-
-current_directory = Path(__file__).parent.resolve()
-base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
 logger = LoggerFactory.get_logger()
 
@@ -28,11 +24,10 @@ logger = LoggerFactory.get_logger()
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
-    user_inp_raw = user_input_dict or default_user_inp_raw
     final_output = None
     try:
         before_parsing_input = time.time()
-        user_input = user_IO.UserInputModule.run_module(user_inp_raw)
+        user_input = user_IO.UserInputModule.run_module(user_input_dict)
 
         # TODO - convert to summarizing file
         # Log CAI scores for organisms
@@ -127,21 +122,3 @@ def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.Eval
     logger.info(f"Weakest link score: {evaluation_result.weakest_score}")
     logger.info(f"Final optimization score: {evaluation_result.optimization_index}")
     return evaluation_result
-
-
-if __name__ == "__main__":
-    tic = time.time()
-    # TODO - move the input dict generation to new file and fix the entry point of run_modules
-    default_user_inp_raw = generate_testing_data_for_comparing_with_previous_algorithm(
-        optimization_method="single_codon_global_ratio",
-        # optimization_method="hill_climbing_bulk_aa_average",
-        # optimization_method="hill_climbing_average",
-        optimization_cub_score="CAI",
-        clusters_count=1,
-        tuning_param=0.5,
-        is_ecoli_optimized=False,
-    )
-    run_modules()
-    toc = time.time()
-    modules_run_time = toc - tic
-    logger.info(F"Total modules run time: {modules_run_time}")
