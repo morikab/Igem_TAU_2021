@@ -5,6 +5,9 @@ from enum import Enum
 
 
 class Organism(object):
+    CAI_SCORES_ATTRIBUTE_NAME = "cai_scores"
+    TAI_SCORES_ATTRIBUTE_NAME = "tai_scores"
+
     def __init__(self,
                  name: str,
                  cai_profile,
@@ -49,11 +52,28 @@ class OptimizationMethod(Enum):
     hill_climbing_bulk_aa_average = "hill_climbing_bulk_aa_average"
     hill_climbing_weakest_link = "hill_climbing_weakest_link"
 
+    @property
+    def is_single_codon_optimization(self) -> bool:
+        return self in (OptimizationMethod.single_codon_global_ratio,
+                        OptimizationMethod.single_codon_local_ratio,
+                        OptimizationMethod.single_codon_global_diff,
+                        OptimizationMethod.single_codon_local_diff)
+
 
 class OptimizationCubScore(Enum):
     codon_adaptation_index = "CAI"
     trna_adaptation_index = "tAI"
     max_codon_trna_adaptation_index = "max_CAI_tAI"
+
+    @property
+    def is_codon_adaptation_score(self) -> bool:
+        return self in (OptimizationCubScore.codon_adaptation_index,
+                        OptimizationCubScore.max_codon_trna_adaptation_index)
+
+    @property
+    def is_trna_adaptation_score(self) -> bool:
+        return self in (OptimizationCubScore.trna_adaptation_index,
+                        OptimizationCubScore.max_codon_trna_adaptation_index)
 
 
 @dataclass

@@ -81,30 +81,34 @@ def choose_orf_optimization_result(
 def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.EvaluationModuleResult:
     optimization_cub_score = user_input.optimization_cub_score
     optimization_method = user_input.optimization_method
-    tai_scores = (models.OptimizationCubScore.trna_adaptation_index,
-                  models.OptimizationCubScore.max_codon_trna_adaptation_index)
-    cai_scores = (models.OptimizationCubScore.codon_adaptation_index,
-                  models.OptimizationCubScore.max_codon_trna_adaptation_index)
     tai_evaluation_result = None
     cai_evaluation_result = None
     # TODO - create a stats object inside the module that will contain all the information we want to log (as json),
     #  and use json.dumps() to store it in file for the stats results.
-    if optimization_cub_score in tai_scores:
+    if optimization_cub_score.is_trna_adaptation_score:
         logger.info("tAI information:")
-        cds_nt_final_tai = ORF.ORFModule.run_module(user_input, "tai", optimization_method)
-
-        # TODO - replace "tai"/"cai" strings with the enum value
-        tai_evaluation_result = EvaluationModule.run_module(cds_nt_final_tai, user_input, optimization_type="tai")
+        trna_adaptation_index_score = optimization_cub_score.trna_adaptation_index
+        cds_nt_final_tai = ORF.ORFModule.run_module(user_input=user_input,
+                                                    optimization_cub_score=trna_adaptation_index_score,
+                                                    optimization_method=optimization_method)
+        tai_evaluation_result = EvaluationModule.run_module(final_seq=cds_nt_final_tai,
+                                                            user_input=user_input,
+                                                            optimization_cub_score=trna_adaptation_index_score)
 
         logger.info(f"Sequence:\n{cds_nt_final_tai}")
         logger.info(f"Optimized sequences score: {tai_evaluation_result.mean_opt_index}, "
                     f"deoptimized sequence score: {tai_evaluation_result.mean_deopt_index}")
         logger.info(f"Final optimization score: {tai_evaluation_result.optimization_index}")
 
-    if optimization_cub_score in cai_scores:
+    if optimization_cub_score.is_codon_adaptation_score:
         logger.info("CAI information:")
-        cds_nt_final_cai = ORF.ORFModule.run_module(user_input, "cai", optimization_method)
-        cai_evaluation_result = EvaluationModule.run_module(cds_nt_final_cai, user_input, optimization_type="cai")
+        codon_adaptation_index_score = optimization_cub_score.codon_adaptation_index
+        cds_nt_final_cai = ORF.ORFModule.run_module(user_input=user_input,
+                                                    optimization_cub_score=codon_adaptation_index_score,
+                                                    optimization_method=optimization_method)
+        cai_evaluation_result = EvaluationModule.run_module(final_seq=cds_nt_final_cai,
+                                                            user_input=user_input,
+                                                            optimization_cub_score=codon_adaptation_index_score)
 
         logger.info(f"Sequence:\n{cds_nt_final_cai}")
         logger.info(f"Optimized sequences score: {cai_evaluation_result.mean_opt_index}, "

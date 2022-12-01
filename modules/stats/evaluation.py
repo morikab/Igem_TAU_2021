@@ -10,9 +10,10 @@ class EvaluationModule(object):
     @staticmethod
     def run_module(final_seq: str,
                    user_input: main_models.UserInput,
-                   optimization_type: str = "cai") -> models.EvaluationModuleResult:
-        std = optimization_type + '_std'
-        weights = optimization_type + '_profile'
+                   optimization_cub_score: main_models.OptimizationCubScore) -> models.EvaluationModuleResult:
+        optimization_cub_score_value = optimization_cub_score.value.tolower()
+        std = f"{optimization_cub_score_value}_std"
+        weights = f"{optimization_cub_score_value}_profile"
 
         optimized_organisms_scores = []
         optimized_organisms_weights = []

@@ -27,11 +27,11 @@ def run_orf_module(optimized_org_dict, deoptimized_org_dict, target_gene):
                  cai_std=org_dict['std'], tai_std=None )
         for org_name, org_dict in deoptimized_org_dict.items()]
 
-    optimized_sequence = optimize_sequence(target_gene=target_gene,
-                                           high_expression_organisms=high_expression_organisms,
-                                           low_expression_organisms=low_expression_organisms,
-                                           tuning_param=0.5,
-                                           local_maximum=False)
+    optimized_sequence = optimize_sequence_by_loss_function(target_gene=target_gene,
+                                                            high_expression_organisms=high_expression_organisms,
+                                                            low_expression_organisms=low_expression_organisms,
+                                                            tuning_param=0.5,
+                                                            local_maximum=False)
     return optimized_sequence
 
 #
