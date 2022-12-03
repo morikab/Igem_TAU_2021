@@ -1,0 +1,12 @@
+2022-11-29 07:02:36,112 - root - INFO - ##########################
+2022-11-29 07:02:36,112 - root - INFO - # ORF #
+2022-11-29 07:02:36,112 - root - INFO - ##########################
+2022-11-29 07:02:36,113 - root - INFO - OptimizationMethod.hill_climbing_bulk_aa_average
+2022-11-29 07:02:36,173 - root - INFO - New seq for iteration 0 with score of: 4.538427857993094
+2022-11-29 07:02:36,224 - root - INFO - New seq for iteration 1 with score of: 4.538427857993094
+2022-11-29 07:02:36,225 - root - INFO - ##########################
+2022-11-29 07:02:36,225 - root - INFO - # ORF #
+2022-11-29 07:02:36,225 - root - INFO - ##########################
+2022-11-29 07:02:36,225 - root - INFO - OptimizationMethod.hill_climbing_bulk_aa_average
+2022-11-29 07:02:36,298 - root - INFO - New seq for iteration 0 with score of: 1.5405742454950992
+2022-11-29 07:02:36,379 - root - INFO - New seq for iteration 1 with score of: 1.5405742454950992

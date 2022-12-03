@@ -88,7 +88,8 @@ def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserI
         new_user_input = models.UserInput(organisms=[],
                                           sequence=user_input.sequence,
                                           tuning_parameter=user_input.tuning_parameter,
-                                          clusters_count=user_input.clusters_count)
+                                          clusters_count=user_input.clusters_count,
+                                          zip_directory= user_input.zip_directory)
 
         new_user_input.organisms = [user_input.organisms[i] for i in range(len(opt_org_list+deopt_org_list))
                                     if user_input.organisms[i].name in opt_and_deopt]
