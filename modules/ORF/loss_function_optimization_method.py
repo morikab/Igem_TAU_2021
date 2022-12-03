@@ -79,9 +79,9 @@ def optimize_sequence_by_loss_function(target_gene: str,
 # --------------------------------------------------------------
 def get_organism_attribute_name_by_optimization_cub_score(optimization_cub_score: models.OptimizationCubScore) -> str:
     if optimization_cub_score.is_codon_adaptation_score:
-        return models.Organism.CAI_SCORES_ATTRIBUTE_NAME
+        return models.Organism.CAI_PROFILE_ATTRIBUTE_NAME
     elif optimization_cub_score.is_trna_adaptation_score:
-        return models.Organism.TAI_SCORES_ATTRIBUTE_NAME
+        return models.Organism.TAI_PROFILE_ATTRIBUTE_NAME
     else:
         raise ValueError(F"Unknown optimization_cub_score {optimization_cub_score}")
 

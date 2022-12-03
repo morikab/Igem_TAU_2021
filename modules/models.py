@@ -5,8 +5,8 @@ from enum import Enum
 
 
 class Organism(object):
-    CAI_SCORES_ATTRIBUTE_NAME = "cai_scores"
-    TAI_SCORES_ATTRIBUTE_NAME = "tai_scores"
+    CAI_PROFILE_ATTRIBUTE_NAME = "cai_profile"
+    TAI_PROFILE_ATTRIBUTE_NAME = "tai_profile"
 
     def __init__(self,
                  name: str,

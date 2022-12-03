@@ -11,7 +11,7 @@ class EvaluationModule(object):
     def run_module(final_seq: str,
                    user_input: main_models.UserInput,
                    optimization_cub_score: main_models.OptimizationCubScore) -> models.EvaluationModuleResult:
-        optimization_cub_score_value = optimization_cub_score.value.tolower()
+        optimization_cub_score_value = optimization_cub_score.value.lower()
         std = f"{optimization_cub_score_value}_std"
         weights = f"{optimization_cub_score_value}_profile"
 
