@@ -3,6 +3,8 @@ import os
 import subprocess
 import pandas as pd
 from pathlib import Path
+from os import listdir
+from os.path import isfile, join
 
 destination_dir = '../../data/refseq_genomes/'
 
@@ -35,9 +37,9 @@ def blastn_run(tls_inp):
     return tls_output, command
 
 
-def run_all_tls(metadata_fid ):
-    tls_metadata = pd.read_csv(metadata_fid)
-    fasta_loc_list = tls_metadata['fasta'].to_list()
+def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
+    tls_files = [f for f in listdir(tls_blast_path) if isfile(join(tls_blast_path, f))]
+    fasta_loc_list = [tls_blast_path + f for f in tls_files if 'fsa_nt' in f]
 
     commands = []
     outputs = []
@@ -54,7 +56,7 @@ def run_all_tls(metadata_fid ):
     # tls_metadata['blast_command'] = commands
     # tls_metadata['blast_csv'] = outputs
     # tls_metadata.to_csv(metadata_fid[:-4]+ '_with_blast.csv')
-    return commands, tls_metadata
+    return commands
 
 # run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
 
@@ -80,7 +82,7 @@ def filename_to_sent_job(sh_file):
 
 if __name__ == "__main__":
     print('Start')
-    command_list, df = run_all_tls(metadata_fid = '../../data/processed_tls/tls_assembly_metadata.csv')
+    command_list = run_all_tls('../../data/genbank_tls/')
     print(len(command_list))
     job_files = []
     for idx, command in enumerate(command_list):
