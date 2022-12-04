@@ -78,8 +78,7 @@ def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.Eval
     optimization_method = user_input.optimization_method
     tai_evaluation_result = None
     cai_evaluation_result = None
-    # TODO - create a stats object inside the module that will contain all the information we want to log (as json),
-    #  and use json.dumps() to store it in file for the stats results.
+
     if optimization_cub_score.is_trna_adaptation_score:
         logger.info("tAI information:")
         trna_adaptation_index_score = optimization_cub_score.trna_adaptation_index
