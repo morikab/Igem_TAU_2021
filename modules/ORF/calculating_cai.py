@@ -30,7 +30,8 @@ genetic_code_dict = {
         'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
     }
 
-def _synonymous_codons(genetic_code_dict = genetic_code_dict):
+
+def _synonymous_codons(genetic_code_dict=genetic_code_dict):
 
     # invert the genetic code dictionary to map each amino acid to its codons
     codons_for_amino_acid = {}
@@ -44,6 +45,7 @@ def _synonymous_codons(genetic_code_dict = genetic_code_dict):
         codon: codons_for_amino_acid[genetic_code_dict[codon]]
         for codon in genetic_code_dict.keys()
     }
+
 
 v = {'TTT': 'F', 'TTC': 'F', 'TTA': 'L', 'TTG': 'L', 'TCT': 'S', 'TCC': 'S', 'TCA': 'S', 'TCG': 'S', 'TAT': 'Y',
      'TAC': 'Y', 'TGT': 'C', 'TGC': 'C', 'TGG': 'W', 'CTT': 'L', 'CTC': 'L', 'CTA': 'L', 'CTG': 'L', 'CCT': 'P',
@@ -171,8 +173,8 @@ def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code='genetic_code
     return weights
 
 
+# TODO - fix method to be more generic
 def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
-
     cai_scores = []
     for sequence in sequence_lst:
         sequence = sequence.upper()
@@ -188,7 +190,7 @@ def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
                 except:
                     sequence_weights.append(sum(weights.values()) / len(weights.values()))    #if codon not in table (like if it conatians N or other ambigous chars- it will be ignored (not counted in the seq length)
         cai_scores.append(float(gmean(sequence_weights)))
-        if float(gmean(sequence_weights)) ==0:
+        if float(gmean(sequence_weights)) == 0:
             print(''.join(sequence))
             print(sequence_weights)
     return cai_scores

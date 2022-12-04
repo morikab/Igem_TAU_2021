@@ -42,6 +42,16 @@ class Organism(object):
     def tai_std(self):
         return statistics.stdev(self._tai_scores_values)
 
+    @property
+    def summary(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "name": self.name,
+            "wanted": self.is_optimized,
+            "optimization_priority": self.optimization_priority,
+            "cai_weights": self.cai_profile,
+            "tai_weights": self.tai_profile,
+        }
+
 
 class OptimizationMethod(Enum):
     single_codon_global_ratio = "single_codon_global_ratio"
@@ -85,3 +95,13 @@ class UserInput:
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_bulk_aa_average
     optimization_cub_score: OptimizationCubScore = OptimizationCubScore.max_codon_trna_adaptation_index
+
+    @property
+    def summary(self) -> typing.Dict[str, typing.Any]:
+        return {
+            "sequence": self.sequence,
+            "tuning_parameter": self.tuning_parameter,
+            "optimization_method": self.optimization_method.value,
+            "optimization_cub_score": self.optimization_cub_score.value,
+            "organisms": [organism.summary for organism in self.organisms],
+        }

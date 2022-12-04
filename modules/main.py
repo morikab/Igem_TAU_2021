@@ -6,6 +6,7 @@ from pathlib import Path
 import typing
 
 from logger_factory.logger_factory import LoggerFactory
+from modules.run_summary import RunSummary
 
 # Create clean artifacts directory
 artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
@@ -28,16 +29,8 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     try:
         before_parsing_input = time.time()
         user_input = user_IO.UserInputModule.run_module(user_input_dict)
-        # TODO - convert to summarizing file
-        # Log CAI scores for organisms
-        for organism in user_input.organisms:
-            logger.info(organism.name)
-            logger.info("CAI weights when using mrna levels:")
-            logger.info(organism.cai_profile)
-
         after_parsing_input = time.time()
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
-
         # ####################################### Family of sequences #####################################
         # in this part, user input is split into different inputs according to the sequence family theory
         clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
@@ -47,6 +40,8 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             evaluation_results.append(evaluation_result)
 
         # ###################################### Output Handling ##########################################
+        RunSummary.save_run_summary(str(artifacts_directory))  # TODO - think if this is indeed the best location
+
         zip_directory = user_input.zip_directory or str(artifacts_directory)
         # TODO - handle multiple results in output generation module
         evaluation_result = evaluation_results[0]

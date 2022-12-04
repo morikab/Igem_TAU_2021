@@ -1,6 +1,7 @@
 import typing
 
 from modules import models
+from modules.run_summary import RunSummary
 from modules.user_IO.input_functions import *
 from modules.ORF.TAI import TAI
 from modules.ORF.calculating_cai import general_geomean
@@ -88,13 +89,17 @@ class UserInputModule(object):
         clusters_count = user_input["clusters_count"]
         zip_directory = user_input.get("output_path")
 
-        return models.UserInput(organisms=organisms_list,
-                                sequence=orf_seq,
-                                tuning_parameter=tuning_parameter,
-                                optimization_method=optimization_method,
-                                optimization_cub_score=optimization_cub_score,
-                                clusters_count=clusters_count,
-                                zip_directory=zip_directory)
+        user_input = models.UserInput(organisms=organisms_list,
+                                      sequence=orf_seq,
+                                      tuning_parameter=tuning_parameter,
+                                      optimization_method=optimization_method,
+                                      optimization_cub_score=optimization_cub_score,
+                                      clusters_count=clusters_count,
+                                      zip_directory=zip_directory)
+
+        RunSummary.add_to_run_summary("user_input", user_input.summary)
+
+        return user_input
 
     @staticmethod
     def _parse_single_input(organism_input):
@@ -127,6 +132,8 @@ class UserInputModule(object):
         cds_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
+
+        # TODO - extract weights by the value of optimization_cub_score to reduce running times of the code
         cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression, exp_csv_fid)
         cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
         cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
