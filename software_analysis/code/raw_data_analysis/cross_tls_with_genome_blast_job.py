@@ -6,6 +6,8 @@ from pathlib import Path
 from os import listdir
 from os.path import isfile, join
 
+###makes blast jobs for tls (with the 16s sequences as a db
+### will run jobs only if noe xisting csv is found
 destination_dir = '../../data/refseq_genomes/'
 
 def run_cmd(cmd, verbose=False, *args, **kwargs):
@@ -25,12 +27,17 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 # -db  -query /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/genbank_tls/tls.KELP.1.fsa_nt -out ./tls.KELP_full_blast.1.csv -max_target_seqs 5 -num_threads 4 -outfmt 10
 
 
+def fastafile_to_blastcsv(fname:str):
+    return fname[:-7]+'_5_hits.csv'
+
+def blastcsv_to_fastafile(fname:str):
+    return fname[:-11] + '_5_hits.csv'
 
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
     db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
     other_preferences = ' -max_target_seqs 5 -outfmt 10 -num_threads 1'
-    tls_output = tls_inp[:-7]+'_5_hits.csv'
+    tls_output = fastafile_to_blastcsv(tls_inp[:-7])
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
     # run_cmd(command)
     # print(command)
@@ -47,10 +54,9 @@ def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
         if Path(tls_fid[:-6]+'csv').is_file():
             print(tls_fid)
             continue
-        else:
-            output, command  = blastn_run(tls_fid)
-            commands.append(command)
-            outputs.append(output)
+        output, command  = blastn_run(tls_fid)
+        commands.append(command)
+        outputs.append(output)
         # print(output)
 
 
