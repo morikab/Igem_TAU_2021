@@ -2,13 +2,6 @@ from cross_tls_with_genome_blast_job import *
 
 
 
-
-with open('/tls_to_16s_blast_5_hits/rerun_killed_jobs.sh') as file:
-    lines = [line.rstrip() for line in file]
-
-for idx, line in enumerate(lines):
-    write_job([line], '/rerun_killed_5_hit_jobs/')
-
 if __name__ == "__main__":
     print('Start')
     command_list = run_all_tls('../../data/genbank_tls/')
