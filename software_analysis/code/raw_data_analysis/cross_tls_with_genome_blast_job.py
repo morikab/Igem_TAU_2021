@@ -47,9 +47,10 @@ def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
         if Path(tls_fid[:-6]+'csv').is_file():
             print(tls_fid)
             continue
-        output, command  = blastn_run(tls_fid)
-        commands.append(command)
-        outputs.append(output)
+        else:
+            output, command  = blastn_run(tls_fid)
+            commands.append(command)
+            outputs.append(output)
         # print(output)
 
 
