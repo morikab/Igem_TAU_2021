@@ -24,6 +24,7 @@ nt_to_aa = {
     'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
 }
 
+###create json with all information
 
 def refseq_to_blast_name(refseq_name):
     blast_name = refseq_name.split('.')[0]
@@ -95,6 +96,7 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
     for entry, entry_dict in tls_metadata.items():
         blast_df = pd.DataFrame(columns= blast_col)
         for fasta, blast in entry_dict['files'].items():
+            print(blast)
             blast_df_new = pd.read_csv(blast)
             blast_df_new.columns = blast_col
             blast_df = pd.concat([blast_df, blast_df_new], ignore_index=True)
@@ -105,7 +107,6 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
         entry_dict['avg_match_len'] = avg_match_len
         entry_dict['match_data'] = match_data
         entry_dict['evalue_scores'] = evalue_scores_dict
-        print(entry_dict)
         save_data(entry, entry_dict, out_fid)
 
 
