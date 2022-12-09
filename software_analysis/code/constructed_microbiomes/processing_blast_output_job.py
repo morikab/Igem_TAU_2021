@@ -86,13 +86,12 @@ def blastn_run(pident_scores_dict, genomes_df):
 
 
 
-def check_all_blast_res(genomes_df, tls_metadata:dict):
+def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
     full_refseq_list = genomes_df.index.to_list()
     blast_col = ['sseqid','qseqid',  'pident','length',
                         'mismatch', 'gapopen', 'qstart', 'qend',
                         'sstart', 'send', 'evalue', 'bitscore'] #fmt 10
 
-    blast_results_dict = {}
     for entry, entry_dict in tls_metadata.items():
         blast_df = pd.DataFrame(columns= blast_col)
         for fasta, blast in entry_dict['files'].items():
@@ -105,12 +104,13 @@ def check_all_blast_res(genomes_df, tls_metadata:dict):
         entry_dict['n_seq'] = n_seq
         entry_dict['avg_match_len'] = avg_match_len
         entry_dict['match_data'] = match_data
-        blast_results_dict[entry] = entry_dict
-    return blast_results_dict
+        entry_dict['evalue_scores'] = evalue_scores_dict
+        print(entry_dict)
+        save_data(entry, entry_dict, out_fid)
 
 
-def save_data(blast_results_dict, out_fid):
-    with open(out_fid + 'blast_results.json', "w") as outfile:
+def save_data(entry, blast_results_dict, out_fid):
+    with open(out_fid + entry+ '_blast_85id_th.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":
@@ -123,8 +123,7 @@ if __name__ == "__main__":
     tls_files = [f for f in listdir(tls_dir) if isfile(join(tls_dir, f))]
     out_fid = '../../data/tls_genome_match/'
     blast_results_dict= tls_metadata(tls_metadata_df, tls_files)
-    blast_results_dict = check_all_blast_res(genomes_df, blast_results_dict)
-    save_data(blast_results_dict, out_fid)
+    check_all_blast_res(genomes_df, blast_results_dict, out_fid)
     print(time.time() - tic)
 
 
