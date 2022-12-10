@@ -65,21 +65,24 @@ def blast_df_to_dict(blast_df, full_refseq_list):
 
     hit_names = [blast_to_refseq_name(q, full_refseq_list) for q in blast_df['qseqid'].to_list()]
     hit_evalue = blast_df['evalue']
+    hit_pident = blast_df['pident']
     evalue_scores_dict = dict(zip(hit_names, hit_evalue))
-    return evalue_scores_dict, n_seq, avg_match_len
+    pident_scores_dict = dict(zip(hit_names, hit_pident))
+    return evalue_scores_dict, pident_scores_dict, n_seq, avg_match_len
 
 
-def blastn_run(pident_scores_dict, genomes_df):
+def blastn_run(evalue_scores_dict, pident_scores_dict, genomes_df):
 
     cai_columns = list(nt_to_aa.keys())
     cai_df = genomes_df.drop([i for i in genomes_df.columns if i not in cai_columns], inplace=False, axis = 1)
     non_cai_df = genomes_df.drop(cai_columns, inplace=False, axis=1)
     match_data = {}
-    for refseq, score in pident_scores_dict.items():
+    for refseq, pident_score in pident_scores_dict.items():
         cai_values = cai_df.loc[refseq, :].transpose().to_dict()
         other_values_dict = non_cai_df.loc[refseq, :].transpose().to_dict()
         match_data[refseq] = {
-            'align_score': score,
+            'align_score': pident_score,
+            'align_evalue': evalue_scores_dict[refseq],
             'cai': cai_values
         }
         match_data[refseq].update(other_values_dict)
@@ -94,6 +97,9 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
                         'sstart', 'send', 'evalue', 'bitscore'] #fmt 10
 
     for entry, entry_dict in tls_metadata.items():
+        if isfile(out_fid + entry+ '_blast_85id_th.json'):
+            continue
+
         blast_df = pd.DataFrame(columns= blast_col)
         for fasta, blast in entry_dict['files'].items():
             print(blast)
@@ -101,8 +107,8 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
             blast_df_new.columns = blast_col
             blast_df = pd.concat([blast_df, blast_df_new], ignore_index=True)
             print(entry)
-        evalue_scores_dict, n_seq, avg_match_len = blast_df_to_dict(blast_df, full_refseq_list)
-        match_data = blastn_run(evalue_scores_dict, genomes_df)
+        evalue_scores_dict, pident_scores_dict, n_seq, avg_match_len = blast_df_to_dict(blast_df, full_refseq_list)
+        match_data = blastn_run(evalue_scores_dict, pident_scores_dict, genomes_df)
         entry_dict['n_seq'] = n_seq
         entry_dict['avg_match_len'] = avg_match_len
         entry_dict['match_data'] = match_data
