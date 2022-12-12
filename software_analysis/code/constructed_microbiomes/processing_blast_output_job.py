@@ -57,7 +57,7 @@ def blast_df_to_dict(blast_df, full_refseq_list):
 
     n_seq = len(blast_df)/5
     blast_df.sort_values(by=['pident'], inplace=True)
-    blast_df['pident'] = blast_df[blast_df['pident'] > 85]['pident']
+    blast_df['pident'] = blast_df[blast_df['pident'] > 95]['pident']
     blast_df.dropna(inplace=True)
     df_counts = blast_df['qseqid'].value_counts()
     hit_counts = df_counts.to_dict()
@@ -105,7 +105,7 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
                         'sstart', 'send', 'evalue', 'bitscore'] #fmt 10
 
     for entry, entry_dict in tls_metadata.items():
-        if isfile(out_fid + entry+ '_blast_85id_th.json'):
+        if isfile(out_fid + entry+ '_blast_95id_th.json'):
             continue
         if len(entry_dict['files'].items()) == 0:
             continue
@@ -125,7 +125,7 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
 
 
 def save_data(entry, blast_results_dict, out_fid):
-    with open(out_fid + entry+ '_blast_85id_th.json', "w") as outfile:
+    with open(out_fid + entry+ '_blast_95id_th.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":

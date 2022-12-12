@@ -70,7 +70,7 @@ def generate_testing_data(orf_seq : str,
 
     return model_input
 
-genomes_path = '../../../data/processed_genomes/cai_and_16s_for_genomes.csv'
+genomes_path = '../../data/processed_genomes/cai_and_16s_for_genomes.csv'
 single_inp = generate_testing_data(genomes_path = genomes_path,
                                              n_organisms=15,
                                              percent_optimized=0.5,

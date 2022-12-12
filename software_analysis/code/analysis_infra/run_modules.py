@@ -40,9 +40,9 @@ def run_modules( genomes_path = '../../../data/processed_genomes/cai_and_16s_for
     return
 
 
-run_modules( genomes_path = '../../../data/processed_genomes/cai_and_16s_for_genomes.csv',
-                 n_organisms=15,
-                 percent_optimized=0.5,
-                 clusters_count= 2,
-                 tuning_param=0.5,
-                 orf_seq= 'GTGGTGAGTAGCGATACGGTACTGATC')
+run_modules(genomes_path ='../../data/processed_genomes/cai_and_16s_for_genomes.csv',
+            n_organisms=15,
+            percent_optimized=0.5,
+            clusters_count= 2,
+            tuning_param=0.5,
+            orf_seq= 'GTGGTGAGTAGCGATACGGTACTGATC')
