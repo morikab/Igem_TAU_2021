@@ -28,15 +28,15 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 
 
 def fastafile_to_blastcsv(fname:str):
-    return fname[:-7]+'_5_hits.csv'
+    return fname[:-7]+'_'+th+'_hits.csv'
 
 def blastcsv_to_fastafile(fname:str):
-    return fname[:-11] + '_5_hits.csv'
+    return fname[:-11] + '_'+th+'_hits.csv'
 
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
     db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
-    other_preferences = ' -max_target_seqs 5 -outfmt 10 -num_threads 1'
+    other_preferences = ' -max_target_seqs '+th+' -outfmt 10 -num_threads 1 -perc_identity 95'
     tls_output = fastafile_to_blastcsv(tls_inp[:-7])
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
     # run_cmd(command)
@@ -77,9 +77,9 @@ def write_job(lines, job_fid):
     f.close()
 
 
-def filename_to_sent_job(sh_file, cput = '08:00:00'):
+def filename_to_sent_job(sh_file, cput = '20:00:00'):
     send_prefix = 'qsub -q TullerNano -r y '
-    send_suffix = ' -l cput='+cput+',pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
+    send_suffix = ' -l cput='+cput+',pmem=6gb,mem=6gb,pvmem=6gb,vmem=6gb '
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
@@ -88,6 +88,8 @@ def filename_to_sent_job(sh_file, cput = '08:00:00'):
 
 
 if __name__ == "__main__":
+
+    th='200'
     print('Start')
     command_list = run_all_tls('../../data/genbank_tls/')
     print(len(command_list))
@@ -95,13 +97,13 @@ if __name__ == "__main__":
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
         job_files.append(filename)
-        write_job([command], 'tls_to_16s_blast_5_hits/' + filename)
+        write_job([command], 'tls_to_16s_blast_'+th+'_hits/' + filename)
 
 
     master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
-    f = open('tls_to_16s_blast_5_hits/mstr_job.sh', 'w')
+    f = open('tls_to_16s_blast_'+th+'_hits/mstr_job.sh', 'w')
     f.write(
-        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_5_hits\n')
+        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_'+th+'_hits\n')
     for line in master_commands:
         f.write(line + '\n')
     f.close()
