@@ -77,9 +77,9 @@ def write_job(lines, job_fid):
     f.close()
 
 
-def filename_to_sent_job(sh_file, cput = '20:00:00'):
+def filename_to_sent_job(sh_file, cput = '10:00:00'):
     send_prefix = 'qsub -q TullerNano -r y '
-    send_suffix = ' -l cput='+cput+',pmem=6gb,mem=6gb,pvmem=6gb,vmem=6gb '
+    send_suffix = ' -l cput='+cput+',pmem=3gb,mem=3gb,pvmem=3gb,vmem=3gb '
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
@@ -89,7 +89,7 @@ def filename_to_sent_job(sh_file, cput = '20:00:00'):
 
 if __name__ == "__main__":
 
-    th='200'
+    th='50'
     print('Start')
     command_list = run_all_tls('../../data/genbank_tls/')
     print(len(command_list))
