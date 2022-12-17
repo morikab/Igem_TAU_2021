@@ -79,7 +79,7 @@ def write_job(lines, job_fid):
 
 def filename_to_sent_job(sh_file, cput = '10:00:00'):
     send_prefix = 'qsub -q TullerNano -r y '
-    send_suffix = ' -l cput='+cput+',pmem=3gb,mem=3gb,pvmem=3gb,vmem=3gb '
+    send_suffix = ' -l cput='+cput+',pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
     error_file = sh_file[:-3] + '_error.txt'
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
