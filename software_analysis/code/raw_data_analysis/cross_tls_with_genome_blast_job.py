@@ -37,10 +37,10 @@ def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
     db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
     other_preferences = ' -max_target_seqs '+th+' -outfmt 10 -num_threads 1 -perc_identity 95'
-    tls_output = fastafile_to_blastcsv(tls_inp[:-7])
+    tls_output = fastafile_to_blastcsv(tls_inp)
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
-    # run_cmd(command)
-    # print(command)
+    print(tls_output)
+    print(command)
     return tls_output, command
 
 
