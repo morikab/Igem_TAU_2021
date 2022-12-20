@@ -37,52 +37,58 @@ def blast_to_refseq_name(blast_name, full_refseq_list):
     return refseq_name
 
 
-def entry_to_data_files(entry:str, tls_files:list, n_hits = '200'):
+def entry_to_data_files(entry:str, tls_files:list):
     ###find the data files for each master study
     fasta_files = [tls_dir + f for f in tls_files if 'fsa_nt' in f and entry in f]
-    data_files = [fasta[:-7]+'_'+n_hits+'_hits.csv' for fasta in fasta_files]
+    data_files = {fasta:fasta[:-7]+'_5_hits.csv' for fasta in fasta_files}
     return data_files
 
-def tls_metadata(tls_metadata:pd.DataFrame(), tls_files:list, n_hits):
+def tls_metadata(tls_metadata:pd.DataFrame(), tls_files:list):
     blast_results_dict = {}
     for entry_name, row in tls_metadata.iterrows():
         tls_dict = row.to_dict()
         del tls_dict['fasta']
-        tls_dict['files'] = entry_to_data_files(entry_name, tls_files, n_hits)
+        tls_dict['files'] = entry_to_data_files(entry_name, tls_files)
         blast_results_dict[entry_name] = tls_dict
     return blast_results_dict
 
-def blast_df_to_dict(blast_df):
+def blast_df_to_dict(blast_df, full_refseq_list):
     'dict structure is that the key is the refseq id and the value is the highest percent of identity'
     'between the specific resfeq id (genome) and the tls scores (meaning the highest identity score between all tls '
     '(that correspond to a specific 16s denoted by its refseq id'
 
-    n_seq = len(set(blast_df['sseqid'].to_list()))
-    blast_df.sort_values(by=['evalue'], inplace=True)
+    n_seq = len(blast_df)/5
+    blast_df.sort_values(by=['pident'], inplace=True)
+    blast_df['pident'] = blast_df[blast_df['pident'] > 95]['pident']
+    blast_df.dropna(inplace=True)
+    df_counts = blast_df['qseqid'].value_counts()
+    hit_counts = df_counts.to_dict()
+    print(hit_counts)
+    blast_df.drop_duplicates(subset=['qseqid'], inplace=True, keep='last')
     blast_df['match_len'] = blast_df['qend']-blast_df['qstart']
     avg_match_len = blast_df['match_len'].mean()
 
-    blast_df.drop(['length', 'match_len', 'mismatch', 'gapopen', 'qstart', 'qend',
-                        'sstart', 'send', 'bitscore'], axis= 1, inplace=True)
-    grouped_blast = blast_df.groupby("sseqid")
-    qseq_list = []
-    evalue_list = []
-    for read_name, read_hits in grouped_blast:
-        read_hits_filtered = read_hits.loc[read_hits['evalue'] == read_hits['evalue'].min()]
-        qseq_list += read_hits_filtered['qseqid'].to_list()
-        evalue_list += read_hits_filtered['evalue'].to_list()
-    scores_dict = dict(sorted(zip(qseq_list, evalue_list)))
+    hit_evalue = blast_df['evalue']
+    hit_pident = blast_df['pident']
+    evalue_scores_dict = dict(zip(blast_df['qseqid'].to_list(), hit_evalue))
+    pident_scores_dict = dict(zip(blast_df['qseqid'].to_list(), hit_pident))
+    scores_dict= {blast_to_refseq_name(q, full_refseq_list): {
+        'evalue':evalue_scores_dict[q],
+        'pident': pident_scores_dict[q],
+        'counts': hit_counts[q]
+    }
+    for q in blast_df['qseqid'].to_list()
+    }
     return scores_dict, n_seq, avg_match_len
 
 
-def blastn_run(scores_dict, genomes_df, full_refseq_list):
+def blastn_run(scores_dict, genomes_df):
 
     cai_columns = list(nt_to_aa.keys())
     cai_df = genomes_df.drop([i for i in genomes_df.columns if i not in cai_columns], inplace=False, axis = 1)
     non_cai_df = genomes_df.drop(cai_columns, inplace=False, axis=1)
     match_data = {}
-    for genome_name, scores_dict in scores_dict.items():
-        refseq = blast_to_refseq_name(genome_name, full_refseq_list)
+    for refseq, scores_dict in scores_dict.items():
         cai_values = cai_df.loc[refseq, :].transpose().to_dict()
         other_values_dict = non_cai_df.loc[refseq, :].transpose().to_dict()
         match_data[refseq] = {
@@ -94,50 +100,48 @@ def blastn_run(scores_dict, genomes_df, full_refseq_list):
 
 
 
-def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str, id_th, n_hits):
+def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str):
     full_refseq_list = genomes_df.index.to_list()
     blast_col = ['sseqid','qseqid',  'pident','length',
                         'mismatch', 'gapopen', 'qstart', 'qend',
-                        'sstart', 'send', 'evalue', 'bitscore']
+                        'sstart', 'send', 'evalue', 'bitscore'] #fmt 10
 
     for entry, entry_dict in tls_metadata.items():
-        if isfile(out_fid + entry+ '_' +id_th+ '_' +n_hits+'.json'):
+        if isfile(out_fid + entry+ '_blast_95id_th.json'):
             continue
-        if len(entry_dict['files']) == 0:
+        if len(entry_dict['files'].items()) == 0:
             continue
         blast_df = pd.DataFrame(columns= blast_col)
-        for blast in entry_dict['files']:
+        for fasta, blast in entry_dict['files'].items():
             print(blast)
             blast_df_new = pd.read_csv(blast)
             blast_df_new.columns = blast_col
             blast_df = pd.concat([blast_df, blast_df_new], ignore_index=True)
             print(entry)
-        scores_dict, n_seq, avg_match_len = blast_df_to_dict(blast_df)
-        match_data = blastn_run(scores_dict, genomes_df, full_refseq_list)
+        scores_dict, n_seq, avg_match_len = blast_df_to_dict(blast_df, full_refseq_list)
+        match_data = blastn_run(scores_dict, genomes_df)
         entry_dict['n_seq'] = n_seq
         entry_dict['avg_match_len'] = avg_match_len
         entry_dict['match_data'] = match_data
-        save_data(entry, entry_dict, out_fid, id_th, n_hits)
+        save_data(entry, entry_dict, out_fid)
 
 
-def save_data(entry, blast_results_dict, out_fid, id_th, n_hits):
-    with open(out_fid + entry+ '_' +id_th+ '_' +n_hits+'.json', "w") as outfile:
+def save_data(entry, blast_results_dict, out_fid):
+    with open(out_fid + entry+ '_blast_95id_th.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":
     print('Start')
     tic = time.time()
-    id_th = '95'
-    n_hits = '5'
-    genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_col=0)
+    genomes_df = pd.read_csv('../../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_col=0)
     genomes_df.drop(columns=['5s', '23s'], inplace=True)
-    tls_metadata_df = pd.read_csv('../../data/processed_tls/tls_assembly_metadata.csv', index_col=0)
-    tls_dir = '../../data/genbank_tls/'
+    tls_metadata_df = pd.read_csv('../../../data/processed_tls/tls_assembly_metadata.csv', index_col=0)
+    tls_dir = '../../../data/genbank_tls/'
     tls_files = [f for f in listdir(tls_dir) if isfile(join(tls_dir, f))]
     out_fid = '../../data/tls_genome_match/'
-    blast_results_dict= tls_metadata(tls_metadata_df, tls_files, n_hits)
-    check_all_blast_res(genomes_df, blast_results_dict, out_fid, id_th, n_hits)
-    print('time ', time.time() - tic)
+    blast_results_dict= tls_metadata(tls_metadata_df, tls_files)
+    check_all_blast_res(genomes_df, blast_results_dict, out_fid)
+    print(time.time() - tic)
 
 
 
