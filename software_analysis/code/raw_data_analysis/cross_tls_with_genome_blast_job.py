@@ -7,25 +7,7 @@ from os import listdir
 from os.path import isfile, join
 
 ###makes blast jobs for tls (with the 16s sequences as a db
-### will run jobs only if noe xisting csv is found
-destination_dir = '../../data/refseq_genomes/'
-
-def run_cmd(cmd, verbose=False, *args, **kwargs):
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True
-    )
-    std_out, std_err = process.communicate()
-    if verbose:
-        print(std_out.strip(), std_err)
-
-
-
-#/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn -db processed_genomes/blast_db/16s_genomes -query genbank_tls/tls.KDSB.1.fsa_nt -out processed_genomes/out_file3.csv -subject_besthit -outfmt 10 -max_target_seqs 1 -num_threads 4
-# -db  -query /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/genbank_tls/tls.KELP.1.fsa_nt -out ./tls.KELP_full_blast.1.csv -max_target_seqs 5 -num_threads 4 -outfmt 10
-
+### will run jobs only if there isn't already an existing empty error file for the job
 
 def fastafile_to_blastcsv(fname:str):
     return fname[:-7] +'_' + n_hits + '_hits.csv'
@@ -91,8 +73,11 @@ def write_mstr_file(job_files, n_hits, output_dir, cput = '10:00:00', mem = 3):
     master_commands = []
     for sh_file in job_files:
         line, error_file = filename_to_sent_job(sh_file, cput, mem)
-        if os.path.exists(os.path.join(output_dir, error_file)):
-            if os.stat(os.path.join(output_dir, error_file)).st_size == 0 : #check that I didn't already successfully run it
+        error_file = os.path.join(output_dir, error_file)
+        if os.path.exists(error_file):
+            print(error_file)
+            if os.stat(error_file).st_size == 0 : #check that I didn't already successfully run it
+                print(error_file, '****')
                 continue
         else:
             master_commands.append(line)

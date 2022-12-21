@@ -58,6 +58,7 @@ def blast_df_to_dict(blast_df):
     '(that correspond to a specific 16s denoted by its refseq id'
 
     n_seq = len(set(blast_df['sseqid'].to_list()))
+    blast_df['pident'] = blast_df[blast_df['pident'] > 95]['pident']
     blast_df.sort_values(by=['evalue'], inplace=True)
     blast_df['match_len'] = blast_df['qend']-blast_df['qstart']
     avg_match_len = blast_df['match_len'].mean()
