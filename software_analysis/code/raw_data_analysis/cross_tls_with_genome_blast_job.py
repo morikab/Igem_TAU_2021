@@ -79,8 +79,7 @@ def write_mstr_file(job_files, n_hits, output_dir, cput = '10:00:00', mem = 3):
             if os.stat(error_file).st_size == 0 : #check that I didn't already successfully run it
                 print(error_file, '****')
                 continue
-        else:
-            master_commands.append(line)
+        master_commands.append(line)
     f = open(os.path.join(output_dir, 'mstr_job.sh'), 'w')
     f.write(
         '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_' + n_hits + '_hits\n')
