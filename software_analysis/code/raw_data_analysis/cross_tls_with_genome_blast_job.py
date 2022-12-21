@@ -28,15 +28,15 @@ def run_cmd(cmd, verbose=False, *args, **kwargs):
 
 
 def fastafile_to_blastcsv(fname:str):
-    return fname[:-7]+'_'+th+'_hits.csv'
+    return fname[:-7] +'_' + n_hits + '_hits.csv'
 
 def blastcsv_to_fastafile(fname:str):
-    return fname[:-11] + '_'+th+'_hits.csv'
+    return fname[:-11] + '_' + n_hits + '_hits.csv'
 
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
     db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
-    other_preferences = ' -max_target_seqs '+th+' -outfmt 10 -num_threads 1 -perc_identity 95'
+    other_preferences = ' -max_target_seqs ' + n_hits + ' -outfmt 10 -num_threads 1 -perc_identity 95'
     tls_output = fastafile_to_blastcsv(tls_inp)
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
     print(tls_output)
@@ -51,9 +51,9 @@ def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        if Path(tls_fid[:-6]+'csv').is_file():
-            print(tls_fid)
-            continue
+        # if Path(tls_fid[:-6]+'csv').is_file(): #instead, skips the run only if the error file exists
+        #     print(tls_fid)
+        #     continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
@@ -77,19 +77,35 @@ def write_job(lines, job_fid):
     f.close()
 
 
-def filename_to_sent_job(sh_file, cput = '10:00:00'):
+def filename_to_sent_job(sh_file, cput = '10:00:00', mem = 3):
     send_prefix = 'qsub -q TullerNano -r y '
-    send_suffix = ' -l cput='+cput+',pmem=1gb,mem=1gb,pvmem=1gb,vmem=1gb '
+    send_suffix = f' -l cput={cput},pmem={mem}gb,mem={mem}gb,pvmem={mem}gb,vmem={mem}gb '
     error_file = sh_file[:-3] + '_error.txt'
+    print(error_file)
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
-    # print(line)
-    return line
+    return line, error_file
 
+def write_mstr_file(job_files, n_hits, output_dir, cput = '10:00:00', mem = 3):
+
+    master_commands = []
+    for sh_file in job_files:
+        line, error_file = filename_to_sent_job(sh_file, cput, mem)
+        if os.path.exists(os.path.join(output_dir, error_file)):
+            if os.stat(os.path.join(output_dir, error_file)).st_size == 0 : #check that I didn't already successfully run it
+                continue
+        else:
+            master_commands.append(line)
+    f = open(os.path.join(output_dir, 'mstr_job.sh'), 'w')
+    f.write(
+        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_' + n_hits + '_hits\n')
+    for line in master_commands:
+        f.write(line + '\n')
+    f.close()
 
 if __name__ == "__main__":
 
-    th='50'
+    n_hits= '200'
     print('Start')
     command_list = run_all_tls('../../data/genbank_tls/')
     print(len(command_list))
@@ -97,20 +113,9 @@ if __name__ == "__main__":
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
         job_files.append(filename)
-        write_job([command], 'tls_to_16s_blast_'+th+'_hits/' + filename)
-
-
-    master_commands = [filename_to_sent_job(sh_file) for sh_file in job_files]
-    f = open('tls_to_16s_blast_'+th+'_hits/mstr_job.sh', 'w')
-    f.write(
-        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_'+th+'_hits\n')
-    for line in master_commands:
-        f.write(line + '\n')
-    f.close()
-        # proc = subprocess.Popen(command, shell=True,
-        #                         stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        # out, err = proc.communicate()
-        # print("{} : {}".format(command, out.decode()))
+        write_job([command], 'tls_to_16s_blast_' + n_hits + '_hits/' + filename)
+    write_mstr_file(job_files, output_dir = f'tls_to_16s_blast_{n_hits}_hits',
+                    n_hits = n_hits, cput='10:00:00', mem=3)
     print("The end")
 
 
