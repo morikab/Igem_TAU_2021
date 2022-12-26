@@ -53,7 +53,7 @@ def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
 def write_job(lines, job_fid):
     f = open(job_fid, 'w')
     f.write(
-        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis\n')
+        '#!/bin/sh \n cd /tamir2/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis\n')
     for line in lines:
         f.write(line + '\n')
     f.close()
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         job_files.append(filename)
         write_job([command], 'tls_to_16s_blast_' + n_hits + '_hits/' + filename)
     write_mstr_file(job_files, output_dir = f'tls_to_16s_blast_{n_hits}_hits',
-                    n_hits = n_hits, cput='10:00:00', mem=3)
+                    n_hits = n_hits, cput='35:00:00', mem=6)
     print("The end")
 
 
