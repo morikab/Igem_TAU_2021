@@ -17,7 +17,7 @@ def blastcsv_to_fastafile(fname:str):
 
 def blastn_run(tls_inp):
     blastn_loc = '/tamir1/liyamlevi/tools/ncbi-blast-2.11.0+/bin/blastn'
-    db_loc = '/tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
+    db_loc = '/tamir2/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/data/processed_genomes/filtered_16s_blastdb/filtered_16s_blastdb'
     other_preferences = ' -max_target_seqs ' + n_hits + ' -outfmt 10 -num_threads 1 -perc_identity 95'
     tls_output = fastafile_to_blastcsv(tls_inp)
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
@@ -82,7 +82,7 @@ def write_mstr_file(job_files, n_hits, output_dir, cput = '10:00:00', mem = 3):
         master_commands.append(line)
     f = open(os.path.join(output_dir, 'mstr_job.sh'), 'w')
     f.write(
-        '#!/bin/sh \n cd /tamir1/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_' + n_hits + '_hits\n')
+        '#!/bin/sh \n cd /tamir2/liyamlevi/projects/communique/Igem_TAU_2021/software_analysis/code/raw_data_analysis/tls_to_16s_blast_' + n_hits + '_hits\n')
     for line in master_commands:
         f.write(line + '\n')
     f.close()
