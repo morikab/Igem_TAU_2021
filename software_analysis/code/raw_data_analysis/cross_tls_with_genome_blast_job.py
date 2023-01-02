@@ -21,8 +21,6 @@ def blastn_run(tls_inp):
     other_preferences = ' -max_target_seqs ' + n_hits + ' -outfmt 10 -num_threads 1 -perc_identity 95'
     tls_output = fastafile_to_blastcsv(tls_inp)
     command = blastn_loc + ' -db ' + db_loc + ' -query ' + tls_inp + ' -out ' + tls_output + other_preferences
-    print(tls_output)
-    print(command)
     return tls_output, command
 
 
@@ -33,9 +31,6 @@ def run_all_tls(tls_blast_path = '../../data/genbank_tls/'):
     commands = []
     outputs = []
     for tls_fid in fasta_loc_list:
-        # if Path(tls_fid[:-6]+'csv').is_file(): #instead, skips the run only if the error file exists
-        #     print(tls_fid)
-        #     continue
         output, command  = blastn_run(tls_fid)
         commands.append(command)
         outputs.append(output)
@@ -63,7 +58,6 @@ def filename_to_sent_job(sh_file, cput = '10:00:00', mem = 3):
     send_prefix = 'qsub -q TullerNano -r y '
     send_suffix = f' -l cput={cput},pmem={mem}gb,mem={mem}gb,pvmem={mem}gb,vmem={mem}gb '
     error_file = sh_file[:-3] + '_error.txt'
-    print(error_file)
     output_file = sh_file[:-3] + '_output.txt'
     line = send_prefix + ' -e ' + error_file + ' -o ' + output_file + send_suffix +sh_file
     return line, error_file
@@ -75,10 +69,10 @@ def write_mstr_file(job_files, n_hits, output_dir, cput = '10:00:00', mem = 3):
         line, error_file = filename_to_sent_job(sh_file, cput, mem)
         error_file = os.path.join(output_dir, error_file)
         if os.path.exists(error_file):
-            print(error_file)
             if os.stat(error_file).st_size == 0 : #check that I didn't already successfully run it
-                print(error_file, '****')
                 continue
+            else:
+                print(line)
         master_commands.append(line)
     f = open(os.path.join(output_dir, 'mstr_job.sh'), 'w')
     f.write(
@@ -92,14 +86,13 @@ if __name__ == "__main__":
     n_hits= '200'
     print('Start')
     command_list = run_all_tls('../../data/genbank_tls/')
-    print(len(command_list))
     job_files = []
     for idx, command in enumerate(command_list):
         filename = str(idx) + '_blast_job.sh'
         job_files.append(filename)
         write_job([command], 'tls_to_16s_blast_' + n_hits + '_hits/' + filename)
     write_mstr_file(job_files, output_dir = f'tls_to_16s_blast_{n_hits}_hits',
-                    n_hits = n_hits, cput='35:00:00', mem=6)
+                    n_hits = n_hits, cput='99:00:00', mem=10)
     print("The end")
 
 

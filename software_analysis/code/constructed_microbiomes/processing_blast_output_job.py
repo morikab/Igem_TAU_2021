@@ -26,6 +26,8 @@ nt_to_aa = {
     'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
 }
 
+
+ignore_metagenomes = ['KEOX', 'KEQH'] #todo: find out why they didn't work?
 ###create json with all information
 
 def refseq_to_blast_name(refseq_name):
@@ -45,7 +47,10 @@ def entry_to_data_files(entry:str, tls_files:list, n_hits = '200'):
 
 def tls_metadata(tls_metadata:pd.DataFrame(), tls_files:list, n_hits):
     blast_results_dict = {}
+
     for entry_name, row in tls_metadata.iterrows():
+        if entry_name in ignore_metagenomes:
+            continue
         tls_dict = row.to_dict()
         del tls_dict['fasta']
         tls_dict['files'] = entry_to_data_files(entry_name, tls_files, n_hits)
@@ -95,14 +100,14 @@ def blastn_run(scores_dict, genomes_df, full_refseq_list):
 
 
 
-def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str, id_th, n_hits):
+def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str, n_hits:str):
     full_refseq_list = genomes_df.index.to_list()
     blast_col = ['sseqid','qseqid',  'pident','length',
                         'mismatch', 'gapopen', 'qstart', 'qend',
                         'sstart', 'send', 'evalue', 'bitscore']
 
     for entry, entry_dict in tls_metadata.items():
-        if isfile(out_fid + entry+ '_' +id_th+ '_' +n_hits+'.json'):
+        if isfile(out_fid + entry+ '_' +n_hits+'.json'):
             continue
         if len(entry_dict['files']) == 0:
             continue
@@ -118,18 +123,17 @@ def check_all_blast_res(genomes_df, tls_metadata:dict, out_fid:str, id_th, n_hit
         entry_dict['n_seq'] = n_seq
         entry_dict['avg_match_len'] = avg_match_len
         entry_dict['match_data'] = match_data
-        save_data(entry, entry_dict, out_fid, id_th, n_hits)
+        save_data(entry, entry_dict, out_fid, n_hits)
 
 
-def save_data(entry, blast_results_dict, out_fid, id_th, n_hits):
-    with open(out_fid + entry+ '_' +id_th+ '_' +n_hits+'.json', "w") as outfile:
+def save_data(entry, blast_results_dict, out_fid, n_hits):
+    with open(out_fid + entry+ '_' + n_hits+'.json', "w") as outfile:
         json.dump(blast_results_dict, outfile)
 
 if __name__ == "__main__":
     print('Start')
     tic = time.time()
-    id_th = '95'
-    n_hits = '5'
+    n_hits = '200'
     genomes_df = pd.read_csv('../../data/processed_genomes/filtered/cai_and_16s_for_genomes_filtered.csv', index_col=0)
     genomes_df.drop(columns=['5s', '23s'], inplace=True)
     tls_metadata_df = pd.read_csv('../../data/processed_tls/tls_assembly_metadata.csv', index_col=0)
@@ -137,7 +141,7 @@ if __name__ == "__main__":
     tls_files = [f for f in listdir(tls_dir) if isfile(join(tls_dir, f))]
     out_fid = '../../data/tls_genome_match/'
     blast_results_dict= tls_metadata(tls_metadata_df, tls_files, n_hits)
-    check_all_blast_res(genomes_df, blast_results_dict, out_fid, id_th, n_hits)
+    check_all_blast_res(genomes_df, blast_results_dict, out_fid, n_hits)
     print('time ', time.time() - tic)
 
 
