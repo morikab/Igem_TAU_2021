@@ -11,6 +11,7 @@ default_genome_path = os.path.join(base_path, 'arabidopsis_microbiome')
 DEFAULT_ORGANISM_PRIORITY = 50
 DEFAULT_CLUSTERS_COUNT = 2
 DEFAULT_TUNING_PARAM = 0.5
+DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
 
 
 def generate_testing_data(n_organisms=15,
@@ -57,9 +58,10 @@ def generate_testing_data(n_organisms=15,
 def generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method,
         optimization_cub_score,
-        clusters_count=DEFAULT_CLUSTERS_COUNT,
-        tuning_param=DEFAULT_TUNING_PARAM,
-        is_ecoli_optimized=False,
+        clusters_count: int = DEFAULT_CLUSTERS_COUNT,
+        tuning_param: float = DEFAULT_TUNING_PARAM,
+        is_ecoli_optimized: bool = False,
+        sequence_file_path: str = DEFAULT_SEQUENCE_FILE_PATH,
 ):
     if is_ecoli_optimized:
         opt_genome = "Escherichia coli.gb"
@@ -73,7 +75,7 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         deopt_mrna_levels = "ecoli_mrna_level.csv"
 
     inp_dict = {
-        "sequence": os.path.join(base_path, "mCherry_original.fasta"),
+        "sequence": sequence_file_path,
         "tuning_param": tuning_param,
         "organisms": {},
         "clusters_count": clusters_count,

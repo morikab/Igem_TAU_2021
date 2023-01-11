@@ -35,7 +35,7 @@ def _parse_single_input(gb_path):
     org_dict = {
         'cai_profile': cai_weights,  # {dna_codon:cai_score}
         'avg': miu,  # float, avg cai score
-        'std' : sigma
+        'std': sigma,
         }
     return org_name, org_dict
 

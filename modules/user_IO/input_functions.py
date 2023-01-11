@@ -118,7 +118,7 @@ def extract_gene_data(genbank_path, expression_csv_fid = None):
 
 def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_csv_fid):
     """
-    calculates the cai weights- if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
+    calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.
     in any other case, ribosomal genes will be used
     """
@@ -129,13 +129,14 @@ def calculate_cai_weights_for_input(cds_dict, estimated_expression, expression_c
                     'All genes will be used as a reference set for CAI calculation, results may be less accurate.')
         cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
     else:
-        if len(estimated_expression) < len(ribosomal_proteins)*3: #if we found less than 50 expression levels for genes (or no expression csv supplied), the CAI will be used as an estimation
+        # if we found less than 50 expression levels for genes (or no expression csv supplied),
+        # the CAI will be used as an estimation
+        if len(estimated_expression) < len(ribosomal_proteins)*3:
             cai_weights = relative_adaptiveness(ribosomal_proteins)
             if expression_csv_fid is not None:
                 logger.info(
                     f'Not enough genes have supplied expression levels, are the gene names the same as the NCBI genbank convention?')
             logger.info('CAI will be calculated from a reference set of ribosomal proteins and used as estimated expression')
-
         else:
             logger.info("Using estimated expression for calculating CAI scores")
             sorted_estimated_expression = dict(

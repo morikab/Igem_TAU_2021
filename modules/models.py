@@ -10,19 +10,19 @@ class Organism(object):
 
     def __init__(self,
                  name: str,
-                 cai_profile,
-                 tai_profile,
-                 cai_scores: typing.Dict,
-                 tai_scores: typing.Dict,
                  is_optimized: bool,
-                 optimization_priority: float):
+                 optimization_priority: float,
+                 cai_profile: typing.Dict = None,
+                 tai_profile: typing.Dict = None,
+                 cai_scores: typing.Dict = None,
+                 tai_scores: typing.Dict = None):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
         self.cai_scores = cai_scores
-        self._cai_scores_values = cai_scores.values()
+        self._cai_scores_values = cai_scores.values() if cai_scores else None
         self.tai_scores = tai_scores
-        self._tai_scores_values = tai_scores.values()
+        self._tai_scores_values = tai_scores.values() if tai_scores else None
         self.is_optimized = is_optimized
         self.optimization_priority = optimization_priority
 
