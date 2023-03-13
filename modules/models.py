@@ -58,9 +58,10 @@ class OptimizationMethod(Enum):
     single_codon_local_ratio = "single_codon_local_ratio"
     single_codon_global_diff = "single_codon_global_diff"
     single_codon_local_diff = "single_codon_local_diff"
-    hill_climbing_average = "hill_climbing_average"
-    hill_climbing_bulk_aa_average = "hill_climbing_bulk_aa_average"
-    hill_climbing_weakest_link = "hill_climbing_weakest_link"
+    zscore_single_aa_average = "zscore_single_aa_average"
+    zscore_bulk_aa_average = "zscore_bulk_aa_average"
+    zscore_single_aa_weakest_link = "zscore_single_aa_weakest_link"
+    zscore_bulk_aa_weakest_link = "zscore_bulk_aa_weakest_link"
 
     @property
     def is_single_codon_optimization(self) -> bool:
@@ -93,7 +94,7 @@ class UserInput:
     zip_directory: str
     tuning_parameter: float
     clusters_count: int
-    optimization_method: OptimizationMethod = OptimizationMethod.hill_climbing_bulk_aa_average
+    optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_average
     optimization_cub_score: OptimizationCubScore = OptimizationCubScore.max_codon_trna_adaptation_index
 
     @property

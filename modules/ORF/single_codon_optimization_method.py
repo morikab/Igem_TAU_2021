@@ -1,6 +1,5 @@
 import typing
 from collections import defaultdict
-from functools import partial
 
 from logger_factory.logger_factory import LoggerFactory
 from modules.configuration import Configuration
@@ -12,31 +11,23 @@ config = Configuration.get_config()
 
 
 # --------------------------------------------------------------
-def optimize_sequence_by_loss_function(target_gene: str,
-                                       organisms: typing.Sequence[models.Organism],
-                                       optimization_method: models.OptimizationMethod,
-                                       optimization_cub_score: models.OptimizationCubScore,
-                                       tuning_param: float,
-                                       num_of_initiation_codons: int = config["ORF"]["INITIATION_CODONS"]) -> str:
+# TODO - rename this method
+def optimize_sequence(target_gene: str,
+                      organisms: typing.Sequence[models.Organism],
+                      optimization_method: models.OptimizationMethod,
+                      optimization_cub_score: models.OptimizationCubScore,
+                      tuning_param: float) -> str:
     """
-    The function calculates the difference between the features of each codon, when each feature has its own weight
-    (ratio).
+    The function calculates the difference between the features of each codon.
 
     :return: Optimized gene sequence according to the organisms' features
     """
-    # optimal_codons: dict(AA->codon)
-    optimal_codons = find_optimal_codons(organisms=organisms,
-                                         tuning_param=tuning_param,
-                                         optimization_method=optimization_method,
-                                         optimization_cub_score=optimization_cub_score)
-    optimized_sequence = ""
+    aa_to_optimal_codon_mapping = find_optimal_codons(organisms=organisms,
+                                                      tuning_param=tuning_param,
+                                                      optimization_method=optimization_method,
+                                                      optimization_cub_score=optimization_cub_score)
     target_protein = shared_functions_and_vars.translate(target_gene)
-    # optimize the initiation
-    optimized_sequence += optimize_initiation(target_gene[:num_of_initiation_codons*3])
-
-    logger.info(F"Skip {num_of_initiation_codons} initiation codons.")
-    for aa in target_protein[num_of_initiation_codons:]:
-        optimized_sequence += optimal_codons[aa]
+    optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
 
     return optimized_sequence
 

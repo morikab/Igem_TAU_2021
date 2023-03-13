@@ -21,8 +21,6 @@ from modules import models
 
 logger = LoggerFactory.get_logger()
 
-# TODO - fix analysis scripts using the changed code...
-
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
     final_output = {}
@@ -40,7 +38,8 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             evaluation_results.append(evaluation_result)
 
         # ###################################### Output Handling ##########################################
-        RunSummary.save_run_summary(str(artifacts_directory))  # TODO - think if this is indeed the best location
+        # TODO - think if this is indeed the best location
+        RunSummary.save_run_summary(str(artifacts_directory))
 
         zip_directory = user_input.zip_directory or str(artifacts_directory)
         # TODO - handle multiple results in output generation module

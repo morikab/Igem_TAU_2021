@@ -43,14 +43,14 @@ class OptimizationModule(object):
                 deoptimized_organisms_weights.append(organism.optimization_priority)
 
         alpha = user_input.tuning_parameter
-        if optimization_method == models.OptimizationMethod.hill_climbing_average:
+        if optimization_method == models.OptimizationMethod.zscore_single_aa_average:
             return cls._calculate_average_score(optimized_organisms_scores=optimized_organisms_scores,
                                                 deoptimized_organisms_scores=deoptimized_organisms_scores,
                                                 optimized_organisms_weights=optimized_organisms_weights,
                                                 deoptimized_organisms_weights=deoptimized_organisms_weights,
                                                 alpha=alpha)
 
-        if optimization_method == models.OptimizationMethod.hill_climbing_weakest_link:
+        if optimization_method == models.OptimizationMethod.zscore_single_aa_weakest_link:
             return cls._calculate_weakest_link_score(
                 optimized_organisms_scores=optimized_organisms_scores,
                 deoptimized_organisms_scores=deoptimized_organisms_scores,

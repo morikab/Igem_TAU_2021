@@ -56,8 +56,8 @@ def generate_testing_data(n_organisms=15,
 
 
 def generate_testing_data_for_comparing_with_previous_algorithm(
-        optimization_method,
-        optimization_cub_score,
+        optimization_method: str,
+        optimization_cub_score: str,
         clusters_count: int = DEFAULT_CLUSTERS_COUNT,
         tuning_param: float = DEFAULT_TUNING_PARAM,
         is_ecoli_optimized: bool = False,

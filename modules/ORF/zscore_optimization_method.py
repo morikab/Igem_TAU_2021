@@ -89,7 +89,7 @@ def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
     in each iteration - in each round, check all single synonymous codon changes, calculate optimization score and
     take the best one
     """
-    optimization_method = models.OptimizationMethod.hill_climbing_average
+    optimization_method = models.OptimizationMethod.zscore_single_aa_average
     seq_options = {}
     original_seq = seq
 

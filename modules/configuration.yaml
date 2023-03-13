@@ -7,5 +7,4 @@ ORF:
   #   * single_codon_local_diff
   #   * hill_climbing_average
   #   * hill_climbing_weakest_link
-  INITIATION_CODONS: 12
   MAX_N_OPTIMIZED_SEQS: 10
