@@ -30,8 +30,10 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
-    OPTIMIZATION_METHODS = ["hill_climbing_bulk_aa_average", "hill_climbing_average", "hill_climbing_weakest_link"]
-    DEFAULT_OPTIMIZATION_METHOD = "hill_climbing_bulk_aa_average"
+    OPTIMIZATION_METHODS = ["single_codon_global_ratio", "single_codon_local_ratio", "single_codon_global_diff",
+                            "single_codon_local_diff", "zscore_single_aa_average", "zscore_bulk_aa_average",
+                            "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link"]
+    DEFAULT_OPTIMIZATION_METHOD = "zscore_bulk_aa_average"
 
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
@@ -175,6 +177,8 @@ class CommuniqueApp(object):
         self.clusters_count.set(self.DEFAULT_CLUSTERS_COUNT_VALUE)
         self.optimization_method = tk.StringVar()
         self.optimization_method.set(self.DEFAULT_OPTIMIZATION_METHOD)
+
+        # TODO - add option to define the CUB score to use here..
 
     @staticmethod
     def format_grid(grid: tk.Frame) -> None:
