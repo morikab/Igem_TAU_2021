@@ -124,10 +124,10 @@ def calculate_organism_loss_per_codon(organism: models.Organism,
     organism_codon_weight = getattr(organism, organism_attribute_name)[codon]
 
     def _optimized_organism_diff_based_loss_function() -> float:
-        return tuning_param * (max_value - organism_codon_weight)
+        return tuning_param * ((max_value - organism_codon_weight) ** 2)
 
     def _deoptimized_organism_diff_based_loss_function() -> float:
-        return (1 - tuning_param) * (1 - max_value + organism_codon_weight)
+        return (1 - tuning_param) * ((1 - max_value + organism_codon_weight) ** 2)
 
     def _optimized_organism_ratio_based_loss_function() -> float:
         return tuning_param * ((organism_codon_weight / max_value - 1) ** 2)
@@ -164,7 +164,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
                   optimization_method: models.OptimizationMethod,
                   optimization_cub_score: models.OptimizationCubScore) -> typing.Dict[str, float]:
     """
-    The function iterates through each feature in each organism, and sums up loss for each codon.
+    The function iterates through each organism and sums up loss for each codon.
     It returns a mapping from codon to its score.
     """
     loss = defaultdict(int)

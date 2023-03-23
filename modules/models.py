@@ -71,6 +71,7 @@ class OptimizationMethod(Enum):
                         OptimizationMethod.single_codon_local_diff)
 
 
+# TODO - rename to OptimizationCubIndex
 class OptimizationCubScore(Enum):
     codon_adaptation_index = "CAI"
     trna_adaptation_index = "tAI"
