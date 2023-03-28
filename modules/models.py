@@ -70,6 +70,23 @@ class OptimizationMethod(Enum):
                         OptimizationMethod.single_codon_global_diff,
                         OptimizationMethod.single_codon_local_diff)
 
+    @property
+    def is_zscore_single_aa_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_single_aa_average, OptimizationMethod.zscore_single_aa_weakest_link)
+
+    @property
+    def is_zscore_bulk_aa_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_bulk_aa_average, OptimizationMethod.zscore_bulk_aa_weakest_link)
+
+    @property
+    def is_zscore_average_score_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_single_aa_average, OptimizationMethod.zscore_bulk_aa_average)
+
+    @property
+    def is_zscore_weakest_link_score_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_single_aa_weakest_link,
+                        OptimizationMethod.zscore_bulk_aa_weakest_link)
+
 
 # TODO - rename to OptimizationCubIndex
 class OptimizationCubScore(Enum):

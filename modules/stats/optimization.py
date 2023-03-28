@@ -26,7 +26,7 @@ class OptimizationModule(object):
         optimized_organisms_weights = []
         deoptimized_organisms_scores = []
         deoptimized_organisms_weights = []
-        # todo: add something related to the ratio between the two worst organisms
+
         for organism in user_input.organisms:
             sigma = getattr(organism, std_key)
             miu = getattr(organism, average_key)
@@ -43,17 +43,19 @@ class OptimizationModule(object):
                 deoptimized_organisms_weights.append(organism.optimization_priority)
 
         alpha = user_input.tuning_parameter
-        if optimization_method == models.OptimizationMethod.zscore_single_aa_average:
+        if optimization_method.is_zscore_average_score_optimization:
             return cls._calculate_average_score(optimized_organisms_scores=optimized_organisms_scores,
                                                 deoptimized_organisms_scores=deoptimized_organisms_scores,
                                                 optimized_organisms_weights=optimized_organisms_weights,
                                                 deoptimized_organisms_weights=deoptimized_organisms_weights,
                                                 alpha=alpha)
 
-        if optimization_method == models.OptimizationMethod.zscore_single_aa_weakest_link:
+        if optimization_method.is_zscore_weakest_link_score_optimization:
             return cls._calculate_weakest_link_score(
                 optimized_organisms_scores=optimized_organisms_scores,
                 deoptimized_organisms_scores=deoptimized_organisms_scores,
+                optimized_organisms_weights=optimized_organisms_weights,
+                deoptimized_organisms_weights=deoptimized_organisms_weights,
                 alpha=alpha,
             )
 
@@ -69,13 +71,19 @@ class OptimizationModule(object):
     ) -> float:
         mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
         mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
-        # norm_factor = max(mean_opt_index, - mean_deopt_index)
-        return alpha * mean_opt_index - (1 - alpha) * mean_deopt_index  # /norm_factor
+        return alpha * mean_opt_index - (1 - alpha) * mean_deopt_index
 
     @staticmethod
     def _calculate_weakest_link_score(
             optimized_organisms_scores: typing.List[float],
             deoptimized_organisms_scores: typing.List[float],
+            optimized_organisms_weights: typing.List[float],
+            deoptimized_organisms_weights: typing.List[float],
             alpha: float,
     ) -> float:
-        return alpha * min(optimized_organisms_scores)-(1-alpha) * max(deoptimized_organisms_scores)
+        weighted_optimized_organisms_scores = [optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
+                                               range(len(optimized_organisms_scores))]
+        weighted_deoptimized_organisms_scores = [deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for
+                                                 i in range(len(deoptimized_organisms_scores))]
+
+        return alpha * min(weighted_optimized_organisms_scores)-(1-alpha) * max(weighted_deoptimized_organisms_scores)

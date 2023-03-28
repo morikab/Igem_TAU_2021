@@ -14,9 +14,6 @@ config = Configuration.get_config()
 
 
 def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, int]:
-    '''
-    change all synonymous codons in the str seq to the selected codon, return str as well
-    '''
     split_seq = [seq[i:i+3].upper() for i in range(0, len(seq), 3)]
     new_split_seq = []
     changed_codons_count = 0
@@ -30,17 +27,18 @@ def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, 
 
 
 # In each round - check all single synonymous codon changes and calculate optimization score - take the best one
-def hill_climbing_optimize_by_zscore(seq: str,
-                                     user_input: models.UserInput,
-                                     optimization_cub_score: models.OptimizationCubScore,
-                                     optimization_method: models.OptimizationMethod,
-                                     max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]):
+def optimize_sequence_by_zscore_single_aa(
+        seq: str,
+        user_input: models.UserInput,
+        optimization_cub_score: models.OptimizationCubScore,
+        optimization_method: models.OptimizationMethod,
+        max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"],
+):
     """
     hill climbing function for performing codon optimization
     in each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
     sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
-    iteration, break. The maximum number of iterations allowed is "max_iter"
-    return: optimized sequence
+    iteration, break. The maximum number of iterations allowed is "max_iter".
     """
     seq_options = {}
     score = OptimizationModule.run_module(
@@ -79,17 +77,11 @@ def hill_climbing_optimize_by_zscore(seq: str,
 
 
 #
-def hill_climbing_optimize_aa_bulk_by_zscore(seq: str,
-                                             user_input: models.UserInput,
-                                             optimization_method: models.OptimizationMethod,
-                                             optimization_cub_score: models.OptimizationCubScore,
-                                             max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]):
-    """
-    Hill climbing function for performing codon optimization
-    in each iteration - in each round, check all single synonymous codon changes, calculate optimization score and
-    take the best one
-    """
-    optimization_method = models.OptimizationMethod.zscore_single_aa_average
+def optimize_sequence_by_zscore_bulk_aa(seq: str,
+                                        user_input: models.UserInput,
+                                        optimization_method: models.OptimizationMethod,
+                                        optimization_cub_score: models.OptimizationCubScore,
+                                        max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]):
     seq_options = {}
     original_seq = seq
 
