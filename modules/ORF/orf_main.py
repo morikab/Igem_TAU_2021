@@ -12,7 +12,7 @@ class ORFModule(object):
     @staticmethod
     def run_module(
             user_input: models.UserInput,
-            optimization_cub_score: models.OptimizationCubScore,
+            optimization_cub_score: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
     ) -> str:
         logger.info("##########################")
@@ -41,7 +41,7 @@ class ORFModule(object):
         if optimization_method.is_single_codon_optimization:
             return optimize_sequence_by_single_codon(target_gene=target_gene,
                                                      organisms=user_input.organisms,
-                                                     optimization_cub_score=optimization_cub_score,
+                                                     optimization_cub_index=optimization_cub_score,
                                                      optimization_method=optimization_method,
                                                      tuning_param=user_input.tuning_parameter)
 

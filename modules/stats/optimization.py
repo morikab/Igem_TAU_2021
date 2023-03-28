@@ -15,7 +15,7 @@ class OptimizationModule(object):
                    final_seq: str,
                    user_input: models.UserInput,
                    optimization_method: models.OptimizationMethod,
-                   optimization_cub_score: models.OptimizationCubScore):
+                   optimization_cub_score: models.OptimizationCubIndex):
         optimization_cub_score_value = optimization_cub_score.value.lower()
 
         std_key = F"{optimization_cub_score_value}_std"

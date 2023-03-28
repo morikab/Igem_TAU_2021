@@ -30,7 +30,7 @@ def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, 
 def optimize_sequence_by_zscore_single_aa(
         seq: str,
         user_input: models.UserInput,
-        optimization_cub_score: models.OptimizationCubScore,
+        optimization_cub_score: models.OptimizationCubIndex,
         optimization_method: models.OptimizationMethod,
         max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"],
 ):
@@ -80,7 +80,7 @@ def optimize_sequence_by_zscore_single_aa(
 def optimize_sequence_by_zscore_bulk_aa(seq: str,
                                         user_input: models.UserInput,
                                         optimization_method: models.OptimizationMethod,
-                                        optimization_cub_score: models.OptimizationCubScore,
+                                        optimization_cub_score: models.OptimizationCubIndex,
                                         max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]):
     seq_options = {}
     original_seq = seq

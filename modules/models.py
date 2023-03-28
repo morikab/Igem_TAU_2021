@@ -54,10 +54,8 @@ class Organism(object):
 
 
 class OptimizationMethod(Enum):
-    single_codon_global_ratio = "single_codon_global_ratio"
-    single_codon_local_ratio = "single_codon_local_ratio"
-    single_codon_global_diff = "single_codon_global_diff"
-    single_codon_local_diff = "single_codon_local_diff"
+    single_codon_ratio = "single_codon_ratio"
+    single_codon_diff = "single_codon_diff"
     zscore_single_aa_average = "zscore_single_aa_average"
     zscore_bulk_aa_average = "zscore_bulk_aa_average"
     zscore_single_aa_weakest_link = "zscore_single_aa_weakest_link"
@@ -65,10 +63,7 @@ class OptimizationMethod(Enum):
 
     @property
     def is_single_codon_optimization(self) -> bool:
-        return self in (OptimizationMethod.single_codon_global_ratio,
-                        OptimizationMethod.single_codon_local_ratio,
-                        OptimizationMethod.single_codon_global_diff,
-                        OptimizationMethod.single_codon_local_diff)
+        return self in (OptimizationMethod.single_codon_ratio, OptimizationMethod.single_codon_diff)
 
     @property
     def is_zscore_single_aa_optimization(self) -> bool:
@@ -88,21 +83,20 @@ class OptimizationMethod(Enum):
                         OptimizationMethod.zscore_bulk_aa_weakest_link)
 
 
-# TODO - rename to OptimizationCubIndex
-class OptimizationCubScore(Enum):
+class OptimizationCubIndex(Enum):
     codon_adaptation_index = "CAI"
     trna_adaptation_index = "tAI"
     max_codon_trna_adaptation_index = "max_CAI_tAI"
 
     @property
     def is_codon_adaptation_score(self) -> bool:
-        return self in (OptimizationCubScore.codon_adaptation_index,
-                        OptimizationCubScore.max_codon_trna_adaptation_index)
+        return self in (OptimizationCubIndex.codon_adaptation_index,
+                        OptimizationCubIndex.max_codon_trna_adaptation_index)
 
     @property
     def is_trna_adaptation_score(self) -> bool:
-        return self in (OptimizationCubScore.trna_adaptation_index,
-                        OptimizationCubScore.max_codon_trna_adaptation_index)
+        return self in (OptimizationCubIndex.trna_adaptation_index,
+                        OptimizationCubIndex.max_codon_trna_adaptation_index)
 
 
 @dataclass
@@ -113,7 +107,7 @@ class UserInput:
     tuning_parameter: float
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_average
-    optimization_cub_score: OptimizationCubScore = OptimizationCubScore.max_codon_trna_adaptation_index
+    optimization_cub_score: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
 
     @property
     def summary(self) -> typing.Dict[str, typing.Any]:

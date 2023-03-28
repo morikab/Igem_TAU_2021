@@ -11,11 +11,10 @@ config = Configuration.get_config()
 
 
 # --------------------------------------------------------------
-# TODO - rename this method
 def optimize_sequence(target_gene: str,
                       organisms: typing.Sequence[models.Organism],
                       optimization_method: models.OptimizationMethod,
-                      optimization_cub_score: models.OptimizationCubScore,
+                      optimization_cub_index: models.OptimizationCubIndex,
                       tuning_param: float) -> str:
     """
     The function calculates the difference between the features of each codon.
@@ -25,7 +24,7 @@ def optimize_sequence(target_gene: str,
     aa_to_optimal_codon_mapping = find_optimal_codons(organisms=organisms,
                                                       tuning_param=tuning_param,
                                                       optimization_method=optimization_method,
-                                                      optimization_cub_score=optimization_cub_score)
+                                                      optimization_cub_index=optimization_cub_index)
     target_protein = shared_functions_and_vars.translate(target_gene)
     optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
 
@@ -68,13 +67,13 @@ def optimize_sequence(target_gene: str,
 
 
 # --------------------------------------------------------------
-def get_organism_attribute_name_by_optimization_cub_score(optimization_cub_score: models.OptimizationCubScore) -> str:
-    if optimization_cub_score.is_codon_adaptation_score:
+def get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index: models.OptimizationCubIndex) -> str:
+    if optimization_cub_index.is_codon_adaptation_score:
         return models.Organism.CAI_PROFILE_ATTRIBUTE_NAME
-    elif optimization_cub_score.is_trna_adaptation_score:
+    elif optimization_cub_index.is_trna_adaptation_score:
         return models.Organism.TAI_PROFILE_ATTRIBUTE_NAME
     else:
-        raise ValueError(F"Unknown optimization_cub_score {optimization_cub_score}")
+        raise ValueError(F"Unknown optimization_cub_score {optimization_cub_index}")
 
 
 # --------------------------------------------------------------
@@ -96,17 +95,17 @@ def get_max_organisms_attribute_value(
         max_value = 0.000001
 
     return max_value
-
-
 # --------------------------------------------------------------
+
+# TODO - delete this method and use a single get_max_organisms_attribute_value
 def get_max_value_for_organism(organism: models.Organism,
                                organism_attribute_name: str,
                                codons: typing.Sequence[str],
                                optimization_method: models.OptimizationMethod,
                                max_value_for_wanted_hosts: float,
                                max_value_for_unwanted_hosts: float) -> float:
-    if optimization_method in (models.OptimizationMethod.single_codon_global_diff,
-                               models.OptimizationMethod.single_codon_global_ratio):
+    if optimization_method in (models.OptimizationMethod.single_codon_diff,
+                               models.OptimizationMethod.single_codon_ratio):
         return max_value_for_wanted_hosts if organism.is_optimized else max_value_for_unwanted_hosts
 
     return get_max_organisms_attribute_value(organisms=[organism],
@@ -136,16 +135,12 @@ def calculate_organism_loss_per_codon(organism: models.Organism,
         return (1 - tuning_param) * ((organism_codon_weight / max_value) ** 2)
 
     optimization_method_to_loss_function_for_optimized_organisms = {
-        models.OptimizationMethod.single_codon_global_diff: _optimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_local_diff: _optimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_global_ratio: _optimized_organism_ratio_based_loss_function,
-        models.OptimizationMethod.single_codon_local_ratio: _optimized_organism_ratio_based_loss_function,
+        models.OptimizationMethod.single_codon_diff: _optimized_organism_diff_based_loss_function,
+        models.OptimizationMethod.single_codon_ratio: _optimized_organism_ratio_based_loss_function,
     }
     optimization_method_to_loss_function_for_deoptimized_organisms = {
-        models.OptimizationMethod.single_codon_global_diff: _deoptimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_local_diff: _deoptimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_global_ratio: _deoptimized_organism_ratio_based_loss_function,
-        models.OptimizationMethod.single_codon_local_ratio: _deoptimized_organism_ratio_based_loss_function,
+        models.OptimizationMethod.single_codon_diff: _deoptimized_organism_diff_based_loss_function,
+        models.OptimizationMethod.single_codon_ratio: _deoptimized_organism_ratio_based_loss_function,
     }
 
     loss_function_mapping = optimization_method_to_loss_function_for_optimized_organisms if organism.is_optimized else \
@@ -162,13 +157,13 @@ def loss_function(organisms: typing.Sequence[models.Organism],
                   codons: typing.Sequence[str],
                   tuning_param: float,
                   optimization_method: models.OptimizationMethod,
-                  optimization_cub_score: models.OptimizationCubScore) -> typing.Dict[str, float]:
+                  optimization_cub_index: models.OptimizationCubIndex) -> typing.Dict[str, float]:
     """
     The function iterates through each organism and sums up loss for each codon.
     It returns a mapping from codon to its score.
     """
     loss = defaultdict(int)
-    organism_attribute_name = get_organism_attribute_name_by_optimization_cub_score(optimization_cub_score)
+    organism_attribute_name = get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index)
     max_value_for_high_expression_organisms = get_max_organisms_attribute_value(
         organisms=[organism for organism in organisms if organism.is_optimized],
         codons=codons,
@@ -273,7 +268,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
 def find_optimal_codons(organisms: typing.Sequence[models.Organism],
                         tuning_param: float,
                         optimization_method: models.OptimizationMethod,
-                        optimization_cub_score: models.OptimizationCubScore,
+                        optimization_cub_index: models.OptimizationCubIndex,
                         evaluation_function: typing.Callable = loss_function) -> typing.Dict[str, str]:
     """
     :return: Dictionary in the format Amino Acid: Optimal codon.
@@ -281,11 +276,12 @@ def find_optimal_codons(organisms: typing.Sequence[models.Organism],
     optimal_codons = {}
 
     for aa, codons in shared_functions_and_vars.synonymous_codons.items():
+        # TODO - remove the proxy function pointer.
         loss = evaluation_function(organisms=organisms,
                                    codons=codons,
                                    tuning_param=tuning_param,
                                    optimization_method=optimization_method,
-                                   optimization_cub_score=optimization_cub_score)
+                                   optimization_cub_index=optimization_cub_index)
         logger.info(F"Loss dict is: {loss}")
         optimal_codons[aa] = min(loss, key=loss.get)
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")

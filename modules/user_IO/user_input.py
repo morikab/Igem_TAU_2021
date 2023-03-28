@@ -85,8 +85,8 @@ class UserInputModule(object):
         optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
             user_input.get("optimization_method") else None
         # FIXME - change default to None and add the option to define cub score in ui
-        optimization_cub_score = models.OptimizationCubScore(user_input["optimization_cub_score"]) if \
-            user_input.get("optimization_cub_score") else models.OptimizationCubScore.codon_adaptation_index
+        optimization_cub_score = models.OptimizationCubIndex(user_input["optimization_cub_score"]) if \
+            user_input.get("optimization_cub_score") else models.OptimizationCubIndex.codon_adaptation_index
         clusters_count = user_input["clusters_count"]
         zip_directory = user_input.get("output_path")
 
