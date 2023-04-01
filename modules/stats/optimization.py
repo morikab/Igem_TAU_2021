@@ -48,7 +48,7 @@ class OptimizationModule(object):
                                                 deoptimized_organisms_scores=deoptimized_organisms_scores,
                                                 optimized_organisms_weights=optimized_organisms_weights,
                                                 deoptimized_organisms_weights=deoptimized_organisms_weights,
-                                                alpha=alpha)
+                                                tuning_parameter=alpha)
 
         if optimization_method.is_zscore_weakest_link_score_optimization:
             return cls._calculate_weakest_link_score(
@@ -56,7 +56,7 @@ class OptimizationModule(object):
                 deoptimized_organisms_scores=deoptimized_organisms_scores,
                 optimized_organisms_weights=optimized_organisms_weights,
                 deoptimized_organisms_weights=deoptimized_organisms_weights,
-                alpha=alpha,
+                tuning_parameter=alpha,
             )
 
         raise NotImplementedError(F"Optimization method: {optimization_method}")
@@ -67,11 +67,11 @@ class OptimizationModule(object):
             deoptimized_organisms_scores: typing.List[float],
             optimized_organisms_weights: typing.List[float],
             deoptimized_organisms_weights: typing.List[float],
-            alpha: float,
+            tuning_parameter: float,
     ) -> float:
         mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
         mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
-        return alpha * mean_opt_index - (1 - alpha) * mean_deopt_index
+        return tuning_parameter * mean_opt_index - (1 - tuning_parameter) * mean_deopt_index
 
     @staticmethod
     def _calculate_weakest_link_score(
@@ -79,11 +79,14 @@ class OptimizationModule(object):
             deoptimized_organisms_scores: typing.List[float],
             optimized_organisms_weights: typing.List[float],
             deoptimized_organisms_weights: typing.List[float],
-            alpha: float,
+            tuning_parameter: float,
     ) -> float:
         weighted_optimized_organisms_scores = [optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
                                                range(len(optimized_organisms_scores))]
-        weighted_deoptimized_organisms_scores = [deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for
-                                                 i in range(len(deoptimized_organisms_scores))]
+        weighted_deoptimized_organisms_scores = [
+            deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for
+            i in range(len(deoptimized_organisms_scores))
+        ]
 
-        return alpha * min(weighted_optimized_organisms_scores)-(1-alpha) * max(weighted_deoptimized_organisms_scores)
+        return (tuning_parameter * min(weighted_optimized_organisms_scores) -
+                (1 - tuning_parameter) * max(weighted_deoptimized_organisms_scores))
