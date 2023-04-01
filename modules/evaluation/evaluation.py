@@ -6,7 +6,6 @@ from modules.ORF.calculating_cai import general_geomean
 from . import models
 
 
-# TODO - Add additional stats (% optimized, % deoptimized, etc.)
 class EvaluationModule(object):
     @staticmethod
     def run_module(final_seq: str,

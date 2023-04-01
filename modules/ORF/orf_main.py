@@ -24,18 +24,18 @@ class ORFModule(object):
 
         if optimization_method.is_zscore_single_aa_optimization:
             return optimize_sequence_by_zscore_single_aa(
-                seq=target_gene,
+                sequence=target_gene,
                 user_input=user_input,
                 optimization_method=optimization_method,
-                optimization_cub_score=optimization_cub_score,
+                optimization_cub_index=optimization_cub_score,
             )
 
         if optimization_method.is_zscore_bulk_aa_optimization:
             return optimize_sequence_by_zscore_bulk_aa(
-                seq=target_gene,
+                sequence=target_gene,
                 user_input=user_input,
                 optimization_method=optimization_method,
-                optimization_cub_score=optimization_cub_score,
+                optimization_cub_index=optimization_cub_score,
             )
 
         if optimization_method.is_single_codon_optimization:

@@ -1,19 +1,145 @@
 import typing
 
 from collections import defaultdict
+from numpy import average
+
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
 from modules.configuration import Configuration
-from modules.stats.optimization import OptimizationModule
 from modules.shared_functions_and_vars import nt_to_aa
 from modules.shared_functions_and_vars import synonymous_codons
+from modules.ORF.calculating_cai import general_geomean
 
 
 logger = LoggerFactory.get_logger()
 config = Configuration.get_config()
 
 
-def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, int]:
+# --------------------------------------------------------------
+# In each round - check all single synonymous codon changes and calculate optimization score - take the best one
+def optimize_sequence_by_zscore_single_aa(
+        sequence: str,
+        user_input: models.UserInput,
+        optimization_cub_index: models.OptimizationCubIndex,
+        optimization_method: models.OptimizationMethod,
+        max_iterations: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"],       # TODO - change to z-score
+):
+    """
+    Iterative codon optimization:
+    In each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
+    sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
+    iteration, break. The maximum number of iterations allowed is "max_iter".
+    """
+    sequence_options = {}
+    score = _calculate_zscore_for_sequence(
+        sequence=sequence,
+        user_input=user_input,
+        optimization_cub_index=optimization_cub_index,
+        optimization_method=optimization_method,
+    )
+    sequence_options[sequence] = score
+
+    # Single codon replacement
+    for run in range(max_iterations):
+        tested_sequence_to_codon = {}
+        for codon in nt_to_aa.keys():
+            tested_sequence, _ = _change_all_codons_of_aa(sequence, codon)
+            tested_sequence_to_codon[tested_sequence] = codon
+
+            score = _calculate_zscore_for_sequence(
+                sequence=tested_sequence,
+                user_input=user_input,
+                optimization_cub_index=optimization_cub_index,
+                optimization_method=optimization_method,
+            )
+            sequence_options[tested_sequence] = score
+
+        new_sequence = max(sequence_options, key=sequence_options.get)
+        logger.info(F"selected_codon in iteration {run} is: {tested_sequence_to_codon[new_sequence]}")
+
+        if new_sequence == sequence:
+            break
+        else:
+            sequence = new_sequence
+    return sequence
+
+
+# --------------------------------------------------------------
+def optimize_sequence_by_zscore_bulk_aa(sequence: str,
+                                        user_input: models.UserInput,
+                                        optimization_method: models.OptimizationMethod,
+                                        optimization_cub_index: models.OptimizationCubIndex,
+                                        max_iterations: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]): # TODO - change to z-score
+    sequence_options = {}
+    original_sequence = sequence
+
+    # # Get codon split in the original sequence
+    # codon_counts_in_seq = defaultdict(int)
+    # split_seq = [original_sequence[i:i + 3].upper() for i in range(0, len(original_sequence), 3)]
+    # for codon in split_seq:
+    #     codon_counts_in_seq[codon] += 1
+    #
+    # logger.info(F"codon_counts_in_seq: {codon_counts_in_seq}")
+
+    score = _calculate_zscore_for_sequence(
+        sequence=sequence,
+        user_input=user_input,
+        optimization_cub_index=optimization_cub_index,
+        optimization_method=optimization_method,
+    )
+    sequence_options[sequence] = score
+    for run in range(max_iterations):
+        def _find_best_aa_synonymous_codon(codons_list, sequence_to_change: str) -> str:
+            aa_codons_to_score = {}
+            for aa_codon in codons_list:
+                candidate_codon_sequence, candidate_codon_count = _change_all_codons_of_aa(sequence_to_change, aa_codon)
+                # logger.info(F"Number of occurrences of codon {aa_codon} in sequence is {candidate_codon_count}")
+                logger.info(F"Running for codon: {aa_codon}")
+                aa_codons_to_score[aa_codon] = _calculate_zscore_for_sequence(
+                    sequence=candidate_codon_sequence,
+                    user_input=user_input,
+                    optimization_cub_index=optimization_cub_index,
+                    optimization_method=optimization_method,
+                )
+                # logger.info(F"z-score after changing codon {aa_codon} is: {aa_codons_to_score[aa_codon]}")
+            selected_aa_codon = max(aa_codons_to_score, key=aa_codons_to_score.get)
+            return selected_aa_codon
+        logger.info(F"zscore of sequence in run {run} is: {sequence_options[sequence]}")
+        aa_to_selected_codon = {}
+        # Find the best synonymous_codon per aa
+        for aa in synonymous_codons.keys():
+            selected_codon = _find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa],
+                                                            sequence_to_change=sequence)
+            aa_to_selected_codon[aa] = selected_codon
+
+        logger.info(F"aa_to_selected_codon in iteration {run} is: {aa_to_selected_codon}")
+
+        # create new sequence by replacing all synonymous codons
+        new_sequence = sequence
+        for aa in aa_to_selected_codon:
+            new_sequence, _ = _change_all_codons_of_aa(new_sequence, aa_to_selected_codon[aa])
+
+        # Calculate score after all replacements
+        score = _calculate_zscore_for_sequence(
+            sequence=new_sequence,
+            user_input=user_input,
+            optimization_cub_index=optimization_cub_index,
+            optimization_method=optimization_method,
+        )
+        sequence_options[new_sequence] = score
+        logger.info(F"New seq for iteration {run} with score of: {score}")
+
+        if new_sequence == sequence:
+            break
+        else:
+            sequence = new_sequence
+
+    logger.info(F"Original score is: {sequence_options[original_sequence]}")
+    return sequence
+
+
+# --------------------------------------------------------------
+def _change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, int]:
     split_seq = [seq[i:i+3].upper() for i in range(0, len(seq), 3)]
     new_split_seq = []
     changed_codons_count = 0
@@ -26,124 +152,84 @@ def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, 
     return ''.join(new_split_seq), changed_codons_count
 
 
-# In each round - check all single synonymous codon changes and calculate optimization score - take the best one
-def optimize_sequence_by_zscore_single_aa(
-        seq: str,
-        user_input: models.UserInput,
-        optimization_cub_score: models.OptimizationCubIndex,
-        optimization_method: models.OptimizationMethod,
-        max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"],
-):
-    """
-    hill climbing function for performing codon optimization
-    in each iteration - for each codon, change all synonymous codons to a specific one and test the zscore of the new
-    sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
-    iteration, break. The maximum number of iterations allowed is "max_iter".
-    """
-    seq_options = {}
-    score = OptimizationModule.run_module(
-        final_seq=seq,
-        user_input=user_input,
-        optimization_cub_score=optimization_cub_score,
-        optimization_method=optimization_method,
-    )
-    seq_options[seq] = score
+# --------------------------------------------------------------
+def _calculate_zscore_for_sequence(sequence: str,
+                                   user_input: models.UserInput,
+                                   optimization_method: models.OptimizationMethod,
+                                   optimization_cub_index: models.OptimizationCubIndex):
+    optimization_cub_index_value = optimization_cub_index.value.lower()
 
-    # Single codon replacement
-    for run in range(max_iter):
-        # TODO - we change in each iteration a single codon. We may consider changing at most X codons at a time to
-        #  reduce risk of falling to a local maxima.
-        tested_seq_to_codon = {}
-        for codon in nt_to_aa.keys():
-            tested_seq, _ = change_all_codons_of_aa(seq, codon)
-            tested_seq_to_codon[tested_seq] = codon
+    std_key = F"{optimization_cub_index_value}_std"
+    average_key = F"{optimization_cub_index_value}_avg"
+    weights = F"{optimization_cub_index_value}_profile"
 
-            score = OptimizationModule.run_module(
-                final_seq=tested_seq,
-                user_input=user_input,
-                optimization_cub_score=optimization_cub_score,
-                optimization_method=optimization_method,
-            )
-            seq_options[tested_seq] = score
+    optimized_organisms_scores = []
+    optimized_organisms_weights = []
+    deoptimized_organisms_scores = []
+    deoptimized_organisms_weights = []
 
-        new_seq = max(seq_options, key=seq_options.get)
-        logger.info(F"selected_codon in iteration {run} is: {tested_seq_to_codon[new_seq]}")
-
-        if new_seq == seq:
-            break
+    for organism in user_input.organisms:
+        sigma = getattr(organism, std_key)
+        miu = getattr(organism, average_key)
+        profile = getattr(organism, weights)
+        index = general_geomean([user_input.sequence, sequence], weights=profile)
+        final_score = index[1]
+        organism_score = (final_score - miu) / sigma
+        logger.info(F"CUB score for organism {organism.name} is: {final_score}")
+        if organism.is_optimized:
+            optimized_organisms_scores.append(organism_score)
+            optimized_organisms_weights.append(organism.optimization_priority)
         else:
-            seq = new_seq
-    return seq
+            deoptimized_organisms_scores.append(organism_score)
+            deoptimized_organisms_weights.append(organism.optimization_priority)
 
+    alpha = user_input.tuning_parameter
+    if optimization_method.is_zscore_average_score_optimization:
+        return _calculate_average_score(optimized_organisms_scores=optimized_organisms_scores,
+                                        deoptimized_organisms_scores=deoptimized_organisms_scores,
+                                        optimized_organisms_weights=optimized_organisms_weights,
+                                        deoptimized_organisms_weights=deoptimized_organisms_weights,
+                                        tuning_parameter=alpha)
 
-#
-def optimize_sequence_by_zscore_bulk_aa(seq: str,
-                                        user_input: models.UserInput,
-                                        optimization_method: models.OptimizationMethod,
-                                        optimization_cub_score: models.OptimizationCubIndex,
-                                        max_iter: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]):
-    seq_options = {}
-    original_seq = seq
-
-    # Get codon split in the original sequence
-    codon_counts_in_seq = defaultdict(int)
-    split_seq = [original_seq[i:i + 3].upper() for i in range(0, len(original_seq), 3)]
-    for codon in split_seq:
-        codon_counts_in_seq[codon] += 1
-
-    logger.info(F"codon_counts_in_seq: {codon_counts_in_seq}")
-
-    score = OptimizationModule.run_module(
-        final_seq=seq,
-        user_input=user_input,
-        optimization_cub_score=optimization_cub_score,
-        optimization_method=optimization_method,
-    )
-    seq_options[seq] = score
-    for run in range(max_iter):
-        def find_best_aa_synonymous_codon(codons_list, seq_to_change: str) -> str:
-            aa_seq_options = {}
-            for aa_codon in codons_list:
-                option_seq, option_codon_count = change_all_codons_of_aa(seq_to_change, aa_codon)
-                # logger.info(F"Number of occurrences of codon {aa_codon} in sequence is {option_codon_count}")
-                logger.info(F"Running for codon: {aa_codon}")
-                aa_seq_options[aa_codon] = OptimizationModule.run_module(
-                    final_seq=option_seq,
-                    user_input=user_input,
-                    optimization_cub_score=optimization_cub_score,
-                    optimization_method=optimization_method,
-                )
-                # logger.info(F"z-score after changing codon {aa_codon} is: {aa_seq_options[aa_codon]}")
-            aa_new_seq = max(aa_seq_options, key=aa_seq_options.get)
-            return aa_new_seq
-        logger.info(F"zscore of sequence in run {run} is: {seq_options[seq]}")
-        aa_to_selected_codon = {}
-        # Find the best synonymous_codon per aa
-        for aa in synonymous_codons.keys():
-            selected_aa_codon = find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa], seq_to_change=seq)
-            aa_to_selected_codon[aa] = selected_aa_codon
-
-        logger.info(F"aa_to_selected_codon in iteration {run} is: {aa_to_selected_codon}")
-
-        # create new seq by replacing all synonymous codons
-        new_seq = seq
-        for aa in aa_to_selected_codon:
-            new_seq, _ = change_all_codons_of_aa(new_seq, aa_to_selected_codon[aa])
-
-        # Calculate score after all replacements
-        score = OptimizationModule.run_module(
-            final_seq=new_seq,
-            user_input=user_input,
-            optimization_cub_score=optimization_cub_score,
-            optimization_method=optimization_method,
+    if optimization_method.is_zscore_weakest_link_score_optimization:
+        return _calculate_weakest_link_score(
+            optimized_organisms_scores=optimized_organisms_scores,
+            deoptimized_organisms_scores=deoptimized_organisms_scores,
+            optimized_organisms_weights=optimized_organisms_weights,
+            deoptimized_organisms_weights=deoptimized_organisms_weights,
+            tuning_parameter=alpha,
         )
-        seq_options[new_seq] = score
-        logger.info(F"New seq for iteration {run} with score of: {score}")
 
-        if new_seq == seq:
-            break
-        else:
-            seq = new_seq
+    raise NotImplementedError(F"Optimization method: {optimization_method}")
 
-    logger.info(F"Original score is: {seq_options[original_seq]}")
-    return seq
+
+# --------------------------------------------------------------
+def _calculate_average_score(
+        optimized_organisms_scores: typing.List[float],
+        deoptimized_organisms_scores: typing.List[float],
+        optimized_organisms_weights: typing.List[float],
+        deoptimized_organisms_weights: typing.List[float],
+        tuning_parameter: float,
+) -> float:
+    mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
+    mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
+    return tuning_parameter * mean_opt_index - (1 - tuning_parameter) * mean_deopt_index
+
+
+# --------------------------------------------------------------
+def _calculate_weakest_link_score(
+        optimized_organisms_scores: typing.List[float],
+        deoptimized_organisms_scores: typing.List[float],
+        optimized_organisms_weights: typing.List[float],
+        deoptimized_organisms_weights: typing.List[float],
+        tuning_parameter: float,
+) -> float:
+    weighted_optimized_organisms_scores = [optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
+                                           range(len(optimized_organisms_scores))]
+    weighted_deoptimized_organisms_scores = [
+        deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for
+        i in range(len(deoptimized_organisms_scores))
+    ]
+
+    return (tuning_parameter * min(weighted_optimized_organisms_scores) -
+            (1 - tuning_parameter) * max(weighted_deoptimized_organisms_scores))
