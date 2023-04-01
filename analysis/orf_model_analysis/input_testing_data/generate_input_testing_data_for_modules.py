@@ -57,11 +57,12 @@ def generate_testing_data(n_organisms=15,
 
 def generate_testing_data_for_comparing_with_previous_algorithm(
         optimization_method: str,
-        optimization_cub_score: str,
+        optimization_cub_index: str,
         clusters_count: int = DEFAULT_CLUSTERS_COUNT,
         tuning_param: float = DEFAULT_TUNING_PARAM,
         is_ecoli_optimized: bool = False,
         sequence_file_path: str = DEFAULT_SEQUENCE_FILE_PATH,
+        # TODO - add output_path to be able to store the results under different names (for separate runs)
 ):
     if is_ecoli_optimized:
         opt_genome = "Escherichia coli.gb"
@@ -80,7 +81,7 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         "organisms": {},
         "clusters_count": clusters_count,
         "optimization_method": optimization_method,
-        "optimization_cub_score": optimization_cub_score,
+        "optimization_cub_index": optimization_cub_index,
     }
 
     inp_dict['organisms'][opt_genome[:-3]] = {

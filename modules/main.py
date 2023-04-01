@@ -15,8 +15,8 @@ if artifacts_directory.exists() and artifacts_directory.is_dir():
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
 from modules import user_IO, ORF, sequence_family
-from modules.stats import models as evaluation_models
-from modules.stats.evaluation import EvaluationModule
+from modules.evaluation import models as evaluation_models
+from modules.evaluation.evaluation import EvaluationModule
 from modules import models
 
 logger = LoggerFactory.get_logger()
@@ -44,10 +44,11 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         zip_directory = user_input.zip_directory or str(artifacts_directory)
         # TODO - handle multiple results in output generation module
         evaluation_result = evaluation_results[0]
-        final_output = user_IO.UserOutputModule.run_module(cds_sequence=evaluation_result.sequence,
-                                                           zscore=evaluation_result.optimization_index,
-                                                           weakest_score=evaluation_result.weakest_score,
-                                                           zip_directory=zip_directory)
+        final_output = user_IO.UserOutputModule.run_module(
+            cds_sequence=evaluation_result.sequence,
+            average_distance_score=evaluation_result.average_distance_score,
+            weakest_link_score=evaluation_result.weakest_link_score,
+            zip_directory=zip_directory)
     except:
         logger.error("Encountered unknown error when running modules.")
         exception_str = traceback.format_exc()
@@ -68,7 +69,7 @@ def choose_orf_optimization_result(
         return cai_evaluation_result
     if cai_evaluation_result is None:
         return tai_evaluation_result
-    return cai_evaluation_result if cai_evaluation_result.optimization_index > tai_evaluation_result.optimization_index\
+    return cai_evaluation_result if cai_evaluation_result.average_distance_score > tai_evaluation_result.average_distance_score\
         else tai_evaluation_result
 
 
@@ -84,14 +85,12 @@ def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.Eval
         cds_nt_final_tai = ORF.ORFModule.run_module(user_input=user_input,
                                                     optimization_cub_score=trna_adaptation_index_score,
                                                     optimization_method=optimization_method)
-        tai_evaluation_result = EvaluationModule.run_module(final_seq=cds_nt_final_tai,
+        tai_evaluation_result = EvaluationModule.run_module(final_sequence=cds_nt_final_tai,
                                                             user_input=user_input,
-                                                            optimization_cub_score=trna_adaptation_index_score)
+                                                            optimization_cub_index=trna_adaptation_index_score)
 
         logger.info(f"Sequence:\n{cds_nt_final_tai}")
-        logger.info(f"Optimized sequences score: {tai_evaluation_result.mean_opt_index}, "
-                    f"deoptimized sequence score: {tai_evaluation_result.mean_deopt_index}")
-        logger.info(f"Final optimization score: {tai_evaluation_result.optimization_index}")
+        logger.info(f"Final optimization score: {tai_evaluation_result.average_distance_score}")
 
     if optimization_cub_score.is_codon_adaptation_score:
         logger.info("CAI information:")
@@ -99,21 +98,17 @@ def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.Eval
         cds_nt_final_cai = ORF.ORFModule.run_module(user_input=user_input,
                                                     optimization_cub_score=codon_adaptation_index_score,
                                                     optimization_method=optimization_method)
-        cai_evaluation_result = EvaluationModule.run_module(final_seq=cds_nt_final_cai,
+        cai_evaluation_result = EvaluationModule.run_module(final_sequence=cds_nt_final_cai,
                                                             user_input=user_input,
-                                                            optimization_cub_score=codon_adaptation_index_score)
+                                                            optimization_cub_index=codon_adaptation_index_score)
 
         logger.info(f"Sequence:\n{cds_nt_final_cai}")
-        logger.info(f"Optimized sequences score: {cai_evaluation_result.mean_opt_index}, "
-                    f"deoptimized sequence score: {cai_evaluation_result.mean_deopt_index}")
-        logger.info(f"Final optimization score: {cai_evaluation_result.optimization_index}")
+        logger.info(f"Final optimization score: {cai_evaluation_result.average_distance_score}")
 
     evaluation_result = choose_orf_optimization_result(tai_evaluation_result=tai_evaluation_result,
                                                        cai_evaluation_result=cai_evaluation_result)
 
     logger.info(f"Sequence:\n{evaluation_result.sequence}")
-    logger.info(f"Optimized sequences score: {evaluation_result.mean_opt_index}, "
-                f"deoptimized sequence score: {evaluation_result.mean_deopt_index}")
-    logger.info(f"Weakest link score: {evaluation_result.weakest_score}")
-    logger.info(f"Final optimization score: {evaluation_result.optimization_index}")
+    logger.info(f"Weakest link score: {evaluation_result.weakest_link_score}")
+    logger.info(f"Final optimization score: {evaluation_result.average_distance_score}")
     return evaluation_result

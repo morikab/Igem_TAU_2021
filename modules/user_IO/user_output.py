@@ -6,7 +6,6 @@ from zipfile import ZipFile
 from logger_factory.logger_factory import LoggerFactory
 from modules.shared_functions_and_vars import write_fasta
 
-# initialize the logger object
 logger = LoggerFactory.get_logger()
 
 
@@ -22,24 +21,23 @@ class UserOutputModule(object):
 
     @classmethod
     def run_module(cls,
-                   cds_sequence,
-                   zscore,
-                   weakest_score,
-                   zip_directory=None):
+                   cds_sequence: str,
+                   average_distance_score: float,
+                   weakest_link_score: float,
+                   zip_directory: str = None):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
 
         logger.info("Output zip file directory path: %s", zip_directory)
 
-        #todo: no need to zip the results anymore
         zip_file_path = cls._create_final_zip(zip_directory=zip_directory,
                                               cds_sequence=cds_sequence)
 
         user_output_dict = {
             "final_sequence": cds_sequence,  # str
-            "optimization_score": zscore,
-            "score_for_weakest_pair": weakest_score,
+            "average_distance_score": average_distance_score,
+            "weakest_link_score": weakest_link_score,
             "zip_file_path": zip_file_path,
         }
 

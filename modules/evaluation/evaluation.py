@@ -1,3 +1,5 @@
+import typing
+
 from numpy import average
 from modules import models as main_models
 from modules.run_summary import RunSummary
@@ -8,12 +10,12 @@ from . import models
 
 class EvaluationModule(object):
     @staticmethod
-    def run_module(final_seq: str,
+    def run_module(final_sequence: str,
                    user_input: main_models.UserInput,
-                   optimization_cub_score: main_models.OptimizationCubIndex) -> models.EvaluationModuleResult:
-        optimization_cub_score_value = optimization_cub_score.value.lower()
-        std = f"{optimization_cub_score_value}_std"
-        weights = f"{optimization_cub_score_value}_profile"
+                   optimization_cub_index: main_models.OptimizationCubIndex) -> models.EvaluationModuleResult:
+        optimization_cub_index_value = optimization_cub_index.value.lower()
+        std = f"{optimization_cub_index_value}_std"
+        weights = f"{optimization_cub_index_value}_profile"
 
         optimized_organisms_scores = []
         optimized_organisms_weights = []
@@ -21,11 +23,10 @@ class EvaluationModule(object):
         deoptimized_organisms_weights = []
 
         organisms_evaluation_summary = []
-        # todo: add something related to the ratio between the two worst organisms
         for organism in user_input.organisms:
             sigma = getattr(organism, std)
             profile = getattr(organism, weights)
-            index = general_geomean([user_input.sequence, final_seq], weights=profile)
+            index = general_geomean([user_input.sequence, final_sequence], weights=profile)
             initial_score = index[0]
             final_score = index[1]
             organism_score = (final_score - initial_score) / sigma
@@ -38,25 +39,33 @@ class EvaluationModule(object):
 
             organism_summary = {
                 "name": organism.name,
-                "wanted": organism.is_optimized,
-                F"{optimization_cub_score_value}_initial_score": initial_score,
-                F"{optimization_cub_score_value}_final_score": final_score,
-                "zscore": organism_score,
+                "is_wanted": organism.is_optimized,
+                F"{optimization_cub_index_value}_initial_score": initial_score,
+                F"{optimization_cub_index_value}_final_score": final_score,
+                "dist_score": organism_score,
             }
             organisms_evaluation_summary.append(organism_summary)
 
-        mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
-        mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
-        alpha = user_input.tuning_parameter
-        optimization_index = (alpha * mean_opt_index - (1-alpha) * mean_deopt_index)  #/norm_factor
-        weakest_score = alpha*min(optimized_organisms_scores)-(1-alpha)*max(deoptimized_organisms_scores)
+        average_distance_score = EvaluationModule._calculate_average_distance_score(
+            optimized_organisms_scores=optimized_organisms_scores,
+            deoptimized_organisms_scores=deoptimized_organisms_scores,
+            optimized_organisms_weights=optimized_organisms_weights,
+            deoptimized_organisms_weights=deoptimized_organisms_weights,
+            tuning_parameter=user_input.tuning_parameter,
+        )
+
+        weakest_link_score = EvaluationModule._calculate_weakest_link_score(
+            optimized_organisms_scores=optimized_organisms_scores,
+            deoptimized_organisms_scores=deoptimized_organisms_scores,
+            optimized_organisms_weights=optimized_organisms_weights,
+            deoptimized_organisms_weights=deoptimized_organisms_weights,
+            tuning_parameter=user_input.tuning_parameter,
+        )
 
         evaluation_result = models.EvaluationModuleResult(
-            sequence=final_seq,
-            mean_opt_index=mean_opt_index,
-            mean_deopt_index=mean_deopt_index,
-            optimization_index=optimization_index,
-            weakest_score=weakest_score,
+            sequence=final_sequence,
+            average_distance_score=average_distance_score,
+            weakest_link_score=weakest_link_score,
         )
 
         evaluation_summary = {
@@ -66,3 +75,37 @@ class EvaluationModule(object):
         RunSummary.add_to_run_summary("evaluation", evaluation_summary)
 
         return evaluation_result
+
+    # --------------------------------------------------------------
+    @staticmethod
+    def _calculate_average_distance_score(optimized_organisms_scores: typing.Sequence[float],
+                                          deoptimized_organisms_scores: typing.Sequence[float],
+                                          optimized_organisms_weights: typing.Sequence[float],
+                                          deoptimized_organisms_weights: typing.Sequence[float],
+                                          tuning_parameter: float) -> float:
+        mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
+        mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
+        return tuning_parameter * mean_opt_index - (1-tuning_parameter) * mean_deopt_index
+
+    # --------------------------------------------------------------
+    @staticmethod
+    def _calculate_weakest_link_score(optimized_organisms_scores: typing.Sequence[float],
+                                      deoptimized_organisms_scores: typing.Sequence[float],
+                                      optimized_organisms_weights: typing.Sequence[float],
+                                      deoptimized_organisms_weights: typing.Sequence[float],
+                                      tuning_parameter: float) -> float:
+        # Validate all organisms weights are in the range [0,1]
+        assert sum(optimized_organisms_weights) == 1
+        assert sum(deoptimized_organisms_weights) == 1
+
+        weighted_optimized_organisms_scores = [
+            optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
+            range(len(optimized_organisms_scores))
+        ]
+        weighted_deoptimized_organisms_scores = [
+            deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for i in
+            range(len(deoptimized_organisms_scores))
+        ]
+        return tuning_parameter * min(weighted_optimized_organisms_scores) - (1-tuning_parameter) * max(
+            weighted_deoptimized_organisms_scores
+        )
