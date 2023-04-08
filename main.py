@@ -30,10 +30,12 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
-    OPTIMIZATION_METHODS = ["single_codon_global_ratio", "single_codon_local_ratio", "single_codon_global_diff",
-                            "single_codon_local_diff", "zscore_single_aa_average", "zscore_bulk_aa_average",
-                            "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link"]
+    OPTIMIZATION_METHODS = ["single_codon_ratio", "single_codon_diff", "zscore_single_aa_average",
+                            "zscore_bulk_aa_average", "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link"]
     DEFAULT_OPTIMIZATION_METHOD = "zscore_bulk_aa_average"
+
+    OPTIMIZATION_CUB_INDICES = ["codon_adaptation_index", "trna_adaptation_index", "max_codon_trna_adaptation_index"]
+    DEFAULT_OPTIMIZATION_INDEX = "codon_adaptation_index"
 
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
@@ -42,6 +44,7 @@ class CommuniqueApp(object):
         self.tuning_parameter = None
         self.clusters_count = None
         self.optimization_method = None
+        self.optimization_cub_index = None
         self.log_text = None
 
         # Widgets
@@ -177,8 +180,8 @@ class CommuniqueApp(object):
         self.clusters_count.set(self.DEFAULT_CLUSTERS_COUNT_VALUE)
         self.optimization_method = tk.StringVar()
         self.optimization_method.set(self.DEFAULT_OPTIMIZATION_METHOD)
-
-        # TODO - add option to define the CUB score to use here..
+        self.optimization_cub_index = tk.StringVar()
+        self.optimization_cub_index.set(self.DEFAULT_OPTIMIZATION_INDEX)
 
     @staticmethod
     def format_grid(grid: tk.Frame) -> None:
@@ -342,7 +345,10 @@ class CommuniqueApp(object):
         ttk.Label(options_frame, text="Optimization Method: ").grid(row=2, column=0)
         tk.OptionMenu(options_frame, self.optimization_method, *self.OPTIMIZATION_METHODS).grid(row=2, column=2)
 
-        ttk.Button(options_frame, text="Save", command=options_window.withdraw).grid(row=3, column=1)
+        ttk.Label(options_frame, text="Codon usage bias (CUB) index: ").grid(row=3, column=0)
+        tk.OptionMenu(options_frame, self.optimization_cub_index, *self.OPTIMIZATION_CUB_INDICES).grid(row=3, column=2)
+
+        ttk.Button(options_frame, text="Save", command=options_window.withdraw).grid(row=4, column=1)
 
         self.format_grid(options_frame)
         options_frame.pack()

@@ -12,10 +12,10 @@ class Organism(object):
                  name: str,
                  is_optimized: bool,
                  optimization_priority: float,
-                 cai_profile: typing.Dict = None,
-                 tai_profile: typing.Dict = None,
-                 cai_scores: typing.Dict = None,
-                 tai_scores: typing.Dict = None):
+                 cai_profile: typing.Optional[typing.Dict] = None,
+                 tai_profile: typing.Optional[typing.Dict] = None,
+                 cai_scores: typing.Optional[typing.Dict] = None,
+                 tai_scores: typing.Optional[typing.Dict] = None):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
@@ -27,19 +27,19 @@ class Organism(object):
         self.optimization_priority = optimization_priority
 
     @property
-    def cai_avg(self):
+    def cai_avg(self) -> float:
         return statistics.mean(self._cai_scores_values)
 
     @property
-    def tai_avg(self):
+    def tai_avg(self) -> float:
         return statistics.mean(self._tai_scores_values)
 
     @property
-    def cai_std(self):
+    def cai_std(self) -> float:
         return statistics.stdev(self._cai_scores_values)
 
     @property
-    def tai_std(self):
+    def tai_std(self) -> float:
         return statistics.stdev(self._tai_scores_values)
 
     @property
@@ -107,7 +107,7 @@ class UserInput:
     tuning_parameter: float
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_average
-    optimization_cub_score: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
+    optimization_cub_index: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
 
     @property
     def summary(self) -> typing.Dict[str, typing.Any]:
@@ -115,6 +115,6 @@ class UserInput:
             "sequence": self.sequence,
             "tuning_parameter": self.tuning_parameter,
             "optimization_method": self.optimization_method.value,
-            "optimization_cub_score": self.optimization_cub_score.value,
+            "optimization_cub_score": self.optimization_cub_index.value,
             "organisms": [organism.summary for organism in self.organisms],
         }

@@ -6,7 +6,7 @@ from collections import Counter
 import warnings
 from Bio import BiopythonWarning
 
-#LIYAM code
+# TODO - consider using CAI package from https://cai.readthedocs.io/en/latest/
 
 
 warnings.simplefilter("ignore", BiopythonWarning)
@@ -84,8 +84,6 @@ def RSCU(sequences, genetic_code='genetic_code'):
     Raises:
         ValueError: When an invalid sequence is provided or a list is not provided.
     """
-
-
     # ensure all input sequences are divisible by three
     sequences_new = []
     for sequence in sequences:
@@ -99,7 +97,7 @@ def RSCU(sequences, genetic_code='genetic_code'):
 
     # count the number of each codon in the sequences
     sequences = (
-        (sequence[i : i + 3].upper() for i in range(0, len(sequence), 3))
+        (sequence[i: i + 3].upper() for i in range(0, len(sequence), 3))
         for sequence in sequences
     )
     codons = chain.from_iterable(

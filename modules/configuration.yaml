@@ -1,10 +1,11 @@
+INPUT:
+  RIBOSOMAL_PROTEINS_COUNT_THRESHOLD: 10
+  EXPRESSION_PERCENTAGE_THRESHOLD: 0.3
 ORF:
-  HILL_CLIMBING_MAX_ITERATIONS: 50
+  ZSCORE_MAX_ITERATIONS: 50
   # Optional values:
-  #   * single_codon_global_ratio
-  #   * single_codon_local_ratio
-  #   * single_codon_global_diff
-  #   * single_codon_local_diff
+  #   * single_codon_ratio
+  #   * single_codon_diff
   #   * hill_climbing_average
   #   * hill_climbing_weakest_link
   MAX_N_OPTIMIZED_SEQS: 10

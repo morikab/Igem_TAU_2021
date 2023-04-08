@@ -27,7 +27,7 @@ class UserInputModule(object):
         :param user_input: in the following format
         {   'tuning_param': 0.5,
             'optimization_method': 'hill_climbing_average',
-            'optimization_cub_score': 'CAI',
+            'optimization_cub_index': 'CAI',
             'clustering_num': 3,
             'organisms: {
                 'ecoli': {
@@ -43,14 +43,55 @@ class UserInputModule(object):
             }
         }
         """
+        optimization_cub_index = models.OptimizationCubIndex(user_input["optimization_cub_index"]) if \
+            user_input.get("optimization_cub_index") else None
+        optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
+            user_input.get("optimization_method") else None
+        tuning_parameter = user_input["tuning_param"]
+        clusters_count = user_input["clusters_count"]
+        zip_directory = user_input.get("output_path")
+
+        organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
+                                                   optimization_cub_index=optimization_cub_index)
+
+        orf_sequence = cls._parse_orf_sequence(user_input["sequence"])
+        logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
+
+        user_input = models.UserInput(organisms=organisms_list,
+                                      sequence=orf_sequence,
+                                      tuning_parameter=tuning_parameter,
+                                      optimization_method=optimization_method,
+                                      optimization_cub_index=optimization_cub_index,
+                                      clusters_count=clusters_count,
+                                      zip_directory=zip_directory)
+
+        RunSummary.add_to_run_summary("user_input", user_input.summary)
+
+        return user_input
+
+    @classmethod
+    def _parse_orf_sequence(cls, orf_fasta_file_path: str) -> str:
+        logger.info(F"Sequence to be optimized given in the following file: {orf_fasta_file_path}")
+
+        try:
+            return str(SeqIO.read(orf_fasta_file_path, "fasta").seq)
+        except:
+            raise ValueError(
+                F"Error in orf sequence .fasta file: {orf_fasta_file_path}. Make sure you inserted a valid .fasta file "
+                F"containing a single record")
+
+    @classmethod
+    def _parse_organisms_list(cls,
+                              organisms_input_list: typing.Dict[str, typing.Any],
+                              optimization_cub_index: models.OptimizationCubIndex) -> typing.List[models.Organism]:
         organisms_list = []
         organisms_names = set()
-
-        for key, val in user_input['organisms'].items():
+        for organism_key, organism_input in organisms_input_list.items():
             try:
-                organism = cls._parse_single_input(val)
+                organism = cls._parse_single_organism_input(organism_input=organism_input,
+                                                            optimization_cub_index=optimization_cub_index)
             except:
-                raise ValueError(f'Error in input: {key}, re-check your input')
+                raise ValueError(f"Error in organism input: {organism_key}, re-check your input")
             if organism.name in organisms_names:
                 raise ValueError(f"Organism: {organism.name}'s genome is inserted twice, re-check your input.")
             organisms_list.append(organism)
@@ -68,49 +109,11 @@ class UserInputModule(object):
                 organism.optimization_priority /= total_deoptimized_weights
             logger.info(f"{organism.name} has weight of {organism.optimization_priority}")
 
-        # Read ORF sequence
-        orf_fasta_fid = user_input['sequence']
-        orf_seq = None
-        if orf_fasta_fid is not None:
-            try:
-                orf_seq = str(SeqIO.read(orf_fasta_fid, 'fasta').seq)
-            except:
-                raise ValueError(
-                    f'Error in protein .fasta file: {orf_fasta_fid}, make sure you inserted an undamaged .fasta file '
-                    f'containing a single recored')
-        logger.info(f'\n\nSequence to be optimized given in the following file {orf_fasta_fid}')
-        logger.info(f'containing this sequence: {orf_seq}')
-
-        tuning_parameter = user_input["tuning_param"]
-        optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
-            user_input.get("optimization_method") else None
-        # FIXME - change default to None and add the option to define cub score in ui
-        optimization_cub_score = models.OptimizationCubIndex(user_input["optimization_cub_score"]) if \
-            user_input.get("optimization_cub_score") else models.OptimizationCubIndex.codon_adaptation_index
-        clusters_count = user_input["clusters_count"]
-        zip_directory = user_input.get("output_path")
-
-        user_input = models.UserInput(organisms=organisms_list,
-                                      sequence=orf_seq,
-                                      tuning_parameter=tuning_parameter,
-                                      optimization_method=optimization_method,
-                                      optimization_cub_score=optimization_cub_score,
-                                      clusters_count=clusters_count,
-                                      zip_directory=zip_directory)
-
-        RunSummary.add_to_run_summary("user_input", user_input.summary)
-
-        return user_input
+        return organisms_list
 
     @staticmethod
-    def _parse_single_input(organism_input):
-        """
-        create the relevant information for each organism
-        :param organism_input: the dictionary supplied for every organism:
-            {'genome_path': '.gb', 'genes_HE': '.csv', 'optimized': False }
-        :return:
-        @organism_object: Parsed organism object
-        """
+    def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
+                                     optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
         gb_path = organism_input['genome_path']
         exp_csv_fid = organism_input['expression_csv']
         try:
@@ -134,19 +137,21 @@ class UserInputModule(object):
         logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
 
-        # TODO - extract weights by the value of optimization_cub_score to reduce running times of the code
-        cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression, exp_csv_fid)
-        cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
-        cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
-
+        cai_weights = None
+        cai_scores_dict = None
         tai_weights = None
-        tai_scores_dict = {}
-        try:
+        tai_scores_dict = None
+        # TODO - Neglect ribosomal proteins when calculating std and avg for cds dict (add return parameter to calculate
+        #  cai weights method.
+        if optimization_cub_index.is_codon_adaptation_score:
+            cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression)
+            cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
+            cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
+
+        if optimization_cub_index.is_trna_adaptation_score:
             tai_weights = TAI(tai_from_tgcnDB(organism_name)).index
             tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
             tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
-        except:
-            pass
 
         organism_object = models.Organism(name=organism_name,
                                           cai_profile=cai_weights,

@@ -1,6 +1,5 @@
 import typing
 
-from collections import defaultdict
 from numpy import average
 
 from logger_factory.logger_factory import LoggerFactory
@@ -22,7 +21,7 @@ def optimize_sequence_by_zscore_single_aa(
         user_input: models.UserInput,
         optimization_cub_index: models.OptimizationCubIndex,
         optimization_method: models.OptimizationMethod,
-        max_iterations: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"],       # TODO - change to z-score
+        max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
 ):
     """
     Iterative codon optimization:
@@ -69,7 +68,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         user_input: models.UserInput,
                                         optimization_method: models.OptimizationMethod,
                                         optimization_cub_index: models.OptimizationCubIndex,
-                                        max_iterations: int = config["ORF"]["HILL_CLIMBING_MAX_ITERATIONS"]): # TODO - change to z-score
+                                        max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
     sequence_options = {}
     original_sequence = sequence
 

@@ -74,7 +74,7 @@ def choose_orf_optimization_result(
 
 
 def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.EvaluationModuleResult:
-    optimization_cub_score = user_input.optimization_cub_score
+    optimization_cub_score = user_input.optimization_cub_index
     optimization_method = user_input.optimization_method
     tai_evaluation_result = None
     cai_evaluation_result = None
