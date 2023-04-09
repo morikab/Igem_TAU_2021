@@ -1,6 +1,8 @@
 import os
 
 import operator
+import typing
+
 from Bio import SeqIO
 import pandas as pd
 
@@ -109,7 +111,8 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     return cds_dict, estimated_expression
 
 
-def calculate_cai_weights_for_input(cds_dict, estimated_expression_dict):
+def calculate_cai_weights_for_input(cds_dict: typing.Dict[str, typing.Any],
+                                    estimated_expression_dict: typing.Dict[str, float]) -> typing.Dict[str, float]:
     """
     calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.

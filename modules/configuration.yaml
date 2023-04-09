@@ -3,9 +3,4 @@ INPUT:
   EXPRESSION_PERCENTAGE_THRESHOLD: 0.3
 ORF:
   ZSCORE_MAX_ITERATIONS: 50
-  # Optional values:
-  #   * single_codon_ratio
-  #   * single_codon_diff
-  #   * hill_climbing_average
-  #   * hill_climbing_weakest_link
   MAX_N_OPTIMIZED_SEQS: 10

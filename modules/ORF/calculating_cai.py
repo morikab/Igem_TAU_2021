@@ -1,12 +1,11 @@
 from itertools import chain
-import Bio.Data.CodonTable as ct
 from scipy.stats import gmean
 from collections import Counter
 # get rid of Biopython warning
 import warnings
 from Bio import BiopythonWarning
 
-# TODO - consider using CAI package from https://cai.readthedocs.io/en/latest/
+# TODO - consider using CAI code: from Bio.SeqUtils import CodonAdaptationIndex
 
 
 warnings.simplefilter("ignore", BiopythonWarning)
