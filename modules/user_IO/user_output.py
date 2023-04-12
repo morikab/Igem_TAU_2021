@@ -24,14 +24,14 @@ class UserOutputModule(object):
                    cds_sequence: str,
                    average_distance_score: float,
                    weakest_link_score: float,
-                   zip_directory: str = None):
+                   output_path: str = None):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
         logger.info('###########################')
 
-        logger.info("Output zip file directory path: %s", zip_directory)
+        logger.info("Output zip file directory path: %s", output_path)
 
-        zip_file_path = cls._create_final_zip(zip_directory=zip_directory,
+        zip_file_path = cls._create_final_zip(output_path=output_path,
                                               cds_sequence=cds_sequence)
 
         user_output_dict = {
@@ -45,11 +45,11 @@ class UserOutputModule(object):
 
     @classmethod
     def _create_final_zip(cls,
-                          zip_directory: typing.Optional[str],
-                          cds_sequence: str) -> str:
-        zip_directory = zip_directory if zip_directory else "."
+                          cds_sequence: str,
+                          output_path: typing.Optional[str] = None) -> str:
+        zip_output_path = output_path or "."
         # Create a ZipFile Object
-        zip_file_path = os.path.join(zip_directory, cls._ZIP_FILE_NAME)
+        zip_file_path = os.path.join(zip_output_path, cls._ZIP_FILE_NAME)
         # Add multiple files to the zip
         with ZipFile(zip_file_path, 'w') as zip_object:
             # Add Fasta file

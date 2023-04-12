@@ -103,7 +103,7 @@ class OptimizationCubIndex(Enum):
 class UserInput:
     organisms: typing.List[Organism]
     sequence: str
-    zip_directory: str
+    output_path: str
     tuning_parameter: float
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_average

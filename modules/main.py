@@ -38,17 +38,16 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
             evaluation_results.append(evaluation_result)
 
         # ###################################### Output Handling ##########################################
-        # TODO - think if this is indeed the best location
-        RunSummary.save_run_summary(str(artifacts_directory))
-
-        zip_directory = user_input.zip_directory or str(artifacts_directory)
+        output_path = user_input.output_path or str(artifacts_directory)
+        RunSummary.save_run_summary(output_path)
         # TODO - handle multiple results in output generation module
         evaluation_result = evaluation_results[0]
         final_output = user_IO.UserOutputModule.run_module(
             cds_sequence=evaluation_result.sequence,
             average_distance_score=evaluation_result.average_distance_score,
             weakest_link_score=evaluation_result.weakest_link_score,
-            zip_directory=zip_directory)
+            output_path=output_path,
+        )
     except:
         logger.error("Encountered unknown error when running modules.")
         exception_str = traceback.format_exc()

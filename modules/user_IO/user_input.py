@@ -49,7 +49,7 @@ class UserInputModule(object):
             user_input.get("optimization_method") else None
         tuning_parameter = user_input["tuning_param"]
         clusters_count = user_input["clusters_count"]
-        zip_directory = user_input.get("output_path")
+        output_path = user_input.get("output_path")
 
         organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
                                                    optimization_cub_index=optimization_cub_index)
@@ -63,7 +63,7 @@ class UserInputModule(object):
                                       optimization_method=optimization_method,
                                       optimization_cub_index=optimization_cub_index,
                                       clusters_count=clusters_count,
-                                      zip_directory=zip_directory)
+                                      output_path=output_path)
 
         RunSummary.add_to_run_summary("user_input", user_input.summary)
 

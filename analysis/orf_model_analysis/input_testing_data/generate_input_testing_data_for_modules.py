@@ -1,8 +1,10 @@
 import os
+import random
+import string
 from pathlib import Path
 from os import listdir
 from os.path import isfile, join
-import random
+
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.parent.resolve(), "example_data")
@@ -12,6 +14,11 @@ DEFAULT_ORGANISM_PRIORITY = 50
 DEFAULT_CLUSTERS_COUNT = 2
 DEFAULT_TUNING_PARAM = 0.5
 DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
+
+
+def generate_random_string(length: int) -> str:
+    letters_and_digits = string.ascii_letters + string.digits
+    return "".join(random.choice(letters_and_digits) for _ in range(length))
 
 
 def generate_testing_data(n_organisms=15,
@@ -62,8 +69,12 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         tuning_param: float = DEFAULT_TUNING_PARAM,
         is_ecoli_optimized: bool = False,
         sequence_file_path: str = DEFAULT_SEQUENCE_FILE_PATH,
-        # TODO - add output_path to be able to store the results under different names (for separate runs)
+        output_path: str = None,
 ):
+    output_path = output_path or F"results\\{optimization_cub_index}_{optimization_method}_ecoli_opt_" \
+                                 F"{is_ecoli_optimized}_{generate_random_string(4)}"
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+
     if is_ecoli_optimized:
         opt_genome = "Escherichia coli.gb"
         opt_mrna_levels = "ecoli_mrna_level.csv"
@@ -82,6 +93,7 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         "clusters_count": clusters_count,
         "optimization_method": optimization_method,
         "optimization_cub_index": optimization_cub_index,
+        "output_path": output_path,
     }
 
     inp_dict['organisms'][opt_genome[:-3]] = {
