@@ -1,4 +1,4 @@
-import typing
+import json
 
 from modules import models
 from modules.run_summary import RunSummary
@@ -115,6 +115,23 @@ class UserInputModule(object):
     def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
                                      optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
         gb_path = organism_input['genome_path']
+
+        # FIXME - delete
+        is_optimized = organism_input["optimized"]
+        parsed_organism_file = f"{gb_path.strip('.gb')}_{is_optimized}_parsed.json"
+        if os.path.exists(parsed_organism_file):
+            with open(parsed_organism_file) as org_file:
+                organism_data = json.load(org_file)
+                return models.Organism(name=organism_data["name"],
+                                       cai_profile=organism_data["cai_weights"],
+                                       tai_profile=organism_data["tai_weights"],
+                                       cai_scores=organism_data["cai_scores"],
+                                       tai_scores=organism_data["tai_scores"],
+                                       is_optimized=organism_data["wanted"],
+                                       optimization_priority=organism_data["optimization_priority"])
+
+        # FIXME - end
+
         exp_csv_fid = organism_input['expression_csv']
         try:
             gb_file = SeqIO.read(gb_path, format='gb')
@@ -160,6 +177,14 @@ class UserInputModule(object):
                                           tai_scores=tai_scores_dict,
                                           is_optimized=is_optimized,
                                           optimization_priority=optimization_priority)
+
+        # FIXME - delete
+        org_summary = organism_object.summary
+        org_summary["cai_scores"] = cai_scores_dict
+        org_summary["tai_scores"] = tai_scores_dict
+        with open(parsed_organism_file, "w") as organism_file:
+            json.dump(org_summary, organism_file)
+        # FIXME - end
 
         logger.info(F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
         return organism_object

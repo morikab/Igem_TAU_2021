@@ -21,5 +21,3 @@ if __name__ == "__main__":
             toc = time.time()
             modules_run_time = toc - tic
             print(F"Modules run time for {optimization_method} is: {modules_run_time}")
-
-            break   # FIXME
