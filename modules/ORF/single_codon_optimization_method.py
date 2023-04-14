@@ -3,9 +3,10 @@ from collections import defaultdict
 from numpy import average
 
 from logger_factory.logger_factory import LoggerFactory
-from modules.configuration import Configuration
 from modules import models
 from modules import shared_functions_and_vars
+from modules.configuration import Configuration
+from modules.run_summary import RunSummary
 
 logger = LoggerFactory.get_logger()
 config = Configuration.get_config()
@@ -21,8 +22,14 @@ def optimize_sequence(target_gene: str,
                                                        tuning_param=tuning_param,
                                                        optimization_method=optimization_method,
                                                        optimization_cub_index=optimization_cub_index)
+
     target_protein = shared_functions_and_vars.translate(target_gene)
     optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
+
+    orf_summary = {
+        "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
+    }
+    RunSummary.add_to_run_summary("orf", orf_summary)
 
     return optimized_sequence
 

@@ -25,3 +25,7 @@ class RunSummary(object):
         output_path = os.path.join(output_directory, "run_summary.json")
         with open(output_path, "w") as output_file:
             json.dump(cls._run_summary, output_file)
+
+    @classmethod
+    def reset(cls) -> None:
+        cls._run_summary = {}

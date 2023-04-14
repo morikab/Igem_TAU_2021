@@ -18,7 +18,7 @@ class ORFModule(object):
         logger.info("##########################")
         logger.info("# ORF #")
         logger.info("##########################\n")
-        logger.info(F"Optimization score used is: {optimization_method}")
+        logger.info(F"Optimization method used is: {optimization_method}")
 
         target_gene = user_input.sequence
 

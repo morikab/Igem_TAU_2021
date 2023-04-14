@@ -28,19 +28,19 @@ class Organism(object):
 
     @property
     def cai_avg(self) -> float:
-        return statistics.mean(self._cai_scores_values)
+        return statistics.mean(self._cai_scores_values) if self.cai_scores else None
 
     @property
     def tai_avg(self) -> float:
-        return statistics.mean(self._tai_scores_values)
+        return statistics.mean(self._tai_scores_values) if self.tai_scores else None
 
     @property
     def cai_std(self) -> float:
-        return statistics.stdev(self._cai_scores_values)
+        return statistics.stdev(self._cai_scores_values) if self.cai_scores else None
 
     @property
     def tai_std(self) -> float:
-        return statistics.stdev(self._tai_scores_values)
+        return statistics.stdev(self._tai_scores_values) if self.tai_scores else None
 
     @property
     def summary(self) -> typing.Dict[str, typing.Any]:
@@ -49,7 +49,11 @@ class Organism(object):
             "wanted": self.is_optimized,
             "optimization_priority": self.optimization_priority,
             "cai_weights": self.cai_profile,
+            "cai_avg": self.cai_avg,
+            "cai_std": self.cai_std,
             "tai_weights": self.tai_profile,
+            "tai_avg": self.tai_avg,
+            "tai_std": self.tai_std,
         }
 
 
@@ -115,6 +119,6 @@ class UserInput:
             "sequence": self.sequence,
             "tuning_parameter": self.tuning_parameter,
             "optimization_method": self.optimization_method.value,
-            "optimization_cub_score": self.optimization_cub_index.value,
+            "optimization_cub_index": self.optimization_cub_index.value,
             "organisms": [organism.summary for organism in self.organisms],
         }

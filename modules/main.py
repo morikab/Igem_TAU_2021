@@ -23,6 +23,7 @@ logger = LoggerFactory.get_logger()
 
 
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
+    RunSummary.reset()
     final_output = {}
     try:
         before_parsing_input = time.time()

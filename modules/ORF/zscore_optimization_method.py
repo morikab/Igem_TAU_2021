@@ -1,10 +1,12 @@
 import typing
+from collections import defaultdict
 
 from numpy import average
 
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
 from modules.configuration import Configuration
+from modules.run_summary import RunSummary
 from modules.shared_functions_and_vars import nt_to_aa
 from modules.shared_functions_and_vars import synonymous_codons
 from modules.ORF.calculating_cai import general_geomean
@@ -30,6 +32,7 @@ def optimize_sequence_by_zscore_single_aa(
     iteration, break. The maximum number of iterations allowed is "max_iter".
     """
     sequence_options = {}
+
     score = _calculate_zscore_for_sequence(
         sequence=sequence,
         user_input=user_input,
@@ -37,9 +40,13 @@ def optimize_sequence_by_zscore_single_aa(
         optimization_method=optimization_method,
     )
     sequence_options[sequence] = score
+    original_sequence = sequence
 
+    aa_to_codon_mapping = defaultdict(str)
+    iterations_count = 0
     # Single codon replacement
     for run in range(max_iterations):
+        iterations_count = run + 1
         tested_sequence_to_codon = {}
         for codon in nt_to_aa.keys():
             tested_sequence, _ = _change_all_codons_of_aa(sequence, codon)
@@ -54,12 +61,25 @@ def optimize_sequence_by_zscore_single_aa(
             sequence_options[tested_sequence] = score
 
         new_sequence = max(sequence_options, key=sequence_options.get)
-        logger.info(F"selected_codon in iteration {run} is: {tested_sequence_to_codon[new_sequence]}")
+        selected_codon = tested_sequence_to_codon[new_sequence]
+        logger.info(F"selected_codon in iteration {run} is: {selected_codon}")
+        aa_to_codon_mapping[nt_to_aa[selected_codon]] = selected_codon
 
         if new_sequence == sequence:
             break
         else:
             sequence = new_sequence
+
+    orf_summary = {
+
+        "iterations_count": iterations_count,
+        "aa_to_optimal_codon": aa_to_codon_mapping,
+        "initial_sequence_optimization_score": sequence_options[original_sequence],
+        "final_sequence_optimization_score": sequence_options[sequence],
+    }
+
+    RunSummary.add_to_run_summary("orf", orf_summary)
+
     return sequence
 
 
@@ -87,6 +107,9 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
         optimization_method=optimization_method,
     )
     sequence_options[sequence] = score
+    aa_to_selected_codon = {}
+    iterations_count = 0
+
     for run in range(max_iterations):
         def _find_best_aa_synonymous_codon(codons_list, sequence_to_change: str) -> str:
             aa_codons_to_score = {}
@@ -105,6 +128,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
             return selected_aa_codon
         logger.info(F"zscore of sequence in run {run} is: {sequence_options[sequence]}")
         aa_to_selected_codon = {}
+        iterations_count = run + 1
         # Find the best synonymous_codon per aa
         for aa in synonymous_codons.keys():
             selected_codon = _find_best_aa_synonymous_codon(codons_list=synonymous_codons[aa],
@@ -133,7 +157,15 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
         else:
             sequence = new_sequence
 
-    logger.info(F"Original score is: {sequence_options[original_sequence]}")
+    orf_summary = {
+        "iterations_count": iterations_count,
+        "aa_to_optimal_codon": aa_to_selected_codon,
+        "initial_sequence_optimization_score": sequence_options[original_sequence],
+        "final_sequence_optimization_score": sequence_options[sequence],
+    }
+
+    RunSummary.add_to_run_summary("orf", orf_summary)
+
     return sequence
 
 
