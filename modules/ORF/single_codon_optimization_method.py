@@ -7,6 +7,7 @@ from modules import models
 from modules import shared_functions_and_vars
 from modules.configuration import Configuration
 from modules.run_summary import RunSummary
+from modules.timer import Timer
 
 logger = LoggerFactory.get_logger()
 config = Configuration.get_config()
@@ -18,16 +19,18 @@ def optimize_sequence(target_gene: str,
                       optimization_method: models.OptimizationMethod,
                       optimization_cub_index: models.OptimizationCubIndex,
                       tuning_param: float) -> str:
-    aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
-                                                       tuning_param=tuning_param,
-                                                       optimization_method=optimization_method,
-                                                       optimization_cub_index=optimization_cub_index)
+    with Timer() as timer:
+        aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
+                                                           tuning_param=tuning_param,
+                                                           optimization_method=optimization_method,
+                                                           optimization_cub_index=optimization_cub_index)
 
-    target_protein = shared_functions_and_vars.translate(target_gene)
-    optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
+        target_protein = shared_functions_and_vars.translate(target_gene)
+        optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
 
     orf_summary = {
         "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
+        "run_time": timer.elapsed_time,
     }
     RunSummary.add_to_run_summary("orf", orf_summary)
 

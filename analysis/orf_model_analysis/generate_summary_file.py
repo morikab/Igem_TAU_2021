@@ -68,6 +68,9 @@ def initialize_column_headers(worksheet) -> None:
     for aa, cell in aa_to_cell_column.items():
         worksheet[F"{cell}1"] = aa
 
+    worksheet["AG1"] = "number_of_iterations"
+    worksheet["AH1"] = "run_time (seconds)"
+
 
 def parse_summary_file(file_path: str, worksheet, row_offset: int) -> None:
     with open(file_path, "r") as summary_file:
@@ -97,9 +100,13 @@ def parse_summary_file(file_path: str, worksheet, row_offset: int) -> None:
         worksheet[f"J{row_offset}"] = summary["evaluation"]["average_distance_score"]
         worksheet[f"K{row_offset}"] = summary["evaluation"]["weakest_link_score"]
 
-        aa_to_optimal_codon = summary["orf"]["aa_to_optimal_codon"]
+        orf_summary = summary["orf"]
+        aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
         for aa, cell in aa_to_cell_column.items():
             worksheet[F"{cell}{row_offset}"] = aa_to_optimal_codon.get(aa) or ""
+
+        worksheet[f"AG{row_offset}"] = orf_summary.get("iterations_count") or 1
+        worksheet[f"AH{row_offset}"] = orf_summary["run_time"]
 
 
 if __name__ == "__main__":
