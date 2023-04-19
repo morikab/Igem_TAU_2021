@@ -29,8 +29,7 @@ aa_to_cell_column = {
 }
 
 
-def generate_summary():
-    base_directory = "results"
+def generate_summary(results_directory: str) -> None:
     filename = "run_summary.json"
 
     workbook = openpyxl.Workbook()
@@ -39,7 +38,7 @@ def generate_summary():
     initialize_column_headers(worksheet)
 
     row_offset = 2
-    for root, dirs, files in os.walk(base_directory):
+    for root, dirs, files in os.walk(results_directory):
         for file in files:
             if file == filename:
                 filepath = os.path.join(root, file)
@@ -110,4 +109,5 @@ def parse_summary_file(file_path: str, worksheet, row_offset: int) -> None:
 
 
 if __name__ == "__main__":
-    generate_summary()
+    # generate_summary(results_directory="results")
+    generate_summary(results_directory=r"results\CAI_zscore_single_aa_average_ecoli_opt_True_0T45")
