@@ -1,32 +1,11 @@
 import json
 import os
+import typing
 
 import openpyxl
 
 
-aa_to_cell_column = {
-    "C": "L",
-    "D": "M",
-    "S": "N",
-    "Q": "O",
-    "M": "P",
-    "N": "Q",
-    "P": "R",
-    "K": "S",
-    "_": "T",
-    "T": "U",
-    "F": "V",
-    "A": "W",
-    "G": "X",
-    "I": "Y",
-    "L": "Z",
-    "H": "AA",
-    "R": "AB",
-    "W": "AC",
-    "V": "AD",
-    "E": "AE",
-    "Y": "AF",
-}
+aa_list = ["C", "D", "S", "Q", "M", "N", "P", "K", "_", "T", "F", "A", "G", "I", "L", "H", "R", "W", "V", "E", "Y"]
 
 
 def generate_summary(results_directory: str) -> None:
@@ -35,77 +14,86 @@ def generate_summary(results_directory: str) -> None:
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
 
-    initialize_column_headers(worksheet)
-
-    row_offset = 2
     for root, dirs, files in os.walk(results_directory):
         for file in files:
             if file == filename:
-                filepath = os.path.join(root, file)
-                parse_summary_file(file_path=filepath, worksheet=worksheet, row_offset=row_offset)
-                row_offset += 1
+                file_path = os.path.join(root, file)
+                update_from_summary(file_path=file_path, worksheet=worksheet)
 
     workbook.save("summary.xlsx")
 
 
-def initialize_column_headers(worksheet) -> None:
-    worksheet["A1"] = "optimization_method"
-
-    worksheet["B1"] = "is_ecoli_wanted"
-    worksheet["C1"] = "initial_gene_cai_score_ecoli"
-    worksheet["D1"] = "final_gene_cai_score_ecoli"
-    worksheet["E1"] = "ecoli_dist_score"
-
-    worksheet["F1"] = "is_bacillus_wanted"
-    worksheet["G1"] = "initial_gene_cai_score_bacillus"
-    worksheet["H1"] = "final_gene_cai_score_bacillus"
-    worksheet["I1"] = "bacillus_dist_score"
-
-    worksheet["J1"] = "final_average_distance_score"
-    worksheet["K1"] = "final_weakest_link_score"
-
-    for aa, cell in aa_to_cell_column.items():
-        worksheet[F"{cell}1"] = aa
-
-    worksheet["AG1"] = "number_of_iterations"
-    worksheet["AH1"] = "run_time (seconds)"
+def add_cell_with_value(worksheet, row: int, column: int, value: typing.Any) -> None:
+    worksheet.insert_cols(column)
+    worksheet.cell(row=row, column=column, value=value)
 
 
-def parse_summary_file(file_path: str, worksheet, row_offset: int) -> None:
+def initialize_column_headers(summary: typing.Dict, worksheet) -> None:
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="optimization_method")
+
+    organisms = summary["user_input"]["organisms"]
+    # Display unwanted organisms first
+    organisms.sort(key=lambda x: x.get("wanted"))
+    for organism in organisms:
+        organism_name = organism["name"]
+        formatted_organism_name = "_".join(organism_name.split(" ")).lower()
+        add_cell_with_value(worksheet=worksheet,
+                            row=1,
+                            column=worksheet.max_column,
+                            value=F"{formatted_organism_name}_is_wanted")
+        add_cell_with_value(worksheet=worksheet,
+                            row=1,
+                            column=worksheet.max_column,
+                            value=F"{formatted_organism_name}_initial_gene_cai_score")
+        add_cell_with_value(worksheet=worksheet,
+                            row=1,
+                            column=worksheet.max_column,
+                            value=F"{formatted_organism_name}_final_gene_cai_score")
+        add_cell_with_value(worksheet=worksheet,
+                            row=1,
+                            column=worksheet.max_column,
+                            value=F"{formatted_organism_name}_dist_score")
+
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_average_distance_score")
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_weakest_link_score")
+
+    for aa in aa_list:
+        add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value=aa)
+
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="number_of_iterations")
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="run_time (seconds)")
+
+
+def update_from_summary(file_path: str, worksheet) -> None:
     with open(file_path, "r") as summary_file:
         summary = json.load(summary_file)
 
-        organisms = summary["evaluation"]["organisms"]
-        first_organism = organisms[0]
-        if first_organism["name"] == "Escherichia coli":
-            e_coli = organisms[0]
-            bacillus = organisms[1]
-        else:
-            e_coli = organisms[1]
-            bacillus = organisms[0]
+    if worksheet.max_row == 1:
+        initialize_column_headers(summary=summary, worksheet=worksheet)
 
-        worksheet[f"A{row_offset}"] = summary["user_input"]["optimization_method"]
+    optimization_method = summary["user_input"]["optimization_method"]
+    summary_row = [optimization_method]
 
-        worksheet[f"B{row_offset}"] = e_coli["is_wanted"]
-        worksheet[f"C{row_offset}"] = e_coli["cai_initial_score"]
-        worksheet[f"D{row_offset}"] = e_coli["cai_final_score"]
-        worksheet[f"E{row_offset}"] = e_coli["dist_score"]
+    organisms = summary["evaluation"]["organisms"]
+    organisms.sort(key=lambda x: x.get("is_wanted"))
+    for organism in organisms:
+        summary_row.append(organism["is_wanted"])
+        summary_row.append(organism["cai_initial_score"])
+        summary_row.append(organism["cai_final_score"])
+        summary_row.append(organism["dist_score"])
 
-        worksheet[f"F{row_offset}"] = bacillus["is_wanted"]
-        worksheet[f"G{row_offset}"] = bacillus["cai_initial_score"]
-        worksheet[f"H{row_offset}"] = bacillus["cai_final_score"]
-        worksheet[f"I{row_offset}"] = bacillus["dist_score"]
+    summary_row.append(summary["evaluation"]["average_distance_score"])
+    summary_row.append(summary["evaluation"]["weakest_link_score"])
 
-        worksheet[f"J{row_offset}"] = summary["evaluation"]["average_distance_score"]
-        worksheet[f"K{row_offset}"] = summary["evaluation"]["weakest_link_score"]
+    orf_summary = summary["orf"]
+    aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
+    for aa in aa_list:
+        summary_row.append(aa_to_optimal_codon.get(aa) or "")
 
-        orf_summary = summary["orf"]
-        aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
-        for aa, cell in aa_to_cell_column.items():
-            worksheet[F"{cell}{row_offset}"] = aa_to_optimal_codon.get(aa) or ""
+    summary_row.append(orf_summary.get("iterations_count") or 1)
+    summary_row.append(orf_summary["run_time"])
 
-        worksheet[f"AG{row_offset}"] = orf_summary.get("iterations_count") or 1
-        worksheet[f"AH{row_offset}"] = orf_summary["run_time"]
+    worksheet.append(summary_row)
 
 
 if __name__ == "__main__":
