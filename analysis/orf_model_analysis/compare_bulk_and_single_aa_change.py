@@ -1,7 +1,7 @@
 import time
 
 from input_testing_data.generate_input_testing_data_for_modules import \
-    generate_testing_data_for_comparing_with_previous_algorithm
+    generate_testing_data_for_ecoli_and_bacillus
 from modules.main import run_modules
 
 if __name__ == "__main__":
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # following variations:
     #   (a) bulk + no bulk
     #   (b) ecoli optimized and not optimized 
-    default_user_inp_raw = generate_testing_data_for_comparing_with_previous_algorithm(
+    default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         optimization_method="single_codon_ratio",
         optimization_cub_index="CAI",
         clusters_count=1,

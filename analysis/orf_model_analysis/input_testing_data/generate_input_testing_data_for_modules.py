@@ -62,15 +62,19 @@ def generate_testing_data(n_organisms=15,
     return inp_dict
 
 
-def generate_testing_data_for_comparing_with_previous_algorithm(
+def generate_testing_data_for_ecoli_and_bacillus(
         optimization_method: str,
         optimization_cub_index: str,
         clusters_count: int = DEFAULT_CLUSTERS_COUNT,
         tuning_param: float = DEFAULT_TUNING_PARAM,
         is_ecoli_optimized: bool = False,
-        sequence_file_path: str = DEFAULT_SEQUENCE_FILE_PATH,
+        sequence_file_path: str = None,
+        sequence: str = None,
         output_path: str = None,
 ):
+    assert (sequence is not None or sequence_file_path is not None), \
+        "Should provide either a sequence or a sequence file path"
+
     output_path = output_path or F"results\\{optimization_cub_index}_{optimization_method}_ecoli_opt_" \
                                  F"{is_ecoli_optimized}_{generate_random_string(4)}"
     Path(output_path).mkdir(parents=True, exist_ok=True)
@@ -87,7 +91,8 @@ def generate_testing_data_for_comparing_with_previous_algorithm(
         deopt_mrna_levels = "ecoli_mrna_level.csv"
 
     inp_dict = {
-        "sequence": sequence_file_path,
+        "sequence_file_path": sequence_file_path,
+        "sequence": sequence,
         "tuning_param": tuning_param,
         "organisms": {},
         "clusters_count": clusters_count,

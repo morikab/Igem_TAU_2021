@@ -54,7 +54,7 @@ class UserInputModule(object):
         organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
                                                    optimization_cub_index=optimization_cub_index)
 
-        orf_sequence = cls._parse_orf_sequence(user_input["sequence"])
+        orf_sequence = cls._parse_orf_sequence(user_input)
         logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
 
         user_input = models.UserInput(organisms=organisms_list,
@@ -70,7 +70,12 @@ class UserInputModule(object):
         return user_input
 
     @classmethod
-    def _parse_orf_sequence(cls, orf_fasta_file_path: str) -> str:
+    def _parse_orf_sequence(cls, user_input: typing.Dict[str, typing.Any]) -> str:
+        sequence = user_input.get("sequence")
+        if sequence is not None:
+            return sequence
+
+        orf_fasta_file_path = user_input["sequence_file_path"]
         logger.info(F"Sequence to be optimized given in the following file: {orf_fasta_file_path}")
 
         try:

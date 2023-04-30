@@ -33,7 +33,7 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> None:
 
     organisms = summary["user_input"]["organisms"]
     # Display unwanted organisms first
-    organisms.sort(key=lambda x: x.get("wanted"))
+    organisms.sort(key=lambda x: x.get("is_wanted"))
     for organism in organisms:
         organism_name = organism["name"]
         formatted_organism_name = "_".join(organism_name.split(" ")).lower()

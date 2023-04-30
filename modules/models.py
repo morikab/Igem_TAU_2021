@@ -46,7 +46,7 @@ class Organism(object):
     def summary(self) -> typing.Dict[str, typing.Any]:
         return {
             "name": self.name,
-            "wanted": self.is_optimized,
+            "is_wanted": self.is_optimized,
             "optimization_priority": self.optimization_priority,
             "cai_weights": self.cai_profile,
             "cai_avg": self.cai_avg,

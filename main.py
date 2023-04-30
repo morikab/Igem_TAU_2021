@@ -39,7 +39,7 @@ class CommuniqueApp(object):
 
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
-        self.sequence = None
+        self.sequence_file_path = None
         self.output_path = None
         self.tuning_parameter = None
         self.clusters_count = None
@@ -173,7 +173,7 @@ class CommuniqueApp(object):
 
     def initialize_user_input_parameters(self) -> None:
         self.organisms = {}
-        self.sequence = None
+        self.sequence_file_path = None
         self.tuning_parameter = tk.IntVar()
         self.tuning_parameter.set(self.DEFAULT_TUNING_PARAMETER_VALUE)
         self.clusters_count = tk.IntVar()
@@ -194,7 +194,7 @@ class CommuniqueApp(object):
     def upload_sequence(self) -> None:
         sequence_file_name = filedialog.askopenfilename(filetypes=[("Fasta files", ".fa .fasta")])
         self.sequence_path_label.config(text=sequence_file_name)
-        self.sequence = sequence_file_name
+        self.sequence_file_path = sequence_file_name
 
     def choose_output_path(self) -> None:
         output_path = filedialog.askdirectory()
@@ -403,7 +403,8 @@ class CommuniqueApp(object):
 
     def generate_user_input(self) -> typing.Dict:
         user_input = {
-            "sequence": self.sequence,
+            "sequence_file_path": self.sequence_file_path,
+            "sequence": None,
             "output_path": self.output_path,
             "tuning_param": self.tuning_parameter.get() / 100,
             "clusters_count": self.clusters_count.get(),
@@ -422,7 +423,7 @@ class CommuniqueApp(object):
         return user_input
 
     def validate_user_input(self) -> bool:
-        if self.sequence is None:
+        if self.sequence_file_path is None:
             messagebox.showerror(title="Error",
                                  message="Please choose a sequence file for optimization.")
             return False
