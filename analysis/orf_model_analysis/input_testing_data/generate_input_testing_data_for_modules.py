@@ -75,9 +75,10 @@ def generate_testing_data_for_ecoli_and_bacillus(
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
 
-    output_path = output_path or F"results\\{optimization_cub_index}_{optimization_method}_ecoli_opt_" \
-                                 F"{is_ecoli_optimized}_{generate_random_string(4)}"
-    Path(output_path).mkdir(parents=True, exist_ok=True)
+    output_path = output_path or "results"
+    output_directory = F"{output_path}\\{optimization_cub_index}_{optimization_method}_ecoli_opt_" \
+                       F"{is_ecoli_optimized}_{generate_random_string(4)}"
+    Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia coli.gb"
@@ -98,7 +99,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "clusters_count": clusters_count,
         "optimization_method": optimization_method,
         "optimization_cub_index": optimization_cub_index,
-        "output_path": output_path,
+        "output_path": output_directory,
     }
 
     inp_dict['organisms'][opt_genome[:-3]] = {

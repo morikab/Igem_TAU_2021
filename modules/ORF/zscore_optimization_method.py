@@ -209,7 +209,7 @@ def _calculate_zscore_for_sequence(sequence: str,
         profile = getattr(organism, weights)
         index_score = general_geomean([sequence], weights=profile)[0]
         organism_score = (index_score - miu) / sigma
-        logger.info(F"CUB score for organism {organism.name} is: {index_score}")
+        # logger.info(F"CUB score for organism {organism.name} is: {index_score}")
         if organism.is_optimized:
             optimized_organisms_scores.append(organism_score)
             optimized_organisms_weights.append(organism.optimization_priority)
