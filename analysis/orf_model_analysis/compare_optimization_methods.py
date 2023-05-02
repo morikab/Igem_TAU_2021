@@ -1,3 +1,4 @@
+import argparse
 import os
 import time
 import typing
@@ -15,22 +16,31 @@ base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data
 DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
 
 
-def run_from_fasta_file(file_path: str) -> None:
+def run_from_fasta_file(file_path: str, start_record: str, max_records_count: int) -> None:
     with open(file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
+    is_record_found = False
+    count = 0
     for key, value in genome_dict.items():
+        if key == start_record:
+            is_record_found = True
+        if not is_record_found:
+            continue
+        if count >= max_records_count:
+            break
+
+        count += 1
         run_all_methods(orf_sequence=str(value.seq),
-                        output_path=F"results_human\\{key.replace('|', '-')}")
-        break
+                        output_path=os.path.join("results_human", key.replace('|', '-')))
 
 
 def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     orf_sequence_file: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
     for optimization_method in [
-        "single_codon_ratio", "single_codon_diff",
-        "zscore_single_aa_average", "zscore_bulk_aa_average",
+        "single_codon_ratio", # "single_codon_diff",
+        # "zscore_single_aa_average", "zscore_bulk_aa_average",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
         for direction in [True, False]:
@@ -64,6 +74,11 @@ def run_single_method_for_orf_sequence(optimization_method: str,
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Analysis script parser")
+    parser.add_argument('-s', '--start', type=str, required=True, help="Fasta record description to start running from")
+    parser.add_argument('-n', '--number', type=int, help="Number of records to parse from the given start record")
+
+    args = parser.parse_args()
     # run_all_methods(orf_sequence=DEFAULT_SEQUENCE)
 
     # run_single_method_for_orf_sequence(optimization_method="zscore_single_aa_average",
@@ -72,7 +87,11 @@ if __name__ == "__main__":
 
     # 145289 records in dict
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
-    run_from_fasta_file(file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
+    run_from_fasta_file(
+        file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
+        start_record=args.start,
+        max_records_count=args.number or 500,
+    )
 
     # 121766 records in dict
     # run_from_fasta_file(
