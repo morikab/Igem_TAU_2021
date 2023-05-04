@@ -1,6 +1,6 @@
 import argparse
+import json
 import os
-import time
 import typing
 from pathlib import Path
 
@@ -32,13 +32,14 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
     #     for record in nc_records:
     #         records_file.write(record + "\n")
 
-    with open("all_records") as records_file:
+    with open(r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\all_records") as records_file:
         records = records_file.readlines()
 
     is_record_found = False
     count = 0
 
     for record in records:
+        record = record.strip("\n")
         if record == start_record:
             is_record_found = True
         if not is_record_found:
@@ -48,8 +49,9 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
 
         count += 1
         value = genome_dict[record]
+        # TODO - add the gene name to output path
         run_all_methods(orf_sequence=str(value.seq),
-                        output_path=os.path.join("results_human", record.replace('|', '-')))
+                        output_path=record.replace('|', '-'))
 
     # for key, value in genome_dict.items():
     #     if key == start_record:
@@ -85,7 +87,6 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        orf_sequence: typing.Optional[str] = None,
                                        orf_sequence_file: typing.Optional[str] = None,
                                        output_path: typing.Optional[str] = None) -> None:
-    tic = time.time()
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         optimization_method=optimization_method,
         optimization_cub_index="CAI",
@@ -94,12 +95,23 @@ def run_single_method_for_orf_sequence(optimization_method: str,
         is_ecoli_optimized=is_ecoli_optimized,
         sequence=orf_sequence,
         sequence_file_path=orf_sequence_file,
-        output_path=output_path,
+        output_path=os.path.join("results_human", output_path),
     )
     run_modules(default_user_inp_raw)
-    toc = time.time()
-    modules_run_time = toc - tic
-    print(F"Modules run time for {optimization_method} is: {modules_run_time}")
+
+    # FIXME - remove
+    import pymongo
+    mongo_db_url = F"mongodb+srv://bentulila:tbIS9YUBFZHGtkyM@cluster0.crikv5c.mongodb.net"
+    database_name = "homo_sapiens"
+    mongo_client = pymongo.MongoClient(mongo_db_url)
+    db = mongo_client.get_database(database_name)
+    results_collection = db.get_collection("homo_sapiens")
+
+    with open(os.path.join(default_user_inp_raw["output_path"], "run_summary.json")) as json_file:
+        record = json.load(json_file)
+    # add here identifying details for the specific run (perhaps output_path as key?)
+    results_collection.insert_one(record)
+    # FIXME - remove
 
 
 if __name__ == "__main__":
