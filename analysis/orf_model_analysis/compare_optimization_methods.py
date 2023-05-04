@@ -20,10 +20,26 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
     with open(file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
+    # nc_records = []
+    # for key in genome_dict.keys():
+    #     splitted = key.split("_")
+    #     splitted = [x.strip("lcl|") for x in splitted]
+    #     # Consider only reference sequences that were manually validated.
+    #     if "NC" in splitted and "XP" not in splitted:
+    #         nc_records.append(key)
+    #
+    # with open("records", "w") as records_file:
+    #     for record in nc_records:
+    #         records_file.write(record + "\n")
+
+    with open("all_records") as records_file:
+        records = records_file.readlines()
+
     is_record_found = False
     count = 0
-    for key, value in genome_dict.items():
-        if key == start_record:
+
+    for record in records:
+        if record == start_record:
             is_record_found = True
         if not is_record_found:
             continue
@@ -31,8 +47,21 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
             break
 
         count += 1
+        value = genome_dict[record]
         run_all_methods(orf_sequence=str(value.seq),
-                        output_path=os.path.join("results_human", key.replace('|', '-')))
+                        output_path=os.path.join("results_human", record.replace('|', '-')))
+
+    # for key, value in genome_dict.items():
+    #     if key == start_record:
+    #         is_record_found = True
+    #     if not is_record_found:
+    #         continue
+    #     if count >= max_records_count:
+    #         break
+    #
+    #     count += 1
+    #     run_all_methods(orf_sequence=str(value.seq),
+    #                     output_path=os.path.join("results_human", key.replace('|', '-')))
 
 
 def run_all_methods(orf_sequence: typing.Optional[str] = None,
