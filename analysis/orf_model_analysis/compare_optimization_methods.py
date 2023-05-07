@@ -1,7 +1,9 @@
 import argparse
 import json
 import os
+import re
 import typing
+from collections import defaultdict
 from pathlib import Path
 
 from Bio import SeqIO
@@ -20,17 +22,23 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
     with open(file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
-    # nc_records = []
-    # for key in genome_dict.keys():
-    #     splitted = key.split("_")
-    #     splitted = [x.strip("lcl|") for x in splitted]
-    #     # Consider only reference sequences that were manually validated.
-    #     if "NC" in splitted and "XP" not in splitted:
-    #         nc_records.append(key)
-    #
-    # with open("records", "w") as records_file:
-    #     for record in nc_records:
-    #         records_file.write(record + "\n")
+    missing_genes = []
+    gene_mapping = defaultdict(list)
+    for key, value in genome_dict.items():
+        parameters = re.findall("gene=.*]", value.description)
+        if not parameters:
+            missing_genes.append(key)
+            continue
+        gene_parameter = parameters[0].split("]")[0]
+        gene_name = gene_parameter.strip("gene=")
+        gene_mapping[gene_name].append(key)
+
+    with open("gene_mapping.txt", "w") as genes_file:
+        json.dump(gene_mapping, genes_file)
+    with open("missing_genes.txt", "w") as missing_genes_file:
+        for gene in missing_genes:
+            missing_genes_file.write(gene)
+    return
 
     with open(r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\all_records") as records_file:
         records = records_file.readlines()
@@ -49,9 +57,10 @@ def run_from_fasta_file(file_path: str, start_record: str, max_records_count: in
 
         count += 1
         value = genome_dict[record]
-        # TODO - add the gene name to output path
         run_all_methods(orf_sequence=str(value.seq),
                         output_path=record.replace('|', '-'))
+
+    # For running for the records themselves from the file (not from an external file)
 
     # for key, value in genome_dict.items():
     #     if key == start_record:
