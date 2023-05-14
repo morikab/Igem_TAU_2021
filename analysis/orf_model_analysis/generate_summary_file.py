@@ -65,11 +65,17 @@ def generate_summary(results_directory: str) -> None:
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
 
+    ordered_organisms = None
     for root, dirs, files in os.walk(results_directory):
         for file in files:
             if file == filename:
                 file_path = os.path.join(root, file)
-                update_from_summary(file_path=file_path, worksheet=worksheet)
+                if ordered_organisms:
+                    update_from_summary(file_path=file_path,
+                                        worksheet=worksheet,
+                                        ordered_organisms=ordered_organisms)
+                else:
+                    ordered_organisms = update_from_summary(file_path=file_path, worksheet=worksheet)
 
     workbook.save(os.path.join(results_directory, "summary.xlsx"))
 
@@ -79,8 +85,11 @@ def add_cell_with_value(worksheet, row: int, column: int, value: typing.Any) -> 
     worksheet.cell(row=row, column=column, value=value)
 
 
-def initialize_column_headers(summary: typing.Dict, worksheet) -> None:
-    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="optimization_method")
+def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequence[str]:
+    add_cell_with_value(worksheet=worksheet,
+                        row=1,
+                        column=worksheet.max_column,
+                        value="optimization_method")
 
     organisms = summary["user_input"]["organisms"]
     # Display unwanted organisms first
@@ -114,20 +123,28 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> None:
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="number_of_iterations")
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="run_time (seconds)")
 
+    return [organism["name"] for organism in organisms]
 
-def update_from_summary(file_path: str, worksheet) -> None:
+
+def update_from_summary(
+        file_path: str,
+        worksheet,
+        ordered_organisms: typing.Optional[typing.Sequence[str]] = None,
+) -> typing.Sequence[str]:
     with open(file_path, "r") as summary_file:
         summary = json.load(summary_file)
 
     if worksheet.max_row == 1:
-        initialize_column_headers(summary=summary, worksheet=worksheet)
+        ordered_organisms = initialize_column_headers(summary=summary, worksheet=worksheet)
 
     optimization_method = summary["user_input"]["optimization_method"]
     summary_row = [optimization_method]
 
     organisms = summary["evaluation"]["organisms"]
-    organisms.sort(key=lambda x: x.get("is_wanted"))
-    for organism in organisms:
+    # organisms.sort(key=lambda x: x.get("is_wanted"))
+    for organism_name in ordered_organisms:
+        organism = [matched_organism for matched_organism in organisms if
+                    matched_organism["name"] == organism_name][0]
         summary_row.append(organism["is_wanted"])
         summary_row.append(organism["cai_initial_score"])
         summary_row.append(organism["cai_final_score"])
@@ -146,6 +163,8 @@ def update_from_summary(file_path: str, worksheet) -> None:
 
     worksheet.append(summary_row)
 
+    return ordered_organisms
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Summary script parser")
@@ -154,7 +173,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     requested_optimization_method = args.method
     # 1
-    # generate_summary(results_directory=r"results\CAI_zscore_single_aa_average_ecoli_opt_True_0T45")
+    generate_summary(results_directory=r"results_human\lcl-NC_000001.11_cds_NP_001005484.2_1")
 
     # 2
     root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results_human"
@@ -162,4 +181,4 @@ if __name__ == "__main__":
     #     generate_summary(results_directory=os.path.join(root_dir, file_name))
 
     # 3
-    accumulate_summary_files(results_directory=root_dir, requested_optimization_method=requested_optimization_method)
+    # accumulate_summary_files(results_directory=root_dir, requested_optimization_method=requested_optimization_method)
