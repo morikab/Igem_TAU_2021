@@ -77,6 +77,11 @@ def extract_sequences_for_analysis(fasta_file_path: str) -> None:
             continue
         gene_parameter = parameters[0].split("]")[0]
         gene_name = gene_parameter.strip("gene=")
+
+        if len(value.seq) % 3 != 0:
+            print(F"Skip sequence {record} for {gene_name} because of length not divisible by 3.")
+            continue
+
         gene_mapping[gene_name].append(record)
         description_to_gene_mapping[record] = gene_name
 
@@ -112,19 +117,27 @@ def run_single_method_for_orf_sequence(optimization_method: str,
     )
     run_modules(default_user_inp_raw)
 
-    # FIXME - remove
-    # import pymongo
-    # mongo_db_url = F"mongodb+srv://bentulila:tbIS9YUBFZHGtkyM@cluster0.crikv5c.mongodb.net"
-    # database_name = "homo_sapiens"
-    # mongo_client = pymongo.MongoClient(mongo_db_url)
-    # db = mongo_client.get_database(database_name)
-    # results_collection = db.get_collection("homo_sapiens")
-    #
-    # with open(os.path.join(default_user_inp_raw["output_path"], "run_summary.json")) as json_file:
-    #     record = json.load(json_file)
-    # # add here identifying details for the specific run (perhaps output_path as key?)
-    # results_collection.insert_one(record)
-    # FIXME - remove
+
+def compare_gene_mappings() -> None:
+    with open("gene_to_longest_sequence_all.json") as gene_mapping_file:
+        previous_mapping = json.load(gene_mapping_file)
+
+    with open("gene_to_longest_sequence.json") as gene_mapping_file:
+        current_mapping = json.load(gene_mapping_file)
+
+    changed_genes = []
+    uncovered_genes = []
+    for gene in previous_mapping.keys():
+        if current_mapping.get(gene) is None:
+            uncovered_genes.append(gene)
+            continue
+
+        if previous_mapping[gene] != current_mapping[gene]:
+            changed_genes.append(current_mapping[gene])
+
+    with open("changed_genes.txt", "w") as changed_genes_file:
+        for gene in changed_genes:
+            changed_genes_file.write(current_mapping[gene]+"\n")
 
 
 if __name__ == "__main__":
