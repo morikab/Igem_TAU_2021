@@ -276,7 +276,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     requested_optimization_method = args.method
     # 1
-    # generate_summary(results_directory=r"results_human\lcl-NC_000001.11_cds_NP_001005484.2_1")
+    generate_summary(results_directory=r"results_human\lcl-NC_000001.11_cds_NP_003386.1_12075")
 
     # 2
     root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results_human"
@@ -296,19 +296,19 @@ if __name__ == "__main__":
     #                                  optimization_method=requested_optimization_method)
 
     # 5
-    summary_files = [
-        r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\single_codon_diff_summary.json",
-        r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\single_codon_ratio_summary.json",
-        r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\zscore_bulk_aa_average_summary.json",
-        r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\zscore_single_aa_average_summary.json",
-    ]
-    missing_directories = set()
-    for file_path in summary_files:
-        missing_directories.update(convert_json_summary_to_xlsx(file_path=file_path))
-
-    with open("gene_to_longest_sequence.json", "r") as genes_file:
-        gene_to_longest_sequence = json.load(genes_file)
-
-    missed_genes = {gene: gene_to_longest_sequence[gene] for gene in missing_directories}
-    with open(F"missed_genes.json", "w") as missed_genes_file:
-        json.dump(missed_genes, missed_genes_file)
+    # summary_files = [
+    #     r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\single_codon_diff_summary.json",
+    #     r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\single_codon_ratio_summary.json",
+    #     r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\zscore_bulk_aa_average_summary.json",
+    #     r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\orf_article_data\homo_sapiens\zscore_single_aa_average_summary.json",
+    # ]
+    # missing_directories = set()
+    # for file_path in summary_files:
+    #     missing_directories.update(convert_json_summary_to_xlsx(file_path=file_path))
+    #
+    # with open("gene_to_longest_sequence.json", "r") as genes_file:
+    #     gene_to_longest_sequence = json.load(genes_file)
+    #
+    # missed_genes = {gene: gene_to_longest_sequence[gene] for gene in missing_directories}
+    # with open(F"missed_genes.json", "w") as missed_genes_file:
+    #     json.dump(missed_genes, missed_genes_file)

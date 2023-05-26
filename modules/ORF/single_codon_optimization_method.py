@@ -39,9 +39,9 @@ def optimize_sequence(target_gene: str,
 
 # --------------------------------------------------------------
 def _get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index: models.OptimizationCubIndex) -> str:
-    if optimization_cub_index.is_codon_adaptation_score:
+    if optimization_cub_index.is_codon_adaptation_index:
         return models.Organism.CAI_PROFILE_ATTRIBUTE_NAME
-    elif optimization_cub_index.is_trna_adaptation_score:
+    elif optimization_cub_index.is_trna_adaptation_index:
         return models.Organism.TAI_PROFILE_ATTRIBUTE_NAME
     else:
         raise ValueError(F"Unknown optimization_cub_score {optimization_cub_index}")

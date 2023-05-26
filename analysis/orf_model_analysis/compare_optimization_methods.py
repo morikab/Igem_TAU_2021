@@ -49,7 +49,7 @@ def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
     for optimization_method in [
         "single_codon_ratio", "single_codon_diff",
-        "zscore_single_aa_average", "zscore_bulk_aa_average",
+        # "zscore_single_aa_average", "zscore_bulk_aa_average",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
         for direction in [True, False]:
@@ -149,12 +149,12 @@ if __name__ == "__main__":
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
 
-    extract_sequences_for_analysis(
-        fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
+    # extract_sequences_for_analysis(
+    #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
 
-    # run_from_fasta_file(
-    #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
-    #     records_file_path="gene_to_longest_sequence.json",
-    #     start_record=args.start,
-    #     max_records_count=args.number or 500,
-    # )
+    run_from_fasta_file(
+        fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
+        records_file_path="gene_to_longest_sequence.json",
+        start_record=args.start,
+        max_records_count=args.number or 500,
+    )

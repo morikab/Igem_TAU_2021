@@ -93,12 +93,12 @@ class OptimizationCubIndex(Enum):
     max_codon_trna_adaptation_index = "max_CAI_tAI"
 
     @property
-    def is_codon_adaptation_score(self) -> bool:
+    def is_codon_adaptation_index(self) -> bool:
         return self in (OptimizationCubIndex.codon_adaptation_index,
                         OptimizationCubIndex.max_codon_trna_adaptation_index)
 
     @property
-    def is_trna_adaptation_score(self) -> bool:
+    def is_trna_adaptation_index(self) -> bool:
         return self in (OptimizationCubIndex.trna_adaptation_index,
                         OptimizationCubIndex.max_codon_trna_adaptation_index)
 

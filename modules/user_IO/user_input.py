@@ -165,12 +165,12 @@ class UserInputModule(object):
         tai_scores_dict = None
         # TODO - Neglect ribosomal proteins when calculating std and avg for cds dict (add return parameter to calculate
         #  cai weights method.
-        if optimization_cub_index.is_codon_adaptation_score:
+        if optimization_cub_index.is_codon_adaptation_index:
             cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression)
             cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
             cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
 
-        if optimization_cub_index.is_trna_adaptation_score:
+        if optimization_cub_index.is_trna_adaptation_index:
             tai_weights = TAI(tai_from_tgcnDB(organism_name)).index
             tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
             tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
