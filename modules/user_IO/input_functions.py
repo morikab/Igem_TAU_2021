@@ -29,7 +29,7 @@ def tai_from_tgcnDB(org_name):
     all_org_tgcn_dict = tgcn_df.T.to_dict('list')
 
     if org_name in all_org_tgcn_dict.keys():
-        tgcn_dict = dict(zip(tgcn_df.columns, all_org_tgcn_dict[org_name] ))
+        tgcn_dict = dict(zip(tgcn_df.columns, all_org_tgcn_dict[org_name]))
         tai_weights = TAI(tgcn_dict).index
         logger.info(f'tGCN values were found, tAI profile was calculated')
     else:

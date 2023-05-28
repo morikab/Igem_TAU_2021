@@ -3,6 +3,7 @@ from modules import models
 
 from .single_codon_optimization_method import optimize_sequence as optimize_sequence_by_single_codon
 from .zscore_optimization_method import optimize_sequence_by_zscore_single_aa
+from .zscore_optimization_method import optimize_sequence_by_zscore_bulk_and_single_aa
 from .zscore_optimization_method import optimize_sequence_by_zscore_bulk_aa
 
 logger = LoggerFactory.get_logger()

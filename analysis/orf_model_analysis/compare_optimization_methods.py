@@ -47,9 +47,10 @@ def run_from_fasta_file(fasta_file_path: str,
 def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     orf_sequence_file: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
+    # TODO - add a new optimization method here..
     for optimization_method in [
-        "single_codon_ratio", "single_codon_diff",
-        # "zscore_single_aa_average", "zscore_bulk_aa_average",
+        # "single_codon_ratio", "single_codon_diff",
+        "zscore_single_aa_average", # "zscore_bulk_aa_average",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
         for direction in [True, False]:

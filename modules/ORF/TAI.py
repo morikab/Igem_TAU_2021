@@ -30,7 +30,7 @@ def weight_cal(Sij, tGCN):
 
 
     W_dict = {}
-    codon_list = ['ATA', 'ATC', 'ATT', 'ATG', 'ACA', 'ACC', 'ACG', 'ACT', 'AAC', 'AAT', 'AAA', 'AAG', 'AGC', 'AGT', 'AGA', 'AGG', 'CTA', 'CTC', 'CTG', 'CTT', 'CCA', 'CCC', 'CCG', 'CCT', 'CAC', 'CAT', 'CAA', 'CAG', 'CGA', 'CGC', 'CGG', 'CGT', 'GTA', 'GTC', 'GTG', 'GTT', 'GCA', 'GCC', 'GCG', 'GCT', 'GAC', 'GAT', 'GAA', 'GAG', 'GGA', 'GGC', 'GGG', 'GGT', 'TCA', 'TCC', 'TCG', 'TCT', 'TTC', 'TTT', 'TTA', 'TTG', 'TAC', 'TAT', 'TGC', 'TGT', 'TGG']
+    codon_list = ['ATA', 'ATC', 'ATT', 'ATG', 'ACA', 'ACC', 'ACG', 'ACT', 'AAC', 'AAT', 'AAA', 'AAG', 'AGC', 'AGT', 'AGA', 'AGG', 'CTA', 'CTC', 'CTG', 'CTT', 'CCA', 'CCC', 'CCG', 'CCT', 'CAC', 'CAT', 'CAA', 'CAG', 'CGA', 'CGC', 'CGG', 'CGT', 'GTA', 'GTC', 'GTG', 'GTT', 'GCA', 'GCC', 'GCG', 'GCT', 'GAC', 'GAT', 'GAA', 'GAG', 'GGA', 'GGC', 'GGG', 'GGT', 'TCA', 'TCC', 'TCG', 'TCT', 'TTC', 'TTT', 'TTA', 'TTG', 'TAC', 'TAT', 'TGC', 'TGT', 'TGG', 'TAG', 'TGA', 'TAA']
     for codon in codon_list:  # where to start scanning len%3!=0 - waiting for liyam answer
         W = 0
         for key in Sij.keys():
@@ -73,8 +73,8 @@ def TAI_cal(W_dict):
 
 # ---------------------------------------------------
 
-class TAI(object):
 
+class TAI(object):
     def __init__(self,  tgcn):
         """
         :param cds_path: cds file (fasta)
@@ -86,7 +86,8 @@ class TAI(object):
         self.index = TAI_weight
 
 
-Sij = {'A:T': 0, #from yeast!!
+# from yeast!!
+Sij = {'A:T': 0,
        'G:C': 0,
        'T:A': 0,
        'C:G': 0.41,

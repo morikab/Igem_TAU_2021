@@ -171,7 +171,8 @@ class UserInputModule(object):
             cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
 
         if optimization_cub_index.is_trna_adaptation_index:
-            tai_weights = TAI(tai_from_tgcnDB(organism_name)).index
+            # TODO - move the location of tai calculation to user_input module
+            tai_weights = tai_from_tgcnDB(organism_name)
             tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
             tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
 
