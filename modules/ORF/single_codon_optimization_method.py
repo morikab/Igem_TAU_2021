@@ -167,7 +167,7 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
     :return: Dictionary in the format Amino Acid: Optimal codon.
     """
     optimal_codons = {}
-
+    codons_loss_score = {}
     for aa, codons in shared_functions_and_vars.synonymous_codons.items():
         loss = loss_function(organisms=organisms,
                              codons=codons,
@@ -176,8 +176,10 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
                              optimization_cub_index=optimization_cub_index)
         logger.info(F"Loss dict is: {loss}")
         optimal_codons[aa] = min(loss, key=loss.get)
+        codons_loss_score[aa] = loss
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
 
+    RunSummary.add_to_run_summary("orf_debug", codons_loss_score)
     return optimal_codons
 
 

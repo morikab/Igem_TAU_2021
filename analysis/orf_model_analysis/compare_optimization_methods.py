@@ -49,8 +49,8 @@ def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
     # TODO - add a new optimization method here..
     for optimization_method in [
-        # "single_codon_ratio", "single_codon_diff",
-        "zscore_single_aa_average", # "zscore_bulk_aa_average",
+        "single_codon_ratio", "single_codon_diff",
+        "zscore_single_aa_average",  "zscore_bulk_aa_average",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
         for direction in [True, False]:
@@ -108,7 +108,7 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        output_path: typing.Optional[str] = None) -> None:
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         optimization_method=optimization_method,
-        optimization_cub_index="CAI",
+        optimization_cub_index="tAI",
         clusters_count=1,
         tuning_param=0.5,
         is_ecoli_optimized=is_ecoli_optimized,
@@ -148,14 +148,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                    output_path="mcherry")
+
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
 
     # extract_sequences_for_analysis(
     #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
 
-    run_from_fasta_file(
-        fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
-        records_file_path="gene_to_longest_sequence.json",
-        start_record=args.start,
-        max_records_count=args.number or 500,
-    )
+    # run_from_fasta_file(
+    #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
+    #     records_file_path="gene_to_longest_sequence.json",
+    #     start_record=args.start,
+    #     max_records_count=args.number or 500,
+    # )

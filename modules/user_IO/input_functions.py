@@ -85,7 +85,7 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
                         if feature.location.strand == -1:
                             cds = reverse_complement(cds)
 
-                        if len(cds) %3 != 0:
+                        if len(cds) % 3 != 0:
                             continue
 
                         gene_names.append(name)

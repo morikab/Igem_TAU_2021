@@ -122,18 +122,18 @@ class UserInputModule(object):
         gb_path = organism_input['genome_path']
 
         # FIXME - delete
-        is_optimized = organism_input["optimized"]
-        parsed_organism_file = f"{gb_path.strip('.gb')}_{is_optimized}_parsed.json"
-        if os.path.exists(parsed_organism_file):
-            with open(parsed_organism_file) as org_file:
-                organism_data = json.load(org_file)
-                return models.Organism(name=organism_data["name"],
-                                       cai_profile=organism_data["cai_weights"],
-                                       tai_profile=organism_data["tai_weights"],
-                                       cai_scores=organism_data["cai_scores"],
-                                       tai_scores=organism_data["tai_scores"],
-                                       is_optimized=organism_data["wanted"],
-                                       optimization_priority=organism_data["optimization_priority"])
+        # is_optimized = organism_input["optimized"]
+        # parsed_organism_file = f"{gb_path.strip('.gb')}_{is_optimized}_parsed.json"
+        # if os.path.exists(parsed_organism_file):
+        #     with open(parsed_organism_file) as org_file:
+        #         organism_data = json.load(org_file)
+        #         return models.Organism(name=organism_data["name"],
+        #                                cai_profile=organism_data["cai_weights"],
+        #                                tai_profile=organism_data["tai_weights"],
+        #                                cai_scores=organism_data["cai_scores"],
+        #                                tai_scores=organism_data["tai_scores"],
+        #                                is_optimized=organism_data["wanted"],
+        #                                optimization_priority=organism_data["optimization_priority"])
 
         # FIXME - end
 
@@ -185,11 +185,11 @@ class UserInputModule(object):
                                           optimization_priority=optimization_priority)
 
         # FIXME - delete
-        org_summary = organism_object.summary
-        org_summary["cai_scores"] = cai_scores_dict
-        org_summary["tai_scores"] = tai_scores_dict
-        with open(parsed_organism_file, "w") as organism_file:
-            json.dump(org_summary, organism_file)
+        # org_summary = organism_object.summary
+        # org_summary["cai_scores"] = cai_scores_dict
+        # org_summary["tai_scores"] = tai_scores_dict
+        # with open(parsed_organism_file, "w") as organism_file:
+        #     json.dump(org_summary, organism_file)
         # FIXME - end
 
         logger.info(F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")

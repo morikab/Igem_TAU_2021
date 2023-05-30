@@ -194,6 +194,11 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
                         column=worksheet.max_column,
                         value="optimization_method")
 
+    add_cell_with_value(worksheet=worksheet,
+                        row=1,
+                        column=worksheet.max_column,
+                        value="optimization_cub_index")
+
     organisms = summary["user_input"]["organisms"]
     # Display unwanted organisms first
     organisms.sort(key=lambda x: x.get("is_wanted"))
@@ -207,11 +212,11 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
         add_cell_with_value(worksheet=worksheet,
                             row=1,
                             column=worksheet.max_column,
-                            value=F"{formatted_organism_name}_initial_gene_cai_score")
+                            value=F"{formatted_organism_name}_initial_gene_score")
         add_cell_with_value(worksheet=worksheet,
                             row=1,
                             column=worksheet.max_column,
-                            value=F"{formatted_organism_name}_final_gene_cai_score")
+                            value=F"{formatted_organism_name}_final_gene_score")
         add_cell_with_value(worksheet=worksheet,
                             row=1,
                             column=worksheet.max_column,
@@ -241,7 +246,9 @@ def update_from_summary(
         ordered_organisms = initialize_column_headers(summary=summary, worksheet=worksheet)
 
     optimization_method = summary["user_input"]["optimization_method"]
-    summary_row = [optimization_method]
+    optimization_cub_index = summary["user_input"]["optimization_cub_index"]
+    formatted_optimization_cub_index = optimization_cub_index.lower()
+    summary_row = [optimization_method, optimization_cub_index]
 
     organisms = summary["evaluation"]["organisms"]
     # organisms.sort(key=lambda x: x.get("is_wanted"))
@@ -249,8 +256,8 @@ def update_from_summary(
         organism = [matched_organism for matched_organism in organisms if
                     matched_organism["name"] == organism_name][0]
         summary_row.append(organism["is_wanted"])
-        summary_row.append(organism["cai_initial_score"])
-        summary_row.append(organism["cai_final_score"])
+        summary_row.append(organism[f"{formatted_optimization_cub_index}_initial_score"])
+        summary_row.append(organism[f"{formatted_optimization_cub_index}_final_score"])
         summary_row.append(organism["dist_score"])
 
     summary_row.append(summary["evaluation"]["average_distance_score"])
@@ -276,7 +283,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     requested_optimization_method = args.method
     # 1
-    generate_summary(results_directory=r"results_human\lcl-NC_000001.11_cds_NP_003386.1_12075")
+    generate_summary(results_directory=r"results_human\mcherry")
 
     # 2
     root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results_human"
