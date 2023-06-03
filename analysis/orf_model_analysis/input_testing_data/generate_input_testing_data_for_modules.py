@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import typing
 from pathlib import Path
 from os import listdir
 from os.path import isfile, join
@@ -8,10 +9,10 @@ from os.path import isfile, join
 
 current_directory = Path(__file__).parent.resolve()
 base_path = os.path.join(Path(current_directory).parent.parent.resolve(), "example_data")
-default_genome_path = os.path.join(base_path, 'arabidopsis_microbiome')
 
+DEFAULT_MICROBIOME_PATH = os.path.join(base_path, 'arabidopsis_microbiome')
 DEFAULT_ORGANISM_PRIORITY = 50
-DEFAULT_CLUSTERS_COUNT = 2
+DEFAULT_CLUSTERS_COUNT = 1
 DEFAULT_TUNING_PARAM = 0.5
 DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
 
@@ -21,45 +22,82 @@ def generate_random_string(length: int) -> str:
     return "".join(random.choice(letters_and_digits) for _ in range(length))
 
 
-def generate_testing_data(n_organisms=15,
-                          percent_optimized=0.5,
-                          clusters_count=DEFAULT_CLUSTERS_COUNT,
-                          tuning_param=DEFAULT_TUNING_PARAM,
-                          genome_path=default_genome_path):
+def get_organisms_for_testing(
+        organisms_count: int,
+        percent_optimized: float = 0.5,
+        microbiome_genome_path: str = DEFAULT_MICROBIOME_PATH,
+        excluded_genomes: typing.Sequence[str] = None,
+) -> typing.Tuple[typing.Sequence[str], typing.Sequence[str]]:
+    wanted_hosts_count = round(organisms_count * percent_optimized)
 
-    inp_dict = {
-            'sequence': os.path.join(base_path, 'mCherry_original.fasta'),
-            'tuning_param': tuning_param,
-            'organisms': {},
-            'clusters_count': clusters_count,
+    excluded_genomes = set(excluded_genomes) or ()
+    genome_list = set(f for f in listdir(microbiome_genome_path) if isfile(join(microbiome_genome_path, f)))
+    genome_list = genome_list.difference(excluded_genomes)
+
+    if organisms_count > len(genome_list):
+        raise ValueError("Not enough genomes in data. Select less genomes")
+
+    selected_genomes = random.sample(genome_list, organisms_count)
+
+    wanted_hosts = selected_genomes[:wanted_hosts_count]
+    unwanted_hosts = selected_genomes[wanted_hosts_count:]
+
+    return wanted_hosts, unwanted_hosts
+
+
+def generate_testing_data(
+        optimization_method: str,
+        optimization_cub_index: str,
+        wanted_hosts: typing.Sequence[str],
+        unwanted_hosts: typing.Sequence[str],
+        genome_path: str = DEFAULT_MICROBIOME_PATH,
+        clusters_count: int = DEFAULT_CLUSTERS_COUNT,
+        wanted_hosts_weights: typing.Dict[str, float] = None,
+        unwanted_hosts_weights: typing.Dict[str, float] = None,
+        tuning_param: float = DEFAULT_TUNING_PARAM,
+        sequence_file_path: str = None,
+        sequence: str = None,
+        output_path: str = None,
+) -> typing.Dict[str, typing.Any]:
+    assert (sequence is not None or sequence_file_path is not None), \
+        "Should provide either a sequence or a sequence file path"
+
+    output_path = os.path.join("results", output_path)
+    output_directory = os.path.join(output_path, F"{optimization_cub_index}_{optimization_method}_"
+                                                 F"{len(wanted_hosts) + len(unwanted_hosts)}_"
+                                                 F"{generate_random_string(4)}")
+    Path(output_directory).mkdir(parents=True, exist_ok=True)
+    input_dict = {
+        "sequence_file_path": sequence_file_path,
+        "sequence": sequence,
+        "tuning_param": tuning_param,
+        "clusters_count": clusters_count,
+        "optimization_method": optimization_method,
+        "optimization_cub_index": optimization_cub_index,
+        "output_path": output_directory,
+        "organisms": {},
     }
-    genome_list = [f for f in listdir(genome_path) if isfile(join(genome_path, f))]
-    if n_organisms > len(genome_list):
-        raise ValueError('not enough genomes in data. select less genomes')
 
-    opt_genomes = random.sample(genome_list,
-                                round(n_organisms*percent_optimized))
+    wanted_hosts_weights = wanted_hosts_weights or {}
+    unwanted_hosts_weights = unwanted_hosts_weights or {}
 
-    for opt_genome in opt_genomes:
-        inp_dict['organisms'][opt_genome[:-3]] = {
-            'genome_path': os.path.join(genome_path, opt_genome),
-            'optimized': True,
-            'expression_csv': None,
-            'optimization_priority': DEFAULT_ORGANISM_PRIORITY,
+    for host in wanted_hosts:
+        input_dict["organisms"][host[:-3]] = {
+            "genome_path": os.path.join(genome_path, host),
+            "optimized": True,
+            "expression_csv": None,
+            "optimization_priority": wanted_hosts_weights.get(host) or DEFAULT_ORGANISM_PRIORITY,
         }
 
-    deopt_genomes = random.sample([i for i in genome_list if i not in opt_genomes],
-                                   round(n_organisms*(1-percent_optimized)))
-
-    for deopt_genome in deopt_genomes:
-        inp_dict['organisms'][deopt_genome[:-2]] = {
-            'genome_path': os.path.join(genome_path, deopt_genome),
-            'optimized': False,
-            'expression_csv': None,
-            'optimization_priority': DEFAULT_ORGANISM_PRIORITY,
+    for host in unwanted_hosts:
+        input_dict["organisms"][host[:-3]] = {
+            "genome_path": os.path.join(genome_path, host),
+            "optimized": False,
+            "expression_csv": None,
+            "optimization_priority": unwanted_hosts_weights.get(host) or DEFAULT_ORGANISM_PRIORITY,
         }
 
-    return inp_dict
+    return input_dict
 
 
 def generate_testing_data_for_ecoli_and_bacillus(

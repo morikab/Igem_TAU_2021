@@ -34,8 +34,8 @@ class CommuniqueApp(object):
                             "zscore_bulk_aa_average", "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link"]
     DEFAULT_OPTIMIZATION_METHOD = "zscore_bulk_aa_average"
 
-    OPTIMIZATION_CUB_INDICES = ["codon_adaptation_index", "trna_adaptation_index", "max_codon_trna_adaptation_index"]
-    DEFAULT_OPTIMIZATION_INDEX = "codon_adaptation_index"
+    OPTIMIZATION_CUB_INDICES = ["CAI", "tAI"]
+    DEFAULT_OPTIMIZATION_INDEX = "CAI"
 
     def __init__(self, master: tk.Tk) -> None:
         self.organisms = {}
@@ -409,6 +409,7 @@ class CommuniqueApp(object):
             "tuning_param": self.tuning_parameter.get() / 100,
             "clusters_count": self.clusters_count.get(),
             "optimization_method": self.optimization_method.get(),
+            "optimization_cub_index": self.optimization_cub_index.get(),
         }
         input_organisms = {}
         for organism in self.organisms.values():

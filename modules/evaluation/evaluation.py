@@ -94,10 +94,6 @@ class EvaluationModule(object):
                                       optimized_organisms_weights: typing.Sequence[float],
                                       deoptimized_organisms_weights: typing.Sequence[float],
                                       tuning_parameter: float) -> float:
-        # Validate all organisms weights are in the range [0,1]
-        assert sum(optimized_organisms_weights) == 1
-        assert sum(deoptimized_organisms_weights) == 1
-
         weighted_optimized_organisms_scores = [
             optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
             range(len(optimized_organisms_scores))

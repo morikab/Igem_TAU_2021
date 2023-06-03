@@ -95,7 +95,7 @@ class UserInputModule(object):
             try:
                 organism = cls._parse_single_organism_input(organism_input=organism_input,
                                                             optimization_cub_index=optimization_cub_index)
-            except:
+            except Exception as e:
                 raise ValueError(f"Error in organism input: {organism_key}, re-check your input")
             if organism.name in organisms_names:
                 raise ValueError(f"Organism: {organism.name}'s genome is inserted twice, re-check your input.")

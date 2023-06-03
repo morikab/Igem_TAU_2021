@@ -156,7 +156,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 for aa_codon in codons_list:
                     candidate_codon_sequence, candidate_codon_count = _change_all_codons_of_aa(sequence_to_change, aa_codon)
                     # logger.info(F"Number of occurrences of codon {aa_codon} in sequence is {candidate_codon_count}")
-                    logger.info(F"Running for codon: {aa_codon}")
+                    # logger.info(F"Running for codon: {aa_codon}")
                     aa_codons_to_score[aa_codon] = _calculate_zscore_for_sequence(
                         sequence=candidate_codon_sequence,
                         user_input=user_input,
