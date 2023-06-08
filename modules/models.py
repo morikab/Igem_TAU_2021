@@ -60,31 +60,44 @@ class Organism(object):
 class OptimizationMethod(Enum):
     single_codon_ratio = "single_codon_ratio"
     single_codon_diff = "single_codon_diff"
-    zscore_single_aa_average = "zscore_single_aa_average"
-    zscore_bulk_aa_average = "zscore_bulk_aa_average"
+    single_codon_weakest_link = "single_codon_weakest_link"
+    zscore_single_aa_ratio = "zscore_single_aa_ratio"
+    zscore_bulk_aa_ratio = "zscore_bulk_aa_ratio"
+    zscore_single_aa_diff = "zscore_single_aa_diff"
+    zscore_bulk_aa_diff = "zscore_bulk_aa_diff"
     zscore_single_aa_weakest_link = "zscore_single_aa_weakest_link"
     zscore_bulk_aa_weakest_link = "zscore_bulk_aa_weakest_link"
 
     @property
     def is_single_codon_optimization(self) -> bool:
-        return self in (OptimizationMethod.single_codon_ratio, OptimizationMethod.single_codon_diff)
+        return self in (OptimizationMethod.single_codon_ratio,
+                        OptimizationMethod.single_codon_diff,
+                        OptimizationMethod.single_codon_weakest_link)
 
     @property
     def is_zscore_single_aa_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_average, OptimizationMethod.zscore_single_aa_weakest_link)
+        return self in (OptimizationMethod.zscore_single_aa_ratio,
+                        OptimizationMethod.zscore_single_aa_diff,
+                        OptimizationMethod.zscore_single_aa_weakest_link)
 
     @property
     def is_zscore_bulk_aa_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_bulk_aa_average, OptimizationMethod.zscore_bulk_aa_weakest_link)
+        return self in (OptimizationMethod.zscore_bulk_aa_ratio,
+                        OptimizationMethod.zscore_bulk_aa_diff,
+                        OptimizationMethod.zscore_bulk_aa_weakest_link)
 
     @property
-    def is_zscore_average_score_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_average, OptimizationMethod.zscore_bulk_aa_average)
+    def is_zscore_ratio_score_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_single_aa_ratio, OptimizationMethod.zscore_bulk_aa_ratio)
 
     @property
     def is_zscore_weakest_link_score_optimization(self) -> bool:
         return self in (OptimizationMethod.zscore_single_aa_weakest_link,
                         OptimizationMethod.zscore_bulk_aa_weakest_link)
+
+    @property
+    def is_zscore_diff_score_optimization(self) -> bool:
+        return self in (OptimizationMethod.zscore_single_aa_diff, OptimizationMethod.zscore_bulk_aa_diff)
 
 
 class OptimizationCubIndex(Enum):
@@ -110,7 +123,7 @@ class UserInput:
     output_path: str
     tuning_parameter: float
     clusters_count: int
-    optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_average
+    optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_ratio
     optimization_cub_index: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
 
     @property

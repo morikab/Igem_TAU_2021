@@ -25,17 +25,13 @@ def parse_zscore_files_of_bulk_and_single() -> None:
         print(iteration["selected_codons"][0][1])
 
 
-def compare_initial_and_final_cds() -> None:
+def compare_initial_and_final_cds_codons_cai_weights() -> None:
     results_file = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results\arabidopsis\test_iteration\CAI_zscore_bulk_aa_average_30_Qmuv/run_summary.json"
 
     with open(results_file, "r") as summary_file:
         summary = json.load(summary_file)
 
     organisms_list = summary["user_input"]["organisms"]
-
-    for org in organisms_list:
-        print(org["name"], org["is_wanted"])
-    return
 
     initial_sequence = summary["user_input"]["sequence"]
     initial_codons = [initial_sequence[i:i+3] for i in range(0, len(initial_sequence), 3)]
@@ -59,5 +55,5 @@ def compare_initial_and_final_cds() -> None:
 
 
 if __name__ == "__main__":
-    compare_initial_and_final_cds()
+    compare_initial_and_final_cds_codons_cai_weights()
     # parse_zscore_files_of_bulk_and_single()

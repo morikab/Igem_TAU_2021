@@ -76,21 +76,29 @@ def _calculate_organism_loss_per_codon(organism: models.Organism,
         return (max_value - organism_codon_weight) ** 2
 
     def _deoptimized_organism_diff_based_loss_function() -> float:
-        return (1 - max_value + organism_codon_weight) ** 2
+        return organism_codon_weight ** 2
 
     def _optimized_organism_ratio_based_loss_function() -> float:
-        return (organism_codon_weight / max_value - 1) ** 2
+        return (max_value - organism_codon_weight) ** 2
 
     def _deoptimized_organism_ratio_based_loss_function() -> float:
-        return (organism_codon_weight / max_value) ** 2
+        return (max_value - organism_codon_weight) ** 2
+
+    def _optimized_organism_weakest_link_based_loss_function() -> float:
+        return (max_value - organism_codon_weight) ** 2
+
+    def _deoptimized_organism_weakest_link_based_loss_function() -> float:
+        return organism_codon_weight ** 2
 
     optimization_method_to_loss_function_for_optimized_organisms = {
         models.OptimizationMethod.single_codon_diff: _optimized_organism_diff_based_loss_function,
         models.OptimizationMethod.single_codon_ratio: _optimized_organism_ratio_based_loss_function,
+        models.OptimizationMethod.single_codon_weakest_link: _optimized_organism_weakest_link_based_loss_function,
     }
     optimization_method_to_loss_function_for_deoptimized_organisms = {
         models.OptimizationMethod.single_codon_diff: _deoptimized_organism_diff_based_loss_function,
         models.OptimizationMethod.single_codon_ratio: _deoptimized_organism_ratio_based_loss_function,
+        models.OptimizationMethod.single_codon_weakest_link: _deoptimized_organism_weakest_link_based_loss_function,
     }
 
     loss_function_mapping = optimization_method_to_loss_function_for_optimized_organisms if organism.is_optimized else \
@@ -137,6 +145,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
                 deoptimized_organisms_weights.append(organism.optimization_priority)
 
         loss_per_codon[codon] = _calculate_total_loss_per_codon(
+            optimization_method=optimization_method,
             optimized_organisms_loss=optimized_organisms_loss,
             deoptimized_organisms_loss=deoptimized_organisms_loss,
             optimized_organisms_weights=optimized_organisms_weights,
@@ -148,16 +157,44 @@ def loss_function(organisms: typing.Sequence[models.Organism],
 
 
 # --------------------------------------------------------------
-def _calculate_total_loss_per_codon(optimized_organisms_loss: typing.List[float],
+def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMethod,
+                                    optimized_organisms_loss: typing.List[float],
                                     deoptimized_organisms_loss: typing.List[float],
                                     optimized_organisms_weights: typing.List[float],
                                     deoptimized_organisms_weights: typing.List[float],
                                     tuning_parameter: float) -> float:
-    mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
-    mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
-    return tuning_parameter * mean_opt_index + (1 - tuning_parameter) * mean_deopt_index
+    def _diff_total_loss() -> float:
+        mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
+        mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
+        return tuning_parameter * mean_opt_index + (1 - tuning_parameter) * mean_deopt_index
 
+    def _ratio_total_loss() -> float:
+        mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
+        mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
+        mean_deopt_index = mean_deopt_index if mean_deopt_index > 0 else 10 ** -6
+        return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
+    def _weakest_link_total_loss() -> float:
+        weighted_optimized_organisms_scores = [optimized_organisms_loss[i] * optimized_organisms_weights[i] for i in
+                                               range(len(optimized_organisms_loss))]
+        weighted_deoptimized_organisms_scores = [
+            deoptimized_organisms_loss[i] * deoptimized_organisms_weights[i] for
+            i in range(len(deoptimized_organisms_loss))
+        ]
+
+        return (tuning_parameter * max(weighted_optimized_organisms_scores) +
+                (1 - tuning_parameter) * max(weighted_deoptimized_organisms_scores))
+
+    optimization_method_to_total_loss = {
+        models.OptimizationMethod.single_codon_diff: _diff_total_loss,
+        models.OptimizationMethod.single_codon_ratio: _ratio_total_loss,
+        models.OptimizationMethod.single_codon_weakest_link: _weakest_link_total_loss,
+    }
+
+    if optimization_method not in optimization_method_to_total_loss:
+        raise NotImplementedError(F"Optimization method: {optimization_method}")
+
+    return optimization_method_to_total_loss[optimization_method]()
 # --------------------------------------------------------------
 def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
                          tuning_param: float,

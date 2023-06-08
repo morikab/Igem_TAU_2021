@@ -30,9 +30,10 @@ class CommuniqueApp(object):
     EXPRESSION_LEVEL_COLUMN_INDEX = 3
     REMOVE_HOST_COLUMN_INDEX = 4
 
-    OPTIMIZATION_METHODS = ["single_codon_ratio", "single_codon_diff", "zscore_single_aa_average",
-                            "zscore_bulk_aa_average", "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link"]
-    DEFAULT_OPTIMIZATION_METHOD = "zscore_bulk_aa_average"
+    OPTIMIZATION_METHODS = ["single_codon_ratio", "single_codon_diff", "single_codon_weakest_link",
+                            "zscore_single_aa_ratio", "zscore_single_aa_diff",  "zscore_single_aa_weakest_link",
+                            "zscore_bulk_aa_ratio", "zscore_bulk_aa_diff", "zscore_bulk_aa_weakest_link"]
+    DEFAULT_OPTIMIZATION_METHOD = "zscore_bulk_aa_diff"
 
     OPTIMIZATION_CUB_INDICES = ["CAI", "tAI"]
     DEFAULT_OPTIMIZATION_INDEX = "CAI"

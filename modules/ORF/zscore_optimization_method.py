@@ -257,15 +257,22 @@ def _calculate_zscore_for_sequence(sequence: str,
             deoptimized_organisms_weights.append(organism.optimization_priority)
 
     alpha = user_input.tuning_parameter
-    if optimization_method.is_zscore_average_score_optimization:
-        return _calculate_average_score(optimized_organisms_scores=optimized_organisms_scores,
-                                        deoptimized_organisms_scores=deoptimized_organisms_scores,
-                                        optimized_organisms_weights=optimized_organisms_weights,
-                                        deoptimized_organisms_weights=deoptimized_organisms_weights,
-                                        tuning_parameter=alpha)
+    if optimization_method.is_zscore_diff_score_optimization:
+        return _calculate_zscore_diff_score(optimized_organisms_scores=optimized_organisms_scores,
+                                            deoptimized_organisms_scores=deoptimized_organisms_scores,
+                                            optimized_organisms_weights=optimized_organisms_weights,
+                                            deoptimized_organisms_weights=deoptimized_organisms_weights,
+                                            tuning_parameter=alpha)
+
+    if optimization_method.is_zscore_ratio_score_optimization:
+        return _calculate_zscore_ratio_score(optimized_organisms_scores=optimized_organisms_scores,
+                                             deoptimized_organisms_scores=deoptimized_organisms_scores,
+                                             optimized_organisms_weights=optimized_organisms_weights,
+                                             deoptimized_organisms_weights=deoptimized_organisms_weights,
+                                             tuning_parameter=alpha)
 
     if optimization_method.is_zscore_weakest_link_score_optimization:
-        return _calculate_weakest_link_score(
+        return _calculate_zscore_weakest_link_score(
             optimized_organisms_scores=optimized_organisms_scores,
             deoptimized_organisms_scores=deoptimized_organisms_scores,
             optimized_organisms_weights=optimized_organisms_weights,
@@ -273,11 +280,12 @@ def _calculate_zscore_for_sequence(sequence: str,
             tuning_parameter=alpha,
         )
 
+
     raise NotImplementedError(F"Optimization method: {optimization_method}")
 
 
 # --------------------------------------------------------------
-def _calculate_average_score(
+def _calculate_zscore_diff_score(
         optimized_organisms_scores: typing.List[float],
         deoptimized_organisms_scores: typing.List[float],
         optimized_organisms_weights: typing.List[float],
@@ -290,7 +298,21 @@ def _calculate_average_score(
 
 
 # --------------------------------------------------------------
-def _calculate_weakest_link_score(
+def _calculate_zscore_ratio_score(
+        optimized_organisms_scores: typing.List[float],
+        deoptimized_organisms_scores: typing.List[float],
+        optimized_organisms_weights: typing.List[float],
+        deoptimized_organisms_weights: typing.List[float],
+        tuning_parameter: float,
+) -> float:
+    mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
+    mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
+    # FIXME - think how to handle: 1. mechane that is 0 2. normalize the result to treat the direction correctly
+    return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
+
+
+# --------------------------------------------------------------
+def _calculate_zscore_weakest_link_score(
         optimized_organisms_scores: typing.List[float],
         deoptimized_organisms_scores: typing.List[float],
         optimized_organisms_weights: typing.List[float],

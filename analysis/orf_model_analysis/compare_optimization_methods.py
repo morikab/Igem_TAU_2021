@@ -47,18 +47,21 @@ def run_from_fasta_file(fasta_file_path: str,
 def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     orf_sequence_file: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
-    # TODO - add a new optimization method here..
     for optimization_method in [
-        "single_codon_ratio", "single_codon_diff",
-        "zscore_single_aa_average",  "zscore_bulk_aa_average",
+        "single_codon_ratio", # "single_codon_diff", "single_codon_weakest_link",
+        # "zscore_single_aa_ratio",
+        "zscore_bulk_aa_ratio",
+        # "zscore_single_aa_diff",  "zscore_bulk_aa_diff",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
-        for direction in [True, False]:
-            run_single_method_for_orf_sequence(optimization_method=optimization_method,
-                                               is_ecoli_optimized=direction,
-                                               orf_sequence=orf_sequence,
-                                               orf_sequence_file=orf_sequence_file,
-                                               output_path=output_path)
+        for optimization_cub_index in ["CAI"]:
+            for direction in [True, False]:
+                run_single_method_for_orf_sequence(optimization_method=optimization_method,
+                                                   optimization_cub_index=optimization_cub_index,
+                                                   is_ecoli_optimized=direction,
+                                                   orf_sequence=orf_sequence,
+                                                   orf_sequence_file=orf_sequence_file,
+                                                   output_path=output_path)
 
 
 def extract_sequences_for_analysis(fasta_file_path: str) -> None:
@@ -105,10 +108,11 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        is_ecoli_optimized: bool,
                                        orf_sequence: typing.Optional[str] = None,
                                        orf_sequence_file: typing.Optional[str] = None,
-                                       output_path: typing.Optional[str] = None) -> None:
+                                       output_path: typing.Optional[str] = None,
+                                       optimization_cub_index: str = "CAI") -> None:
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         optimization_method=optimization_method,
-        optimization_cub_index="tAI",
+        optimization_cub_index=optimization_cub_index,
         clusters_count=1,
         tuning_param=0.5,
         is_ecoli_optimized=is_ecoli_optimized,
