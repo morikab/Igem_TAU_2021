@@ -22,6 +22,11 @@ from modules import models
 logger = LoggerFactory.get_logger()
 
 
+def run_input_processing(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None) -> models.UserInput:
+    RunSummary.reset()
+    return user_IO.UserInputModule.run_module(user_input_dict)
+
+
 def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
     RunSummary.reset()
     final_output = {}

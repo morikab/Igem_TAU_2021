@@ -1,6 +1,11 @@
 import json
 import pandas as pd
+import os
 import typing
+from collections import defaultdict
+from pathlib import Path
+
+from modules.shared_functions_and_vars import nt_to_aa
 
 
 def get_iterations_scores(zscore_json: typing.Dict) -> typing.Sequence[float]:
@@ -54,6 +59,47 @@ def compare_initial_and_final_cds_codons_cai_weights() -> None:
     df.to_csv("codon_heat_map.csv")
 
 
+def compare_single_codon_method_scores() -> None:
+    root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results_human\mcherry"
+    filename = "run_summary.json"
+
+    columns = defaultdict(list)
+
+    are_initial_scores_initialized = False
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            if file == filename:
+                file_path = os.path.join(root, file)
+                with open(file_path, "r") as json_file:
+                    summary = json.load(json_file)
+                if not are_initial_scores_initialized:
+                    for organism in summary["user_input"]["organisms"]:
+                        _update_initial_cub_scores(organism=organism, columns=columns, cub_index="CAI")
+                        _update_initial_cub_scores(organism=organism, columns=columns, cub_index="tAI")
+                    are_initial_scores_initialized = True
+
+                columns["name"].append(Path(root).name)
+                columns["cub_index"].append(summary["user_input"]["optimization_cub_index"])
+
+                flattened_scores = {}
+                for dictionary in summary["orf_debug"].values():
+                    flattened_scores.update(dictionary)
+
+                for codon in nt_to_aa.keys():
+                    columns[codon].append(flattened_scores[codon])
+
+    df = pd.DataFrame(columns)
+    df.to_csv(os.path.join(root_dir, "single_codon_methods.csv"))
+
+
+def _update_initial_cub_scores(organism: typing.Dict, columns: typing.Dict, cub_index: str):
+    columns["name"].append(organism["name"])
+    columns["cub_index"].append(cub_index)
+    for codon in nt_to_aa.keys():
+        columns[codon].append(organism[F"{cub_index.lower()}_weights"][codon])
+
+
 if __name__ == "__main__":
-    compare_initial_and_final_cds_codons_cai_weights()
+    compare_single_codon_method_scores()
+    # compare_initial_and_final_cds_codons_cai_weights()
     # parse_zscore_files_of_bulk_and_single()

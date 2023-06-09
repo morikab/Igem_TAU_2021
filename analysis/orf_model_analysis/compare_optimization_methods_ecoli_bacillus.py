@@ -11,6 +11,7 @@ from Bio import SeqIO
 from input_testing_data.generate_input_testing_data_for_modules import \
     generate_testing_data_for_ecoli_and_bacillus
 from modules.main import run_modules
+from modules.main import run_input_processing
 
 
 current_directory = Path(__file__).parent.resolve()
@@ -48,13 +49,13 @@ def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     orf_sequence_file: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None) -> None:
     for optimization_method in [
-        "single_codon_ratio", # "single_codon_diff", "single_codon_weakest_link",
+        "single_codon_ratio", "single_codon_diff", "single_codon_weakest_link",
         # "zscore_single_aa_ratio",
-        "zscore_bulk_aa_ratio",
+        # "zscore_bulk_aa_ratio",
         # "zscore_single_aa_diff",  "zscore_bulk_aa_diff",
         # "zscore_single_aa_weakest_link", "zscore_bulk_aa_weakest_link",
     ]:
-        for optimization_cub_index in ["CAI"]:
+        for optimization_cub_index in ["CAI", "tAI"]:
             for direction in [True, False]:
                 run_single_method_for_orf_sequence(optimization_method=optimization_method,
                                                    optimization_cub_index=optimization_cub_index,
@@ -64,7 +65,7 @@ def run_all_methods(orf_sequence: typing.Optional[str] = None,
                                                    output_path=output_path)
 
 
-def extract_sequences_for_analysis(fasta_file_path: str) -> None:
+def extract_ncbi_sequences_for_analysis(fasta_file_path: str) -> None:
     with open(fasta_file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
@@ -121,6 +122,7 @@ def run_single_method_for_orf_sequence(optimization_method: str,
         output_path=os.path.join("results_human", output_path),
     )
     run_modules(default_user_inp_raw)
+    # run_input_processing(default_user_inp_raw)
 
 
 def compare_gene_mappings() -> None:
@@ -157,7 +159,7 @@ if __name__ == "__main__":
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
 
-    # extract_sequences_for_analysis(
+    # extract_ncbi_sequences_for_analysis(
     #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
 
     # run_from_fasta_file(
