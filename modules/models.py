@@ -135,3 +135,24 @@ class UserInput:
             "optimization_cub_index": self.optimization_cub_index.value,
             "organisms": [organism.summary for organism in self.organisms],
         }
+
+
+@dataclass
+class SequenceZscores:
+    wanted_hosts_scores: typing.List[float]
+    wanted_hosts_weights: typing.List[float]
+    unwanted_hosts_scores: typing.List[float]
+    unwanted_hosts_weights: typing.List[float]
+
+    def normalize(self, min_zscore: float, max_zscore: float) -> None:
+        self.wanted_hosts_scores = [(score-min_zscore)/(max_zscore-min_zscore) for score in self.wanted_hosts_scores]
+        self.unwanted_hosts_scores = [(score-min_zscore)/(max_zscore-min_zscore) for score in
+                                      self.unwanted_hosts_scores]
+
+    @property
+    def min_zscore(self) -> float:
+        return min(min(self.wanted_hosts_scores), min(self.unwanted_hosts_scores))
+
+    @property
+    def max_zscore(self) -> float:
+        return max(max(self.wanted_hosts_scores), max(self.unwanted_hosts_scores))

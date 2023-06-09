@@ -58,15 +58,13 @@ def optimize_sequence_by_zscore_single_aa(
     """
 
     with Timer() as timer:
-        sequence_options = {}
-
-        original_sequence_score = _calculate_zscore_for_sequence(
+        initial_sequence = sequence
+        score = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
             optimization_cub_index=optimization_cub_index,
-            optimization_method=optimization_method,
         )
-        score = original_sequence_score
+        initial_sequence_score = None
 
         aa_to_codon_mapping = defaultdict(str)
         iterations_count = 0
@@ -77,27 +75,44 @@ def optimize_sequence_by_zscore_single_aa(
             # In the first iteration, include also the original sequence
             sequence_options = {sequence: score}
             tested_sequence_to_codon = defaultdict(list)
-            codon_to_score = {}
             for codon in nt_to_aa.keys():
                 tested_sequence, _ = _change_all_codons_of_aa(sequence, codon)
                 tested_sequence_to_codon[tested_sequence].append(codon)
 
-                score = _calculate_zscore_for_sequence(
+                sequence_options[tested_sequence] = _calculate_zscore_for_sequence(
                     sequence=tested_sequence,
                     user_input=user_input,
                     optimization_cub_index=optimization_cub_index,
-                    optimization_method=optimization_method,
                 )
-                codon_to_score[codon] = score
-                sequence_options[tested_sequence] = score
 
-            new_sequence = max(sequence_options, key=sequence_options.get)
+            if optimization_method.is_zscore_ratio_score_optimization:
+                min_zscore = min(score.min_zscore for score in sequence_options.values())
+                max_zscore = max(score.max_zscore for score in sequence_options.values())
+
+                for score in sequence_options.values():
+                    score.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
+
+            sequence_to_total_score = {
+                sequence_option: get_total_score(zscore=sequence_score,
+                                                 optimization_method=optimization_method,
+                                                 tuning_parameter=user_input.tuning_parameter) for
+                sequence_option, sequence_score in sequence_options.items()
+            }
+            if initial_sequence_score is None:
+                initial_sequence_score = sequence_to_total_score[initial_sequence]
+
+            new_sequence = max(sequence_to_total_score, key=sequence_to_total_score.get)
             selected_codons = tested_sequence_to_codon.get(new_sequence)
+
+            codon_to_score = {}
+            for codon_sequence in tested_sequence_to_codon:
+                for codon in tested_sequence_to_codon[codon_sequence]:
+                    codon_to_score[codon] = sequence_to_total_score[codon_sequence]
 
             iteration_summary = {
                 "selected_codons": [(selected_codon, nt_to_aa[selected_codon]) for selected_codon in selected_codons],
                 "codon_to_score": codon_to_score,
-                "sequence_score": sequence_options[new_sequence],
+                "sequence_score": sequence_to_total_score[new_sequence],
             }
             iterations_summary.append(iteration_summary)
 
@@ -113,8 +128,8 @@ def optimize_sequence_by_zscore_single_aa(
     orf_summary = {
         "iterations_count": iterations_count,
         "aa_to_optimal_codon": aa_to_codon_mapping,
-        "initial_sequence_optimization_score": original_sequence_score,
-        "final_sequence_optimization_score": sequence_options[sequence],
+        "initial_sequence_optimization_score": initial_sequence_score,
+        "final_sequence_optimization_score": sequence_to_total_score[sequence],
         "run_time": timer.elapsed_time,
         "iterations_summary": iterations_summary,
     }
@@ -125,27 +140,18 @@ def optimize_sequence_by_zscore_single_aa(
 
 
 # --------------------------------------------------------------
+# FIXME - continue from here!!!! Fix the code for bulk aa variation as I did for the single aa variation
 def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         user_input: models.UserInput,
                                         optimization_method: models.OptimizationMethod,
                                         optimization_cub_index: models.OptimizationCubIndex,
                                         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
 
-
-    # # Get codon split in the original sequence
-    # codon_counts_in_seq = defaultdict(int)
-    # split_seq = [original_sequence[i:i + 3].upper() for i in range(0, len(original_sequence), 3)]
-    # for codon in split_seq:
-    #     codon_counts_in_seq[codon] += 1
-    #
-    # logger.info(F"codon_counts_in_seq: {codon_counts_in_seq}")
-
     with Timer() as timer:
         initial_sequence_score = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
             optimization_cub_index=optimization_cub_index,
-            optimization_method=optimization_method,
         )
         aa_to_selected_codon = {}
         iterations_count = 0
@@ -161,7 +167,6 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                         sequence=candidate_codon_sequence,
                         user_input=user_input,
                         optimization_cub_index=optimization_cub_index,
-                        optimization_method=optimization_method,
                     )
                     # logger.info(F"z-score after changing codon {aa_codon} is: {aa_codons_to_score[aa_codon]}")
                 selected_aa_codon = max(aa_codons_to_score, key=aa_codons_to_score.get)
@@ -185,7 +190,6 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 sequence=new_sequence,
                 user_input=user_input,
                 optimization_cub_index=optimization_cub_index,
-                optimization_method=optimization_method,
             )
             iteration_summary = {
                 "aa_to_selected_codon": aa_to_selected_codon,
@@ -229,8 +233,73 @@ def _change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str,
 # --------------------------------------------------------------
 def _calculate_zscore_for_sequence(sequence: str,
                                    user_input: models.UserInput,
-                                   optimization_method: models.OptimizationMethod,
                                    optimization_cub_index: models.OptimizationCubIndex):
+    optimization_cub_index_value = optimization_cub_index.value.lower()
+
+    std_key = F"{optimization_cub_index_value}_std"
+    average_key = F"{optimization_cub_index_value}_avg"
+    weights = F"{optimization_cub_index_value}_profile"
+
+    wanted_hosts_scores = []
+    wanted_hosts_weights = []
+    unwanted_hosts_scores = []
+    unwanted_hosts_weights = []
+
+    for organism in user_input.organisms:
+        sigma = getattr(organism, std_key)
+        miu = getattr(organism, average_key)
+        profile = getattr(organism, weights)
+        index_score = general_geomean([sequence], weights=profile)[0]
+        organism_score = (index_score - miu) / sigma
+        if organism.is_optimized:
+            wanted_hosts_scores.append(organism_score)
+            wanted_hosts_weights.append(organism.optimization_priority)
+        else:
+            unwanted_hosts_scores.append(organism_score)
+            unwanted_hosts_weights.append(organism.optimization_priority)
+
+        return models.SequenceZscores(
+            wanted_hosts_scores=wanted_hosts_scores,
+            wanted_hosts_weights=wanted_hosts_weights,
+            unwanted_hosts_scores=unwanted_hosts_scores,
+            unwanted_hosts_weights=unwanted_hosts_weights,
+        )
+
+
+# --------------------------------------------------------------
+def get_total_score(zscore: models.SequenceZscores,
+                    optimization_method: models.OptimizationMethod,
+                    tuning_parameter: float) -> float:
+    if optimization_method.is_zscore_diff_score_optimization:
+        return _calculate_zscore_diff_score(optimized_organisms_scores=zscore.wanted_hosts_scores,
+                                            deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
+                                            optimized_organisms_weights=zscore.wanted_hosts_weights,
+                                            deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
+                                            tuning_parameter=tuning_parameter)
+
+    if optimization_method.is_zscore_ratio_score_optimization:
+        return _calculate_zscore_ratio_score(optimized_organisms_scores=zscore.wanted_hosts_scores,
+                                             deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
+                                             optimized_organisms_weights=zscore.wanted_hosts_weights,
+                                             deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
+                                             tuning_parameter=tuning_parameter)
+
+    if optimization_method.is_zscore_weakest_link_score_optimization:
+        return _calculate_zscore_weakest_link_score(
+            optimized_organisms_scores=zscore.wanted_hosts_scores,
+            deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
+            optimized_organisms_weights=zscore.wanted_hosts_weights,
+            deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
+            tuning_parameter=tuning_parameter,
+        )
+
+
+# --------------------------------------------------------------
+
+def _calculate_zscore_for_sequence_old(sequence: str,
+                                       user_input: models.UserInput,
+                                       optimization_method: models.OptimizationMethod,
+                                       optimization_cub_index: models.OptimizationCubIndex):
     optimization_cub_index_value = optimization_cub_index.value.lower()
 
     std_key = F"{optimization_cub_index_value}_std"
