@@ -117,3 +117,23 @@ def run_orf_optimization(user_input: models.UserInput) -> evaluation_models.Eval
     logger.info(f"Weakest link score: {evaluation_result.weakest_link_score}")
     logger.info(f"Final optimization score: {evaluation_result.average_distance_score}")
     return evaluation_result
+
+
+def run_orf_module(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
+    RunSummary.reset()
+    user_input = user_IO.UserInputModule.run_module(user_input_dict)
+
+    optimization_cub_index = user_input.optimization_cub_index
+    optimization_method = user_input.optimization_method
+
+    if optimization_cub_index.is_trna_adaptation_index:
+        logger.info("tAI information:")
+        trna_adaptation_index = optimization_cub_index.trna_adaptation_index
+        return ORF.ORFModule.run_module(user_input=user_input,
+                                        optimization_cub_index=trna_adaptation_index,
+                                        optimization_method=optimization_method)
+
+    codon_adaptation_index = optimization_cub_index.codon_adaptation_index
+    return ORF.ORFModule.run_module(user_input=user_input,
+                                    optimization_cub_index=codon_adaptation_index,
+                                    optimization_method=optimization_method)

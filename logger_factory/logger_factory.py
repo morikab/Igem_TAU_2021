@@ -31,24 +31,26 @@ class LoggerFactory(object):
         # Stream Handler
         # -------------
         # TODO - un-comment if running only modules.
-        logger.addHandler(logging.StreamHandler())
+        logger.addHandler(logging.StreamHandler())      # FIXME
         # -------------
         # Queue Handler
         # -------------
-        queue_handler = QueueHandler()
-        queue_handler.setFormatter(logging.Formatter(log_format))
-        queue_handler.name = cls._QUEUE_HANDLER_NAME
-        logger.addHandler(queue_handler)
+        # FIXME
+        # queue_handler = QueueHandler()
+        # queue_handler.setFormatter(logging.Formatter(log_format))
+        # queue_handler.name = cls._QUEUE_HANDLER_NAME
+        # logger.addHandler(queue_handler)
         # -------------
         # File Handler
         # -------------
         # Make sure logs directory exists
-        Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
-        # Generate log file
-        log_file_path = os.path.join(cls.LOG_DIRECTORY, cls.LOG_FILE_NAME)
-        log_file_handler = logging.FileHandler(log_file_path, mode="w")
-        log_file_handler.setFormatter(logging.Formatter(log_format))
-        logger.addHandler(log_file_handler)
+        # FIXME
+        # Path(cls.LOG_DIRECTORY).mkdir(parents=True, exist_ok=True)
+        # # Generate log file
+        # log_file_path = os.path.join(cls.LOG_DIRECTORY, cls.LOG_FILE_NAME)
+        # log_file_handler = logging.FileHandler(log_file_path, mode="w")
+        # log_file_handler.setFormatter(logging.Formatter(log_format))
+        # logger.addHandler(log_file_handler)
         return logger
 
     @staticmethod
