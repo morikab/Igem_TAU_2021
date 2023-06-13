@@ -50,20 +50,16 @@ def run_for_endogenous_genes(fasta_file_path: str) -> None:
     with open(fasta_file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
-        optimization_method = "zscore_bulk_aa_ratio"
-        optimization_cub_index = "CAI"
-        direction = False
-
         for optimization_method in [
             # "single_codon_ratio", "single_codon_diff", "single_codon_weakest_link",
             # "zscore_single_aa_ratio",
             "zscore_bulk_aa_ratio",
             # "zscore_single_aa_diff",
-             "zscore_bulk_aa_diff",
+            # "zscore_bulk_aa_diff",
             # "zscore_single_aa_weakest_link",
             # "zscore_bulk_aa_weakest_link",
         ]:
-            for optimization_cub_index in ["CAI", "tAI"]:
+            for optimization_cub_index in ["CAI"]:
                 for direction in [True, False]:
                     results_dict = {}
                     for gene_name, gene_sequence in genome_dict.items():
@@ -78,8 +74,9 @@ def run_for_endogenous_genes(fasta_file_path: str) -> None:
                             orf_sequence=gene_sequence,
                             output_path="endogenous")
 
-                    with open(F"{optimization_cub_index}_{optimization_method}_{direction}_fata_results.json",
-                              "w") as results_file:
+                    with open(
+                            F"{optimization_cub_index}_{optimization_method}_{Path(fasta_file_path).name[:10]}_{direction}_fasta_results.json",
+                            "w") as results_file:
                         json.dump(results_dict, results_file)
 
 
