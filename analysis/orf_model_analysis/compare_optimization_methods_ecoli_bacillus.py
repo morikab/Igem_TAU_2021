@@ -46,38 +46,30 @@ def run_from_fasta_file(fasta_file_path: str,
                         output_path=record.replace('|', '-'))
 
 
-def run_for_endogenous_genes(fasta_file_path: str) -> None:
+def run_for_endogenous_genes(fasta_file_path: str,
+                             optimization_method: str,
+                             optimization_cub_index: str,
+                             is_ecoli_optimized: bool,
+                             output_path: str) -> None:
     with open(fasta_file_path, "r") as fasta_handle:
         genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
-        for optimization_method in [
-            # "single_codon_ratio", "single_codon_diff", "single_codon_weakest_link",
-            # "zscore_single_aa_ratio",
-            "zscore_bulk_aa_ratio",
-            # "zscore_single_aa_diff",
-            # "zscore_bulk_aa_diff",
-            # "zscore_single_aa_weakest_link",
-            # "zscore_bulk_aa_weakest_link",
-        ]:
-            for optimization_cub_index in ["CAI"]:
-                for direction in [True, False]:
-                    results_dict = {}
-                    for gene_name, gene_sequence in genome_dict.items():
-                        gene_sequence = str(gene_sequence.seq)
-                        if len(gene_sequence) % 3 != 0:
-                            print(F"Invalid length {len(gene_sequence)} for gene {gene_name}")
-                            continue
-                        results_dict[gene_name] = run_single_method_for_orf_sequence(
-                            optimization_method=optimization_method,
-                            optimization_cub_index=optimization_cub_index,
-                            is_ecoli_optimized=direction,
-                            orf_sequence=gene_sequence,
-                            output_path="endogenous")
+    results_dict = {}
+    for gene_name, gene_sequence in genome_dict.items():
+        gene_sequence = str(gene_sequence.seq)
+        if len(gene_sequence) % 3 != 0:
+            print(F"Invalid length {len(gene_sequence)} for gene {gene_name}")
+            continue
+        results_dict[gene_name] = run_single_method_for_orf_sequence(
+            optimization_method=optimization_method,
+            optimization_cub_index=optimization_cub_index,
+            is_ecoli_optimized=is_ecoli_optimized,
+            orf_sequence=gene_sequence)
 
-                    with open(
-                            F"{optimization_cub_index}_{optimization_method}_{Path(fasta_file_path).name[:10]}_{direction}_fasta_results.json",
-                            "w") as results_file:
-                        json.dump(results_dict, results_file)
+    with open(
+            F"{optimization_cub_index}_{optimization_method}_{Path(fasta_file_path).name[:10]}_{is_ecoli_optimized}_fasta_results.json",
+            "w") as results_file:
+        json.dump(results_dict, results_file)
 
 
 def run_all_methods(orf_sequence: typing.Optional[str] = None,
@@ -189,13 +181,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analysis script parser")
     parser.add_argument('-s', '--start', type=str, required=True, help="Fasta record description to start running from")
     parser.add_argument('-n', '--number', type=int, help="Number of records to parse from the given start record")
+    parser.add_argument('-f', '--fasta', type=str, help="Fasta file for orf sequences to run on (for endogenous run)")
+    parser.add_argument('-m', '--method', type=str, help="Optimization method")
+    parser.add_argument('-i', '--index', type=str, help="Optimization CUB index")
+    parser.add_argument('--opt', type=bool, help="Boolean indicating whether e.coli is optimized or not")
+    parser.add_argument('-o', '--output', type=str, help="Output path")
 
     args = parser.parse_args()
 
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                output_path="mcherry")
 
-    run_for_endogenous_genes(fasta_file_path=r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus subtilis_False_parsed.fasta")
+    run_for_endogenous_genes(fasta_file_path=args.fasta,
+                             optimization_method=args.method,
+                             optimization_cub_index=args.index,
+                             is_ecoli_optimized=args.opt,
+                             output_path=args.output)
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
 

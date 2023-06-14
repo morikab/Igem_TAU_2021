@@ -10,8 +10,8 @@ from modules.run_summary import RunSummary
 
 # Create clean artifacts directory
 artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
-if artifacts_directory.exists() and artifacts_directory.is_dir():
-    shutil.rmtree(artifacts_directory)
+# if artifacts_directory.exists() and artifacts_directory.is_dir():
+#     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
 from modules import user_IO, ORF, sequence_family

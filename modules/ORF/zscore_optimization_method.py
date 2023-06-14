@@ -188,8 +188,6 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 initial_sequence_score = get_total_score(zscore=initial_sequence_zscore,
                                                          optimization_method=optimization_method,
                                                          tuning_parameter=user_input.tuning_parameter)
-                # FIXME - delete this
-                return initial_sequence_score
 
             for aa in synonymous_codons.keys():
                 selected_codon = _find_best_synonymous_codon_for_aa(codons_list=synonymous_codons[aa],

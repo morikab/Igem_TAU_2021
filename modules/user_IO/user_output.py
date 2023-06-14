@@ -31,14 +31,14 @@ class UserOutputModule(object):
 
         logger.info("Output zip file directory path: %s", output_path)
 
-        zip_file_path = cls._create_final_zip(output_path=output_path,
-                                              cds_sequence=cds_sequence)
+        # zip_file_path = cls._create_final_zip(output_path=output_path,
+        #                                       cds_sequence=cds_sequence)
 
         user_output_dict = {
             "final_sequence": cds_sequence,  # str
             "average_distance_score": average_distance_score,
             "weakest_link_score": weakest_link_score,
-            "zip_file_path": zip_file_path,
+            # "zip_file_path": zip_file_path,
         }
 
         return user_output_dict
