@@ -29,3 +29,7 @@ class RunSummary(object):
     @classmethod
     def reset(cls) -> None:
         cls._run_summary = {}
+
+    @classmethod
+    def get(cls) -> typing.Dict[str, typing.Any]:
+        return cls._run_summary

@@ -27,7 +27,8 @@ def run_input_processing(user_input_dict: typing.Optional[typing.Dict[str, typin
     return user_IO.UserInputModule.run_module(user_input_dict)
 
 
-def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None):
+def run_modules(user_input_dict: typing.Dict[str, typing.Any],
+                should_run_output_module: bool = True) -> typing.Dict[str, typing.Any]:
     RunSummary.reset()
     final_output = {}
     try:
@@ -46,14 +47,16 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
         # ###################################### Output Handling ##########################################
         output_path = user_input.output_path or str(artifacts_directory)
         RunSummary.save_run_summary(output_path)
+
+        final_output = RunSummary.get()
+
         # TODO - handle multiple results in output generation module
         evaluation_result = evaluation_results[0]
-        final_output = user_IO.UserOutputModule.run_module(
-            cds_sequence=evaluation_result.sequence,
-            average_distance_score=evaluation_result.average_distance_score,
-            weakest_link_score=evaluation_result.weakest_link_score,
-            output_path=output_path,
-        )
+        if should_run_output_module:
+            final_output["zip_output_file_path"] = user_IO.UserOutputModule.run_module(
+                cds_sequence=evaluation_result.sequence,
+                output_path=output_path,
+            )
     except:
         logger.error("Encountered unknown error when running modules.")
         exception_str = traceback.format_exc()

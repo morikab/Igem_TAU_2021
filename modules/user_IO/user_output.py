@@ -22,8 +22,6 @@ class UserOutputModule(object):
     @classmethod
     def run_module(cls,
                    cds_sequence: str,
-                   average_distance_score: float,
-                   weakest_link_score: float,
                    output_path: str = None):
         logger.info('###########################')
         logger.info('# USER OUTPUT INFORMATION #')
@@ -31,17 +29,10 @@ class UserOutputModule(object):
 
         logger.info("Output zip file directory path: %s", output_path)
 
-        # zip_file_path = cls._create_final_zip(output_path=output_path,
-        #                                       cds_sequence=cds_sequence)
+        zip_file_path = cls._create_final_zip(output_path=output_path,
+                                              cds_sequence=cds_sequence)
 
-        user_output_dict = {
-            "final_sequence": cds_sequence,  # str
-            "average_distance_score": average_distance_score,
-            "weakest_link_score": weakest_link_score,
-            # "zip_file_path": zip_file_path,
-        }
-
-        return user_output_dict
+        return zip_file_path
 
     @classmethod
     def _create_final_zip(cls,

@@ -144,7 +144,7 @@ def run_single_method_for_orf_sequence(optimization_method: str,
     )
     # return run_orf_module(default_user_inp_raw)
 
-    modules_output = run_modules(default_user_inp_raw)
+    modules_output = run_modules(default_user_inp_raw, should_run_output_module=False)
     if "error_message" in modules_output:
           raise Exception(F"Encountered error while running module: {modules_output['error_message']}")
 
