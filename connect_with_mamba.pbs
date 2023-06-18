@@ -1,0 +1,39 @@
+#!/bin/bash
+#PBS -q tamirQ
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=12:00:00
+#PBS -N connect
+#PBS -V
+
+cd $PBS_O_WORKDIR # Go to the job submission directory
+
+## Get tunneling info
+#XDG_RUNTIME_DIR=""
+local_port=8888  # Can use random port if preferred (as the remote port)
+#remote_port=$(shuf -i8000-9999 -n1)
+remote_port=8937
+remote_host_ip=$(hostname -i)
+
+## Print tunneling instructions to jupyter.info
+cat > jupyter.info << EOF
+Paste ssh command in a terminal on your local host (i.e., laptop)
+it may take a minute or two for it to be ready.
+-------------------------Copy-----------------------------------
+on Mac/Linux/PC: ssh -N -L $local_port:$remote_host_ip:$remote_port $USER@power9login.tau.ac.il
+----------------------------------------------------------------
+After it asks for your password, then open a web browser on your
+local host to the address below.
+----------------------------------------------------------------
+localhost:$local_port
+EOF
+
+module load Python3.9Plus
+cd /tamir2/moranb/microbiome/Igem_TAU_2021
+source venv/bin/activate
+
+## Launch jupyter server (jupyter lab can be replaced with jupyter-notebook if preferred)
+jupyter lab  --no-browser --ip=$remote_host_ip --port=$remote_port
+#jupyter-notebook  --no-browser --ip=$remote_host_ip --port=$remote_port
+
+deactivate
+rm jupyter.info
