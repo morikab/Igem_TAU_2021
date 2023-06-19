@@ -171,7 +171,7 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
     def _ratio_total_loss() -> float:
         mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
         mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
-        epsilon = 10 ** -6
+        epsilon = 10 ** -9
         mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
         return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 

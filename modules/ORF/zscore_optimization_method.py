@@ -59,7 +59,7 @@ def optimize_sequence_by_zscore_single_aa(
 
     with Timer() as timer:
         initial_sequence = sequence
-        score = _calculate_zscore_for_sequence(
+        previous_sequence_score = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
             optimization_cub_index=optimization_cub_index,
@@ -72,8 +72,8 @@ def optimize_sequence_by_zscore_single_aa(
         # Single codon replacement
         for run in range(max_iterations):
             iterations_count = run + 1
-            # In the first iteration, include also the original sequence
-            sequence_to_zscore = {sequence: score}
+            # Include also the sequence from the previous iteration
+            sequence_to_zscore = {sequence: previous_sequence_score}
             tested_sequence_to_codon = defaultdict(list)
             for codon in nt_to_aa.keys():
                 tested_sequence, _ = _change_all_codons_of_aa(sequence, codon)
@@ -124,6 +124,7 @@ def optimize_sequence_by_zscore_single_aa(
                 break
             else:
                 sequence = new_sequence
+                previous_sequence_score = sequence_to_total_score[sequence]
 
     orf_summary = {
         "iterations_count": iterations_count,
@@ -147,7 +148,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
 
     with Timer() as timer:
-        initial_sequence_zscore = _calculate_zscore_for_sequence(
+        previous_sequence_zscore = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
             optimization_cub_index=optimization_cub_index,
@@ -168,14 +169,14 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                     optimization_cub_index=optimization_cub_index,
                 )
             if optimization_method.is_zscore_ratio_score_optimization:
-                min_zscore = min(score.min_zscore for score in codons_to_zscore.values())
-                max_zscore = max(score.max_zscore for score in codons_to_zscore.values())
+                min_zscore = min(min(score.min_zscore for score in codons_to_zscore.values()),
+                                 previous_sequence_zscore.min_zscore)
+                max_zscore = max(max(score.max_zscore for score in codons_to_zscore.values()),
+                                 previous_sequence_zscore.max_zscore)
 
                 for zscore in codons_to_zscore.values():
                     zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
-
-                if initial_sequence_score is None:
-                    initial_sequence_zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
+                previous_sequence_zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
 
             codons_to_total_score = {
                 codon: get_total_score(zscore=zscore,
@@ -184,10 +185,11 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 codon, zscore in codons_to_zscore.items()
             }
 
+            previous_sequence_score = get_total_score(zscore=previous_sequence_zscore,
+                                                      optimization_method=optimization_method,
+                                                      tuning_parameter=user_input.tuning_parameter)
             if initial_sequence_score is None:
-                initial_sequence_score = get_total_score(zscore=initial_sequence_zscore,
-                                                         optimization_method=optimization_method,
-                                                         tuning_parameter=user_input.tuning_parameter)
+                initial_sequence_score = previous_sequence_score
 
             for aa in synonymous_codons.keys():
                 selected_codon = _find_best_synonymous_codon_for_aa(codons_list=synonymous_codons[aa],
@@ -218,7 +220,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
             }
             iterations_summary.append(iteration_summary)
 
-            if new_sequence == sequence:
+            if new_sequence == sequence or previous_sequence_score > score:
                 break
             else:
                 sequence = new_sequence
@@ -300,134 +302,105 @@ def get_total_score(zscore: models.SequenceZscores,
                     optimization_method: models.OptimizationMethod,
                     tuning_parameter: float) -> float:
     if optimization_method.is_zscore_diff_score_optimization:
-        return _calculate_zscore_diff_score(optimized_organisms_scores=zscore.wanted_hosts_scores,
-                                            deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
-                                            optimized_organisms_weights=zscore.wanted_hosts_weights,
-                                            deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
+        return _calculate_zscore_diff_score(zscore=zscore,
                                             tuning_parameter=tuning_parameter)
 
     if optimization_method.is_zscore_ratio_score_optimization:
-        return _calculate_zscore_ratio_score(optimized_organisms_scores=zscore.wanted_hosts_scores,
-                                             deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
-                                             optimized_organisms_weights=zscore.wanted_hosts_weights,
-                                             deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
+        return _calculate_zscore_ratio_score(zscore=zscore,
                                              tuning_parameter=tuning_parameter)
 
     if optimization_method.is_zscore_weakest_link_score_optimization:
-        return _calculate_zscore_weakest_link_score(
-            optimized_organisms_scores=zscore.wanted_hosts_scores,
-            deoptimized_organisms_scores=zscore.unwanted_hosts_scores,
-            optimized_organisms_weights=zscore.wanted_hosts_weights,
-            deoptimized_organisms_weights=zscore.unwanted_hosts_weights,
-            tuning_parameter=tuning_parameter,
-        )
+        return _calculate_zscore_weakest_link_score(zscore=zscore,
+                                                    tuning_parameter=tuning_parameter,
+                                                    )
 
 
 # --------------------------------------------------------------
 
-def _calculate_zscore_for_sequence_old(sequence: str,
-                                       user_input: models.UserInput,
-                                       optimization_method: models.OptimizationMethod,
-                                       optimization_cub_index: models.OptimizationCubIndex):
-    optimization_cub_index_value = optimization_cub_index.value.lower()
-
-    std_key = F"{optimization_cub_index_value}_std"
-    average_key = F"{optimization_cub_index_value}_avg"
-    weights = F"{optimization_cub_index_value}_profile"
-
-    optimized_organisms_scores = []
-    optimized_organisms_weights = []
-    deoptimized_organisms_scores = []
-    deoptimized_organisms_weights = []
-
-    for organism in user_input.organisms:
-        sigma = getattr(organism, std_key)
-        miu = getattr(organism, average_key)
-        profile = getattr(organism, weights)
-        index_score = general_geomean([sequence], weights=profile)[0]
-        organism_score = (index_score - miu) / sigma
-        # logger.info(F"CUB score for organism {organism.name} is: {index_score}")
-        if organism.is_optimized:
-            optimized_organisms_scores.append(organism_score)
-            optimized_organisms_weights.append(organism.optimization_priority)
-        else:
-            deoptimized_organisms_scores.append(organism_score)
-            deoptimized_organisms_weights.append(organism.optimization_priority)
-
-    alpha = user_input.tuning_parameter
-    if optimization_method.is_zscore_diff_score_optimization:
-        return _calculate_zscore_diff_score(optimized_organisms_scores=optimized_organisms_scores,
-                                            deoptimized_organisms_scores=deoptimized_organisms_scores,
-                                            optimized_organisms_weights=optimized_organisms_weights,
-                                            deoptimized_organisms_weights=deoptimized_organisms_weights,
-                                            tuning_parameter=alpha)
-
-    if optimization_method.is_zscore_ratio_score_optimization:
-        return _calculate_zscore_ratio_score(optimized_organisms_scores=optimized_organisms_scores,
-                                             deoptimized_organisms_scores=deoptimized_organisms_scores,
-                                             optimized_organisms_weights=optimized_organisms_weights,
-                                             deoptimized_organisms_weights=deoptimized_organisms_weights,
-                                             tuning_parameter=alpha)
-
-    if optimization_method.is_zscore_weakest_link_score_optimization:
-        return _calculate_zscore_weakest_link_score(
-            optimized_organisms_scores=optimized_organisms_scores,
-            deoptimized_organisms_scores=deoptimized_organisms_scores,
-            optimized_organisms_weights=optimized_organisms_weights,
-            deoptimized_organisms_weights=deoptimized_organisms_weights,
-            tuning_parameter=alpha,
-        )
-
-
-    raise NotImplementedError(F"Optimization method: {optimization_method}")
-
+# def _calculate_zscore_for_sequence_old(sequence: str,
+#                                        user_input: models.UserInput,
+#                                        optimization_method: models.OptimizationMethod,
+#                                        optimization_cub_index: models.OptimizationCubIndex):
+#     optimization_cub_index_value = optimization_cub_index.value.lower()
+#
+#     std_key = F"{optimization_cub_index_value}_std"
+#     average_key = F"{optimization_cub_index_value}_avg"
+#     weights = F"{optimization_cub_index_value}_profile"
+#
+#     optimized_organisms_scores = []
+#     optimized_organisms_weights = []
+#     deoptimized_organisms_scores = []
+#     deoptimized_organisms_weights = []
+#
+#     for organism in user_input.organisms:
+#         sigma = getattr(organism, std_key)
+#         miu = getattr(organism, average_key)
+#         profile = getattr(organism, weights)
+#         index_score = general_geomean([sequence], weights=profile)[0]
+#         organism_score = (index_score - miu) / sigma
+#         # logger.info(F"CUB score for organism {organism.name} is: {index_score}")
+#         if organism.is_optimized:
+#             optimized_organisms_scores.append(organism_score)
+#             optimized_organisms_weights.append(organism.optimization_priority)
+#         else:
+#             deoptimized_organisms_scores.append(organism_score)
+#             deoptimized_organisms_weights.append(organism.optimization_priority)
+#
+#     alpha = user_input.tuning_parameter
+#     if optimization_method.is_zscore_diff_score_optimization:
+#         return _calculate_zscore_diff_score(optimized_organisms_scores=optimized_organisms_scores,
+#                                             deoptimized_organisms_scores=deoptimized_organisms_scores,
+#                                             optimized_organisms_weights=optimized_organisms_weights,
+#                                             deoptimized_organisms_weights=deoptimized_organisms_weights,
+#                                             tuning_parameter=alpha)
+#
+#     if optimization_method.is_zscore_ratio_score_optimization:
+#         return _calculate_zscore_ratio_score(optimized_organisms_scores=optimized_organisms_scores,
+#                                              deoptimized_organisms_scores=deoptimized_organisms_scores,
+#                                              optimized_organisms_weights=optimized_organisms_weights,
+#                                              deoptimized_organisms_weights=deoptimized_organisms_weights,
+#                                              tuning_parameter=alpha)
+#
+#     if optimization_method.is_zscore_weakest_link_score_optimization:
+#         return _calculate_zscore_weakest_link_score(
+#             optimized_organisms_scores=optimized_organisms_scores,
+#             deoptimized_organisms_scores=deoptimized_organisms_scores,
+#             optimized_organisms_weights=optimized_organisms_weights,
+#             deoptimized_organisms_weights=deoptimized_organisms_weights,
+#             tuning_parameter=alpha,
+#         )
+#
+#
+#     raise NotImplementedError(F"Optimization method: {optimization_method}")
+#
 
 # --------------------------------------------------------------
-def _calculate_zscore_diff_score(
-        optimized_organisms_scores: typing.List[float],
-        deoptimized_organisms_scores: typing.List[float],
-        optimized_organisms_weights: typing.List[float],
-        deoptimized_organisms_weights: typing.List[float],
-        tuning_parameter: float,
-) -> float:
-    mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
-    mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
+def _calculate_zscore_diff_score(zscore: models.SequenceZscores,
+                                 tuning_parameter: float) -> float:
+    mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
+    mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
     return tuning_parameter * mean_opt_index - (1 - tuning_parameter) * mean_deopt_index
 
 
 # --------------------------------------------------------------
-def _calculate_zscore_ratio_score(
-        optimized_organisms_scores: typing.List[float],
-        deoptimized_organisms_scores: typing.List[float],
-        optimized_organisms_weights: typing.List[float],
-        deoptimized_organisms_weights: typing.List[float],
-        tuning_parameter: float,
-) -> float:
-    mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
-    mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
-    epsilon = 10 ** -6
+def _calculate_zscore_ratio_score(zscore: models.SequenceZscores,
+                                  tuning_parameter: float) -> float:
+    mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
+    mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
+    epsilon = 10 ** -9
     mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
-    try:
-        return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
-    except:
-        pass
-    finally:
-        pass
+
+    return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
 
 # --------------------------------------------------------------
-def _calculate_zscore_weakest_link_score(
-        optimized_organisms_scores: typing.List[float],
-        deoptimized_organisms_scores: typing.List[float],
-        optimized_organisms_weights: typing.List[float],
-        deoptimized_organisms_weights: typing.List[float],
-        tuning_parameter: float,
-) -> float:
-    weighted_optimized_organisms_scores = [optimized_organisms_scores[i] * optimized_organisms_weights[i] for i in
-                                           range(len(optimized_organisms_scores))]
+def _calculate_zscore_weakest_link_score(zscore: models.SequenceZscores,
+                                         tuning_parameter: float) -> float:
+    weighted_optimized_organisms_scores = [zscore.wanted_hosts_scores[i] * zscore.wanted_hosts_weights[i] for i in
+                                           range(len(zscore.wanted_hosts_scores))]
     weighted_deoptimized_organisms_scores = [
-        deoptimized_organisms_scores[i] * deoptimized_organisms_weights[i] for
-        i in range(len(deoptimized_organisms_scores))
+        zscore.unwanted_hosts_scores[i] * zscore.unwanted_hosts_weights[i] for
+        i in range(len( zscore.unwanted_hosts_scores))
     ]
 
     return (tuning_parameter * min(weighted_optimized_organisms_scores) -
