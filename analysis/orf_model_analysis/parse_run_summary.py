@@ -98,18 +98,8 @@ def _update_initial_cub_scores(organism: typing.Dict, columns: typing.Dict, cub_
     for codon in nt_to_aa.keys():
         columns[codon].append(organism[F"{cub_index.lower()}_weights"][codon])
 
-from collections import ChainMap
-def fix_res(file_path):
-    with open(file_path, "r") as res:
-        content = json.load(res)
-
-    with open(file_path, "w") as res:
-        new_content = dict(ChainMap(*content))
-        json.dump(new_content, res)
-
 
 if __name__ == "__main__":
-    fix_res("res.json")
-    # compare_single_codon_method_scores()
+    compare_single_codon_method_scores()
     # compare_initial_and_final_cds_codons_cai_weights()
     # parse_zscore_files_of_bulk_and_single()
