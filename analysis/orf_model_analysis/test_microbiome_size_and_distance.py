@@ -78,10 +78,11 @@ def run_for_sub_microbiome(output_path: str,
             optimization_method=optimization_method,
             optimization_cub_index=optimization_cub_index,
             orf_sequence=gene_sequence,
-            output_path=os.path.join(output_path, configuration, endogenous_genes_organism, gene_name),
+            output_path=os.path.join(output_path, configuration, endogenous_genes_organism), # gene_name),
             wanted_hosts=wanted_hosts,
             unwanted_hosts=unwanted_hosts,
         )
+        exit(0)
     with open(
             os.path.join(output_path,
                          F"{optimization_cub_index}_{optimization_method}_{Path(fasta_file_path).name[:10]}_fasta_results.json"),

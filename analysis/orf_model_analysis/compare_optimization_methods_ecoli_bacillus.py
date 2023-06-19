@@ -66,6 +66,8 @@ def run_for_endogenous_genes(fasta_file_path: str,
             is_ecoli_optimized=is_ecoli_optimized,
             orf_sequence=gene_sequence)
 
+        break
+
     with open(
             F"{optimization_cub_index}_{optimization_method}_{Path(fasta_file_path).name[:10]}_{is_ecoli_optimized}_fasta_results.json",
             "w") as results_file:
