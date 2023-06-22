@@ -12,7 +12,8 @@ class EvaluationModule(object):
     @staticmethod
     def run_module(final_sequence: str,
                    user_input: main_models.UserInput,
-                   optimization_cub_index: main_models.OptimizationCubIndex) -> models.EvaluationModuleResult:
+                   optimization_cub_index: main_models.OptimizationCubIndex,
+                   run_summary: RunSummary) -> models.EvaluationModuleResult:
         optimization_cub_index_value = optimization_cub_index.value.lower()
         std = f"{optimization_cub_index_value}_std"
         weights = f"{optimization_cub_index_value}_profile"
@@ -72,7 +73,7 @@ class EvaluationModule(object):
             "organisms": organisms_evaluation_summary,
             **evaluation_result.summary,
         }
-        RunSummary.add_to_run_summary("evaluation", evaluation_summary)
+        run_summary.add_to_run_summary("evaluation", evaluation_summary)
 
         return evaluation_result
 

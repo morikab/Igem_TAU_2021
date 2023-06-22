@@ -48,6 +48,7 @@ def optimize_sequence_by_zscore_single_aa(
         user_input: models.UserInput,
         optimization_cub_index: models.OptimizationCubIndex,
         optimization_method: models.OptimizationMethod,
+        run_summary: RunSummary,
         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
 ):
     """
@@ -134,8 +135,7 @@ def optimize_sequence_by_zscore_single_aa(
         "run_time": timer.elapsed_time,
         "iterations_summary": iterations_summary,
     }
-    # RunSummary.add_to_run_summary("orf", orf_summary)
-    RunSummary.put_in_run_summary("orf", orf_summary)
+    run_summary.add_to_run_summary("orf", orf_summary)
 
     return sequence
 
@@ -145,6 +145,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         user_input: models.UserInput,
                                         optimization_method: models.OptimizationMethod,
                                         optimization_cub_index: models.OptimizationCubIndex,
+                                        run_summary: RunSummary,
                                         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
 
     with Timer() as timer:
@@ -234,7 +235,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
         "iterations_summary": iterations_summary,
     }
 
-    RunSummary.add_to_run_summary("orf", orf_summary)
+    run_summary.add_to_run_summary("orf", orf_summary)
 
     return sequence
 

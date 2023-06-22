@@ -64,6 +64,7 @@ def run_for_endogenous_genes(fasta_file_path: str,
             optimization_method=optimization_method,
             optimization_cub_index=optimization_cub_index,
             is_ecoli_optimized=is_ecoli_optimized,
+            output_path=output_path,
             orf_sequence=gene_sequence)
 
     with open(
@@ -148,7 +149,7 @@ def run_single_method_for_orf_sequence(optimization_method: str,
         is_ecoli_optimized=is_ecoli_optimized,
         sequence=orf_sequence,
         sequence_file_path=orf_sequence_file,
-        output_path=os.path.join("results_human", output_path),
+        output_path=os.path.join("results", output_path),
     )
     # return run_modules(default_user_inp_raw)
     return run_orf_module(default_user_inp_raw)

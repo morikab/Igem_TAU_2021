@@ -15,14 +15,14 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, user_inp_raw: typing.Dict) -> models.UserInput:
+    def run_module(cls, user_inp_raw: typing.Dict, run_summary: RunSummary) -> models.UserInput:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
-        return cls._parse_input(user_inp_raw)
+        return cls._parse_input(user_input=user_inp_raw, run_summary=run_summary)
 
     @classmethod
-    def _parse_input(cls, user_input: typing.Dict[str, typing.Any]) -> models.UserInput:
+    def _parse_input(cls, user_input: typing.Dict[str, typing.Any], run_summary: RunSummary) -> models.UserInput:
         """
         :param user_input: in the following format
         {   'tuning_param': 0.5,
@@ -65,7 +65,7 @@ class UserInputModule(object):
                                       clusters_count=clusters_count,
                                       output_path=output_path)
 
-        RunSummary.add_to_run_summary("user_input", user_input.summary)
+        run_summary.add_to_run_summary("user_input", user_input.summary)
 
         return user_input
 

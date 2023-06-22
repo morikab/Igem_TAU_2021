@@ -1,5 +1,6 @@
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
+from modules.run_summary import RunSummary
 
 from .single_codon_optimization_method import optimize_sequence as optimize_sequence_by_single_codon
 from .zscore_optimization_method import optimize_sequence_by_zscore_single_aa
@@ -15,6 +16,7 @@ class ORFModule(object):
             user_input: models.UserInput,
             optimization_cub_index: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
+            run_summary: RunSummary,
     ) -> str:
         logger.info("##########################")
         logger.info("# ORF #")
@@ -29,6 +31,7 @@ class ORFModule(object):
                 user_input=user_input,
                 optimization_method=optimization_method,
                 optimization_cub_index=optimization_cub_index,
+                run_summary=run_summary,
             )
 
         if optimization_method.is_zscore_bulk_aa_optimization:
@@ -37,6 +40,7 @@ class ORFModule(object):
                 user_input=user_input,
                 optimization_method=optimization_method,
                 optimization_cub_index=optimization_cub_index,
+                run_summary=run_summary,
             )
 
         if optimization_method.is_single_codon_optimization:
@@ -44,6 +48,7 @@ class ORFModule(object):
                                                      organisms=user_input.organisms,
                                                      optimization_cub_index=optimization_cub_index,
                                                      optimization_method=optimization_method,
-                                                     tuning_param=user_input.tuning_parameter)
+                                                     tuning_param=user_input.tuning_parameter,
+                                                     run_summary=run_summary)
 
         raise ValueError(F"optimization method {optimization_method} is invalid")
