@@ -41,6 +41,7 @@ def optimize_sequence_by_zscore_bulk_and_single_aa(
     )
 
 
+# TODO - need to modify single aa variation with the normalizd ratio variation..
 # --------------------------------------------------------------
 # In each round - check all single synonymous codon changes and calculate optimization score - take the best one
 def optimize_sequence_by_zscore_single_aa(
@@ -149,7 +150,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
 
     with Timer() as timer:
-        previous_sequence_zscore = _calculate_zscore_for_sequence(
+        initial_sequence_zscore = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
             optimization_cub_index=optimization_cub_index,
@@ -170,14 +171,15 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                     optimization_cub_index=optimization_cub_index,
                 )
             if optimization_method.is_zscore_ratio_score_optimization:
-                min_zscore = min(min(score.min_zscore for score in codons_to_zscore.values()),
-                                 previous_sequence_zscore.min_zscore)
-                max_zscore = max(max(score.max_zscore for score in codons_to_zscore.values()),
-                                 previous_sequence_zscore.max_zscore)
+                min_zscore = min(score.min_zscore for score in codons_to_zscore.values())
+                max_zscore = max(score.max_zscore for score in codons_to_zscore.values())
 
                 for zscore in codons_to_zscore.values():
                     zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
-                previous_sequence_zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
+                if initial_sequence_score is None:
+                    initial_min_zscore = min(min_zscore, initial_sequence_zscore.min_zscore)
+                    initial_max_zscore = max(max_zscore, initial_sequence_zscore.max_zscore)
+                    initial_sequence_zscore.normalize(min_zscore=initial_min_zscore, max_zscore=initial_max_zscore)
 
             codons_to_total_score = {
                 codon: get_total_score(zscore=zscore,
@@ -186,11 +188,11 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 codon, zscore in codons_to_zscore.items()
             }
 
-            previous_sequence_score = get_total_score(zscore=previous_sequence_zscore,
-                                                      optimization_method=optimization_method,
-                                                      tuning_parameter=user_input.tuning_parameter)
             if initial_sequence_score is None:
-                initial_sequence_score = previous_sequence_score
+                initial_sequence_score = get_total_score(zscore=initial_sequence_zscore,
+                                                         optimization_method=optimization_method,
+                                                         tuning_parameter=user_input.tuning_parameter)
+                previous_sequence_score = initial_sequence_score
 
             for aa in synonymous_codons.keys():
                 selected_codon = _find_best_synonymous_codon_for_aa(codons_list=synonymous_codons[aa],
@@ -208,8 +210,11 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 user_input=user_input,
                 optimization_cub_index=optimization_cub_index,
             )
+
             if optimization_method.is_zscore_ratio_score_optimization:
-                zscore.normalize(min_zscore=min_zscore, max_zscore=max_zscore)
+                updated_min_zscore = min(min_zscore, zscore.min_zscore)
+                updated_max_zscore = max(max_zscore, zscore.max_zscore)
+                zscore.normalize(min_zscore=updated_min_zscore, max_zscore=updated_max_zscore)
 
             score = get_total_score(zscore=zscore,
                                     optimization_method=optimization_method,
@@ -225,6 +230,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 break
             else:
                 sequence = new_sequence
+                previous_sequence_score = score
 
     orf_summary = {
         "iterations_count": iterations_count,
@@ -291,9 +297,9 @@ def _calculate_zscore_for_sequence(sequence: str,
             unwanted_hosts_weights.append(organism.optimization_priority)
 
     return models.SequenceZscores(
-        wanted_hosts_scores=wanted_hosts_scores,
+        initial_wanted_hosts_scores=wanted_hosts_scores,
         wanted_hosts_weights=wanted_hosts_weights,
-        unwanted_hosts_scores=unwanted_hosts_scores,
+        initial_unwanted_hosts_scores=unwanted_hosts_scores,
         unwanted_hosts_weights=unwanted_hosts_weights,
     )
 
