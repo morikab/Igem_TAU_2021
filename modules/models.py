@@ -139,18 +139,21 @@ class UserInput:
 
 @dataclass
 class SequenceZscores:
-    wanted_hosts_scores: typing.List[float]
-    wanted_hosts_weights: typing.List[float]
-    unwanted_hosts_scores: typing.List[float]
-    unwanted_hosts_weights: typing.List[float]
+    initial_wanted_hosts_scores: typing.List[float] = None
+    wanted_hosts_weights: typing.List[float] = None
+    initial_unwanted_hosts_scores: typing.List[float] = None
+    unwanted_hosts_weights: typing.List[float] = None
 
     min_score_for_normalization: typing.Optional[float] = None
     max_score_for_normalization: typing.Optional[float] = None
+    normalized_wanted_hosts_scores: typing.Optional[typing.List[float]] = None
+    normalized_unwanted_hosts_scores: typing.Optional[typing.List[float]] = None
 
     def normalize(self, min_zscore: float, max_zscore: float) -> None:
-        self.wanted_hosts_scores = [(score-min_zscore)/(max_zscore-min_zscore) for score in self.wanted_hosts_scores]
-        self.unwanted_hosts_scores = [(score-min_zscore)/(max_zscore-min_zscore) for score in
-                                      self.unwanted_hosts_scores]
+        self.normalized_wanted_hosts_scores = [(score - min_zscore) / (max_zscore - min_zscore) for score in
+                                               self.wanted_hosts_scores]
+        self.normalized_unwanted_hosts_scores = [(score - min_zscore) / (max_zscore - min_zscore) for score in
+                                                 self.unwanted_hosts_scores]
         self.min_score_for_normalization = min_zscore
         self.max_score_for_normalization = max_zscore
 
@@ -161,3 +164,11 @@ class SequenceZscores:
     @property
     def max_zscore(self) -> float:
         return max(max(self.wanted_hosts_scores), max(self.unwanted_hosts_scores))
+
+    @property
+    def wanted_hosts_scores(self) -> typing.List[float]:
+        return self.normalized_wanted_hosts_scores or self.initial_wanted_hosts_scores
+
+    @property
+    def unwanted_hosts_scores(self) -> typing.List[float]:
+        return self.normalized_unwanted_hosts_scores or self.initial_unwanted_hosts_scores

@@ -18,7 +18,8 @@ def optimize_sequence(target_gene: str,
                       organisms: typing.Sequence[models.Organism],
                       optimization_method: models.OptimizationMethod,
                       optimization_cub_index: models.OptimizationCubIndex,
-                      tuning_param: float) -> str:
+                      tuning_param: float,
+                      run_summary: RunSummary) -> str:
     with Timer() as timer:
         aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
                                                            tuning_param=tuning_param,
@@ -32,7 +33,7 @@ def optimize_sequence(target_gene: str,
         "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
         "run_time": timer.elapsed_time,
     }
-    RunSummary.add_to_run_summary("orf", orf_summary)
+    run_summary.add_to_run_summary("orf", orf_summary)
 
     return optimized_sequence
 
