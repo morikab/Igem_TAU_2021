@@ -24,7 +24,8 @@ def optimize_sequence(target_gene: str,
         aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
                                                            tuning_param=tuning_param,
                                                            optimization_method=optimization_method,
-                                                           optimization_cub_index=optimization_cub_index)
+                                                           optimization_cub_index=optimization_cub_index,
+                                                           run_summary=run_summary)
 
         target_protein = shared_functions_and_vars.translate(target_gene)
         optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
@@ -197,11 +198,14 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
         raise NotImplementedError(F"Optimization method: {optimization_method}")
 
     return optimization_method_to_total_loss[optimization_method]()
+
+
 # --------------------------------------------------------------
 def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
                          tuning_param: float,
                          optimization_method: models.OptimizationMethod,
-                         optimization_cub_index: models.OptimizationCubIndex) -> typing.Dict[str, str]:
+                         optimization_cub_index: models.OptimizationCubIndex,
+                         run_summary: RunSummary) -> typing.Dict[str, str]:
     """
     :return: Dictionary in the format Amino Acid: Optimal codon.
     """
@@ -218,7 +222,7 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
         codons_loss_score[aa] = loss
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
 
-    RunSummary.add_to_run_summary("orf_debug", codons_loss_score)
+    run_summary.add_to_run_summary("orf_debug", codons_loss_score)
     return optimal_codons
 
 
