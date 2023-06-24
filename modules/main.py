@@ -12,7 +12,7 @@ from modules.run_summary import RunSummary
 artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "artifacts"))
 # if artifacts_directory.exists() and artifacts_directory.is_dir():
 #     shutil.rmtree(artifacts_directory)
-artifacts_directory.mkdir(parents=True, exist_ok=True)
+# artifacts_directory.mkdir(parents=True, exist_ok=True)
 
 from modules import user_IO, ORF, sequence_family
 from modules.evaluation import models as evaluation_models
@@ -46,9 +46,24 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
 
         # ###################################### Output Handling ##########################################
         output_path = user_input.output_path or str(artifacts_directory)
-        run_summary.save_run_summary(output_path)
 
-        final_output = run_summary.get()
+        # FIXME - start
+        run_summary_content = run_summary.get()
+        return run_summary_content
+        
+        if run_summary_content.get("orf") is None:
+            raise ValueError(run_summary_content)
+        
+        final_output = {
+            "initial_optimization_score": run_summary_content["orf"].get("initial_sequence_optimization_score"),
+            "final_optimization_score": run_summary_content["orf"].get("final_sequence_optimization_score"),
+            "average_distance_score": run_summary_content["evaluation"]["average_distance_score"],
+            "weakest_link_score": run_summary_content["evaluation"]["weakest_link_score"],
+        }
+        
+        # run_summary.save_run_summary(output_path)
+        # final_output = run_summary.get()
+        # FIXME - end 
 
         # TODO - handle multiple results in output generation module
         evaluation_result = evaluation_results[0]
