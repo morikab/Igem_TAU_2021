@@ -133,6 +133,7 @@ class UserInputModule(object):
                                        tai_profile=organism_data["tai_weights"],
                                        cai_scores=organism_data["cai_scores"],
                                        tai_scores=organism_data["tai_scores"],
+                                       reference_genes=organism_data["reference_genes"],
                                        is_optimized=organism_data["is_wanted"],
                                        optimization_priority=organism_data["optimization_priority"])
 
@@ -164,10 +165,9 @@ class UserInputModule(object):
         cai_scores_dict = None
         tai_weights = None
         tai_scores_dict = None
-        # TODO - Neglect ribosomal proteins when calculating std and avg for cds dict (add return parameter to calculate
-        #  cai weights method.
+        reference_genes = None
         if optimization_cub_index.is_codon_adaptation_index:
-            cai_weights = calculate_cai_weights_for_input(cds_dict, estimated_expression)
+            cai_weights, reference_genes = calculate_cai_weights_for_input(cds_dict, estimated_expression)
             cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
             cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
 
@@ -182,6 +182,7 @@ class UserInputModule(object):
                                           tai_profile=tai_weights,
                                           cai_scores=cai_scores_dict,
                                           tai_scores=tai_scores_dict,
+                                          reference_genes=reference_genes,
                                           is_optimized=is_optimized,
                                           optimization_priority=optimization_priority)
 
@@ -190,12 +191,15 @@ class UserInputModule(object):
         org_summary["cai_scores"] = cai_scores_dict
         org_summary["tai_scores"] = tai_scores_dict
         org_summary["cds_dict"] = cds_dict
+        org_summary["reference_genes"] = reference_genes
         # with open(parsed_organism_file_name+".fasta", "w") as organism_fasta_file:
         write_fasta(fid=parsed_organism_file_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
         with open(parsed_organism_file, "w") as organism_file:
             json.dump(org_summary, organism_file)
         # FIXME - end
+
+        # TODO - continue from here... check the code for the chosen organisms from the notebook (and repeat the run configs).
 
         logger.info(F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
         return organism_object

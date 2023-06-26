@@ -111,17 +111,21 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     return cds_dict, estimated_expression
 
 
-def calculate_cai_weights_for_input(cds_dict: typing.Dict[str, typing.Any],
-                                    estimated_expression_dict: typing.Dict[str, float]) -> typing.Dict[str, float]:
+def calculate_cai_weights_for_input(
+        cds_dict: typing.Dict[str, typing.Any],
+        estimated_expression_dict: typing.Dict[str, float],
+) -> typing.Tuple[typing.Dict[str, float], typing.Sequence[str]]:
     """
     calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.
     in any other case, ribosomal genes will be used
     """
     ribosomal_proteins_count_threshold = config["INPUT"]["RIBOSOMAL_PROTEINS_COUNT_THRESHOLD"]
-    ribosomal_proteins = [cds for description, cds in cds_dict.items() if "ribosom" in description]
+    ribosomal_proteins = {description: cds for description, cds in cds_dict.items() if "ribosom" in description}
     ribosomal_proteins_count = len(ribosomal_proteins)
     logger.info(F"Found {ribosomal_proteins_count} ribosomal proteins in input genome.")
+
+    reference_genes = []
 
     if len(estimated_expression_dict) < max(ribosomal_proteins_count, ribosomal_proteins_count_threshold) * 3:
         logger.info("Estimated expression dictionary does not have enough expression levels. CAI will be calculated "
@@ -134,7 +138,8 @@ def calculate_cai_weights_for_input(cds_dict: typing.Dict[str, typing.Any],
             cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
         else:
             logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
-            cai_weights = relative_adaptiveness(ribosomal_proteins)
+            cai_weights = relative_adaptiveness(ribosomal_proteins.values())
+            reference_genes = ribosomal_proteins.keys()
     else:
         logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
         logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
@@ -150,4 +155,4 @@ def calculate_cai_weights_for_input(cds_dict: typing.Dict[str, typing.Any],
                                      highly_expressed_names]
         cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
 
-    return cai_weights
+    return cai_weights, reference_genes
