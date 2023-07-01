@@ -15,32 +15,41 @@ class Organism(object):
                  cai_profile: typing.Optional[typing.Dict] = None,
                  tai_profile: typing.Optional[typing.Dict] = None,
                  cai_scores: typing.Optional[typing.Dict] = None,
-                 tai_scores: typing.Optional[typing.Dict] = None):
+                 tai_scores: typing.Optional[typing.Dict] = None,
+                 reference_genes: typing.Optional[typing.Sequence] = None):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
         self.cai_scores = cai_scores
-        self._cai_scores_values = cai_scores.values() if cai_scores else None
         self.tai_scores = tai_scores
-        self._tai_scores_values = tai_scores.values() if tai_scores else None
+        self.reference_genes = reference_genes
         self.is_optimized = is_optimized
         self.optimization_priority = optimization_priority
 
+    def filter_reference_genes(self, scores: typing.Dict[str, float]):
+        return [scores[gene_name] for gene_name in scores.keys() if gene_name not in self.reference_genes]
+
     @property
-    def cai_avg(self) -> float:
-        return statistics.mean(self._cai_scores_values) if self.cai_scores else None
+    def cai_avg(self) -> typing.Optional[float]:
+        if self.cai_scores is None:
+            return None
+        scores = self.filter_reference_genes(self.cai_scores)
+        return statistics.mean(scores)
 
     @property
     def tai_avg(self) -> float:
-        return statistics.mean(self._tai_scores_values) if self.tai_scores else None
+        return statistics.mean(self.tai_scores.values()) if self.tai_scores else None
 
     @property
-    def cai_std(self) -> float:
-        return statistics.stdev(self._cai_scores_values) if self.cai_scores else None
+    def cai_std(self) -> typing.Optional[float]:
+        if self.cai_scores is None:
+            return None
+        scores = self.filter_reference_genes(self.cai_scores)
+        return statistics.stdev(scores)
 
     @property
     def tai_std(self) -> float:
-        return statistics.stdev(self._tai_scores_values) if self.tai_scores else None
+        return statistics.stdev(self.tai_scores.values()) if self.tai_scores else None
 
     @property
     def summary(self) -> typing.Dict[str, typing.Any]:
