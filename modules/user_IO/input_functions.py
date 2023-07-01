@@ -139,7 +139,7 @@ def calculate_cai_weights_for_input(
         else:
             logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
             cai_weights = relative_adaptiveness(ribosomal_proteins.values())
-            reference_genes = ribosomal_proteins.keys()
+            reference_genes = list(ribosomal_proteins.keys())
     else:
         logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
         logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
