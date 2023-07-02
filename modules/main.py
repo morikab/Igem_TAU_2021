@@ -49,7 +49,6 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
 
         # FIXME - start
         run_summary_content = run_summary.get()
-        return run_summary_content
         
         if run_summary_content.get("orf") is None:
             raise ValueError(run_summary_content)
