@@ -77,13 +77,15 @@ def run_all_methods(orf_sequence: typing.Optional[str] = None,
                     orf_sequence_file: typing.Optional[str] = None,
                     output_path: typing.Optional[str] = None):
     for optimization_method in [
-        # "single_codon_ratio", "single_codon_diff", "single_codon_weakest_link",
+        "single_codon_ratio",
+        "single_codon_diff",
+        "single_codon_weakest_link",
         # "zscore_single_aa_ratio",
         "zscore_bulk_aa_ratio",
         # "zscore_single_aa_diff",
-        # "zscore_bulk_aa_diff",
+        "zscore_bulk_aa_diff",
         # "zscore_single_aa_weakest_link",
-        # "zscore_bulk_aa_weakest_link",
+        "zscore_bulk_aa_weakest_link",
     ]:
         for optimization_cub_index in ["CAI", "tAI"]:
             for direction in [True, False]:
@@ -151,8 +153,8 @@ def run_single_method_for_orf_sequence(optimization_method: str,
         sequence_file_path=orf_sequence_file,
         output_path=os.path.join("results", output_path),
     )
-    # return run_modules(default_user_inp_raw)
-    return run_orf_module(default_user_inp_raw)
+    return run_modules(default_user_inp_raw)
+    # return run_orf_module(default_user_inp_raw)
     # run_input_processing(default_user_inp_raw)
 
 
@@ -190,14 +192,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                output_path="mcherry")
+    run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                    output_path="mcherry")
 
-    run_for_endogenous_genes(fasta_file_path=args.fasta,
-                             optimization_method=args.method,
-                             optimization_cub_index=args.index,
-                             is_ecoli_optimized=args.opt,
-                             output_path=args.output)
+    # run_for_endogenous_genes(fasta_file_path=args.fasta,
+    #                          optimization_method=args.method,
+    #                          optimization_cub_index=args.index,
+    #                          is_ecoli_optimized=args.opt,
+    #                          output_path=args.output)
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
 
