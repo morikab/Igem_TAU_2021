@@ -217,8 +217,13 @@ if __name__ == "__main__":
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry")
 
-    generate_sequences_fasta_file(r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results")
+    run_single_method_for_orf_sequence(optimization_method="zscore_bulk_aa_ratio",
+                                       optimization_cub_index="tAI",
+                                       is_ecoli_optimized=True,
+                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                                       output_path="mcherry_debug")
 
+    # generate_sequences_fasta_file(r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results")
     # run_for_endogenous_genes(fasta_file_path=args.fasta,
     #                          optimization_method=args.method,
     #                          optimization_cub_index=args.index,

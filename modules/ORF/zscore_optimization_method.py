@@ -394,8 +394,8 @@ def _calculate_zscore_ratio_score(zscore: models.SequenceZscores,
                                   tuning_parameter: float) -> float:
     mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
     mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
-    epsilon = 10 ** -9
-    mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
+    # epsilon = 10 ** -9
+    # mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
 
     return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
