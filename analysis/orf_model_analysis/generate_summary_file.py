@@ -283,7 +283,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     requested_optimization_method = args.method
     # 1
-    generate_summary(results_directory=r"results_human\mcherry")
+    generate_summary(results_directory=r"results\mcherry")
 
     # 2
     root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results_human"

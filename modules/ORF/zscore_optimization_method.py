@@ -2,6 +2,7 @@ import typing
 from collections import defaultdict
 
 from numpy import average
+from scipy.stats.mstats import gmean
 
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
@@ -392,10 +393,11 @@ def _calculate_zscore_diff_score(zscore: models.SequenceZscores,
 # --------------------------------------------------------------
 def _calculate_zscore_ratio_score(zscore: models.SequenceZscores,
                                   tuning_parameter: float) -> float:
-    mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
-    mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
-    epsilon = 10 ** -9
-    mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
+    # mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
+    # mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
+
+    mean_opt_index = gmean(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
+    mean_deopt_index = gmean(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
 
     return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
