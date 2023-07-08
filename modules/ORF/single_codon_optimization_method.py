@@ -1,6 +1,7 @@
 import typing
 from collections import defaultdict
 from numpy import average
+from scipy.stats.mstats import gmean
 
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
@@ -84,7 +85,6 @@ def _calculate_organism_loss_per_codon(organism: models.Organism,
         return (max_value - organism_codon_weight + 1) ** 2
 
     def _deoptimized_organism_ratio_based_loss_function() -> float:
-        # TODO - should we apply the fix of adding an epsilon to all variations or only to the ratio variation?
         return (max_value - organism_codon_weight + 1) ** 2
 
     def _optimized_organism_weakest_link_based_loss_function() -> float:
@@ -172,10 +172,12 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
         return tuning_parameter * mean_opt_index + (1 - tuning_parameter) * mean_deopt_index
 
     def _ratio_total_loss() -> float:
-        mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
-        mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
-        # epsilon = 10 ** -9
-        # mean_deopt_index = mean_deopt_index if mean_deopt_index != 0 else epsilon
+        # mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
+        # mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
+
+        mean_opt_index = gmean(optimized_organisms_loss, weights=optimized_organisms_weights)
+        mean_deopt_index = gmean(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
+
         return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
     def _weakest_link_total_loss() -> float:
