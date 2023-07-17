@@ -107,7 +107,6 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     # prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
 
-    # return prom200_dict, cds_dict, intergenic_dict, estimated_expression
     return cds_dict, estimated_expression
 
 
