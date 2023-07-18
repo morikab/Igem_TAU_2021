@@ -109,6 +109,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         sequence_file_path: str = None,
         sequence: str = None,
         output_path: str = None,
+        should_use_mrna_levels: bool = True,
 ):
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
@@ -120,12 +121,12 @@ def generate_testing_data_for_ecoli_and_bacillus(
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia-coli.gb"
-        opt_mrna_levels = "ecoli_mrna_level.csv"
+        opt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None,
         deopt_genome = "Bacillus-subtilis.gb"
         deopt_mrna_levels = "bacillus_mrna_level.csv"
     else:
         opt_genome = "Bacillus-subtilis.gb"
-        opt_mrna_levels = "bacillus_mrna_level.csv"
+        opt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None,
         deopt_genome = "Escherichia-coli.gb"
         deopt_mrna_levels = "ecoli_mrna_level.csv"
 
@@ -143,14 +144,14 @@ def generate_testing_data_for_ecoli_and_bacillus(
     inp_dict['organisms'][opt_genome[:-3]] = {
         "genome_path": os.path.join(base_path, opt_genome),
         "optimized": True,
-        "expression_csv": os.path.join(base_path, opt_mrna_levels),
+        "expression_csv": os.path.join(base_path, opt_mrna_levels) if should_use_mrna_levels else None,
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 
     inp_dict["organisms"][deopt_genome[:-2]] = {
         "genome_path": os.path.join(base_path, deopt_genome),
         "optimized": False,
-        "expression_csv": os.path.join(base_path, deopt_mrna_levels),
+        "expression_csv": os.path.join(base_path, deopt_mrna_levels) if should_use_mrna_levels else None,
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 

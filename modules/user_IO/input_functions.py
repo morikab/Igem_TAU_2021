@@ -150,6 +150,7 @@ def calculate_cai_weights_for_input(
         logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
                     F"genes from estimated expression dictionary.")
         highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
+        reference_genes = highly_expressed_names
         highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in
                                      highly_expressed_names]
         cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)

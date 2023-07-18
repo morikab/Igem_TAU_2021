@@ -33,7 +33,8 @@ class Organism(object):
     def cai_avg(self) -> typing.Optional[float]:
         if self.cai_scores is None:
             return None
-        scores = self.filter_reference_genes(self.cai_scores)
+        # scores = self.filter_reference_genes(self.cai_scores)
+        scores = self.cai_scores
         return statistics.mean(scores)
 
     @property
@@ -44,7 +45,8 @@ class Organism(object):
     def cai_std(self) -> typing.Optional[float]:
         if self.cai_scores is None:
             return None
-        scores = self.filter_reference_genes(self.cai_scores)
+        # scores = self.filter_reference_genes(self.cai_scores)
+        scores = self.cai_scores
         return statistics.stdev(scores)
 
     @property
