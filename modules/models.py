@@ -35,7 +35,7 @@ class Organism(object):
             return None
         # scores = self.filter_reference_genes(self.cai_scores)
         scores = self.cai_scores
-        return statistics.mean(scores)
+        return statistics.mean(scores.values())
 
     @property
     def tai_avg(self) -> float:
@@ -47,7 +47,7 @@ class Organism(object):
             return None
         # scores = self.filter_reference_genes(self.cai_scores)
         scores = self.cai_scores
-        return statistics.stdev(scores)
+        return statistics.stdev(scores.values())
 
     @property
     def tai_std(self) -> float:

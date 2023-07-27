@@ -121,14 +121,14 @@ def generate_testing_data_for_ecoli_and_bacillus(
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia-coli.gb"
-        opt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None,
+        opt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None
         deopt_genome = "Bacillus-subtilis.gb"
-        deopt_mrna_levels = "bacillus_mrna_level.csv"
+        deopt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None
     else:
         opt_genome = "Bacillus-subtilis.gb"
-        opt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None,
+        opt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None
         deopt_genome = "Escherichia-coli.gb"
-        deopt_mrna_levels = "ecoli_mrna_level.csv"
+        deopt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None
 
     inp_dict = {
         "sequence_file_path": sequence_file_path,
