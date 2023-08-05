@@ -322,66 +322,6 @@ def get_total_score(zscore: models.SequenceZscores,
                                                     tuning_parameter=tuning_parameter,
                                                     )
 
-
-# --------------------------------------------------------------
-
-# def _calculate_zscore_for_sequence_old(sequence: str,
-#                                        user_input: models.UserInput,
-#                                        optimization_method: models.OptimizationMethod,
-#                                        optimization_cub_index: models.OptimizationCubIndex):
-#     optimization_cub_index_value = optimization_cub_index.value.lower()
-#
-#     std_key = F"{optimization_cub_index_value}_std"
-#     average_key = F"{optimization_cub_index_value}_avg"
-#     weights = F"{optimization_cub_index_value}_profile"
-#
-#     optimized_organisms_scores = []
-#     optimized_organisms_weights = []
-#     deoptimized_organisms_scores = []
-#     deoptimized_organisms_weights = []
-#
-#     for organism in user_input.organisms:
-#         sigma = getattr(organism, std_key)
-#         miu = getattr(organism, average_key)
-#         profile = getattr(organism, weights)
-#         index_score = general_geomean([sequence], weights=profile)[0]
-#         organism_score = (index_score - miu) / sigma
-#         # logger.info(F"CUB score for organism {organism.name} is: {index_score}")
-#         if organism.is_optimized:
-#             optimized_organisms_scores.append(organism_score)
-#             optimized_organisms_weights.append(organism.optimization_priority)
-#         else:
-#             deoptimized_organisms_scores.append(organism_score)
-#             deoptimized_organisms_weights.append(organism.optimization_priority)
-#
-#     alpha = user_input.tuning_parameter
-#     if optimization_method.is_zscore_diff_score_optimization:
-#         return _calculate_zscore_diff_score(optimized_organisms_scores=optimized_organisms_scores,
-#                                             deoptimized_organisms_scores=deoptimized_organisms_scores,
-#                                             optimized_organisms_weights=optimized_organisms_weights,
-#                                             deoptimized_organisms_weights=deoptimized_organisms_weights,
-#                                             tuning_parameter=alpha)
-#
-#     if optimization_method.is_zscore_ratio_score_optimization:
-#         return _calculate_zscore_ratio_score(optimized_organisms_scores=optimized_organisms_scores,
-#                                              deoptimized_organisms_scores=deoptimized_organisms_scores,
-#                                              optimized_organisms_weights=optimized_organisms_weights,
-#                                              deoptimized_organisms_weights=deoptimized_organisms_weights,
-#                                              tuning_parameter=alpha)
-#
-#     if optimization_method.is_zscore_weakest_link_score_optimization:
-#         return _calculate_zscore_weakest_link_score(
-#             optimized_organisms_scores=optimized_organisms_scores,
-#             deoptimized_organisms_scores=deoptimized_organisms_scores,
-#             optimized_organisms_weights=optimized_organisms_weights,
-#             deoptimized_organisms_weights=deoptimized_organisms_weights,
-#             tuning_parameter=alpha,
-#         )
-#
-#
-#     raise NotImplementedError(F"Optimization method: {optimization_method}")
-#
-
 # --------------------------------------------------------------
 def _calculate_zscore_diff_score(zscore: models.SequenceZscores,
                                  tuning_parameter: float) -> float:
