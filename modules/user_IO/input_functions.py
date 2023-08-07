@@ -38,6 +38,39 @@ def tai_from_tgcnDB(org_name):
     return tai_weights
 
 
+def extract_mrna_expression_levels(expression_csv_fid: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_df = pd.read_csv(expression_csv_fid)
+
+    gene_name_to_mrna_level = {}
+    for idx, pair in enumerate(zip(expression_df.gene.to_list(), expression_df.mRNA_level.to_list())):
+        measured_gene_name, expression_level = pair
+        try:
+            gene_name_to_mrna_level[measured_gene_name.lower()] = float(expression_level)
+        except:
+            continue
+    mrna_levels = list(gene_name_to_mrna_level.values())
+    mrna_names = list(gene_name_to_mrna_level.keys())
+
+    return mrna_names, mrna_levels
+
+
+# TODO - create a flag that indicates whether input contains mRNA or PA levels
+def extract_protein_abundance_levels(expression_csv_fid: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_df = pd.read_json(expression_csv_fid)
+
+    gene_name_to_expression_level = {}
+    for idx, pair in enumerate(zip(expression_df.name.to_list(), expression_df.abundance.to_list())):
+        measured_gene_name, expression_level = pair
+        try:
+            gene_name_to_expression_level[measured_gene_name.lower()] = float(expression_level)
+        except:
+            continue
+    protein_levels = list(gene_name_to_expression_level.values())
+    protein_names = list(gene_name_to_expression_level.keys())
+
+    return protein_names, protein_levels
+
+
 def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
     cds_seqs = []
@@ -46,21 +79,12 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     starts = []
     ends = []
     strands = []
+    gene_expression_levels = []
     estimated_expression = {}
 
     if expression_csv_fid is not None:
         try:
-            expression_df = pd.read_csv(expression_csv_fid)
-
-            gene_name_to_mrna_level = {}
-            for idx, pair in enumerate(zip(expression_df.gene.to_list(), expression_df.mRNA_level.to_list())):
-                measured_gene_name, expression_level = pair
-                try:
-                    gene_name_to_mrna_level[measured_gene_name.lower()] = float(expression_level)
-                except:
-                    continue
-            mrna_levels = list(gene_name_to_mrna_level.values())
-            mrna_names = list(gene_name_to_mrna_level.keys())
+            gene_expression_names, gene_expression_levels = extract_protein_abundance_levels(expression_csv_fid)
         except:
             expression_csv_fid = None
             logger.info('Expression data file is corrupt. \nMake sure that: ')
@@ -97,14 +121,15 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
 
                         if expression_csv_fid is not None:
                             try:
-                                mrna_level = [mrna_levels[index] for index in range(len(mrna_names)) if mrna_names[index] == name.lower()][0]
-                                estimated_expression[name + '|'+ function] = mrna_level
-                            except:
+                                # TODO - check the matching here - why we lose so much information?
+                                index = gene_expression_names.index(name.lower())
+                                expression_level = gene_expression_levels[index]
+                                estimated_expression[name + '|' + function] = expression_level
+                            except ValueError:
                                 continue
 
     entry_num = len(gene_names)
     name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
-    # prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
     cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
 
     return cds_dict, estimated_expression

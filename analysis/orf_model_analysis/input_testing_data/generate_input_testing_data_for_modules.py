@@ -16,6 +16,11 @@ DEFAULT_CLUSTERS_COUNT = 1
 DEFAULT_TUNING_PARAM = 0.5
 DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
 
+# DEFAULT_ECOLI_EXPRESSION_LEVELS_CSV = "ecoli_mrna_level.csv"
+# DEFAULT_BACILLUS_EXPRESSION_LEVELS_CSV = "bacillus_mrna_level.csv"
+DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE = "PA_ecoli.json"
+DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE = "PA_bacillus.json"
+
 
 def generate_random_string(length: int) -> str:
     letters_and_digits = string.ascii_letters + string.digits
@@ -121,14 +126,14 @@ def generate_testing_data_for_ecoli_and_bacillus(
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia-coli.gb"
-        opt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None
+        opt_mrna_levels = DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
         deopt_genome = "Bacillus-subtilis.gb"
-        deopt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None
+        deopt_mrna_levels = DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
     else:
         opt_genome = "Bacillus-subtilis.gb"
-        opt_mrna_levels = "bacillus_mrna_level.csv" if should_use_mrna_levels else None
+        opt_mrna_levels = DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
         deopt_genome = "Escherichia-coli.gb"
-        deopt_mrna_levels = "ecoli_mrna_level.csv" if should_use_mrna_levels else None
+        deopt_mrna_levels = DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
 
     inp_dict = {
         "sequence_file_path": sequence_file_path,
