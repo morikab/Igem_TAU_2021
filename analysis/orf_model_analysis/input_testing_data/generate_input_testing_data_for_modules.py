@@ -16,10 +16,11 @@ DEFAULT_CLUSTERS_COUNT = 1
 DEFAULT_TUNING_PARAM = 0.5
 DEFAULT_SEQUENCE_FILE_PATH = os.path.join(base_path, "mCherry_original.fasta")
 
-# DEFAULT_ECOLI_EXPRESSION_LEVELS_CSV = "ecoli_mrna_level.csv"
-# DEFAULT_BACILLUS_EXPRESSION_LEVELS_CSV = "bacillus_mrna_level.csv"
-DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE = "PA_ecoli.json"
-DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE = "PA_bacillus.json"
+DEFAULT_ECOLI_MRNA_EXPRESSION_LEVELS_FILE = "ecoli_mrna_level.csv"
+DEFAULT_BACILLUS_MRNA_EXPRESSION_LEVELS_FILE = "bacillus_mrna_level.csv"
+
+DEFAULT_ECOLI_PROTEIN_ABUNDANCE_FILE = "PA_ecoli.json"
+DEFAULT_BACILLUS_PROTEIN_ABUNDANCE_FILE = "PA_bacillus.json"
 
 
 def generate_random_string(length: int) -> str:
@@ -115,6 +116,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         sequence: str = None,
         output_path: str = None,
         should_use_mrna_levels: bool = True,
+        should_use_protein_abundance: bool = False,
 ):
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
@@ -126,14 +128,18 @@ def generate_testing_data_for_ecoli_and_bacillus(
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia-coli.gb"
-        opt_mrna_levels = DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        opt_mrna_levels = DEFAULT_ECOLI_MRNA_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        opt_protein_abundance = DEFAULT_ECOLI_PROTEIN_ABUNDANCE_FILE if should_use_protein_abundance else None
         deopt_genome = "Bacillus-subtilis.gb"
-        deopt_mrna_levels = DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        deopt_mrna_levels = DEFAULT_BACILLUS_MRNA_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        deopt_protein_abundance = DEFAULT_BACILLUS_PROTEIN_ABUNDANCE_FILE if should_use_protein_abundance else None
     else:
         opt_genome = "Bacillus-subtilis.gb"
-        opt_mrna_levels = DEFAULT_BACILLUS_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        opt_mrna_levels = DEFAULT_BACILLUS_MRNA_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        opt_protein_abundance = DEFAULT_BACILLUS_PROTEIN_ABUNDANCE_FILE if should_use_protein_abundance else None
         deopt_genome = "Escherichia-coli.gb"
-        deopt_mrna_levels = DEFAULT_ECOLI_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        deopt_mrna_levels = DEFAULT_ECOLI_MRNA_EXPRESSION_LEVELS_FILE if should_use_mrna_levels else None
+        deopt_protein_abundance = DEFAULT_ECOLI_PROTEIN_ABUNDANCE_FILE if should_use_protein_abundance else None
 
     inp_dict = {
         "sequence_file_path": sequence_file_path,
@@ -146,17 +152,31 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "output_path": output_directory,
     }
 
+    expression_csv_type = None
+    opt_expression_csv = None
+    deopt_expression_csv = None
+    if should_use_protein_abundance:
+        expression_csv_type = "protein_abundance"
+        opt_expression_csv = os.path.join(base_path, opt_protein_abundance)
+        deopt_expression_csv = os.path.join(base_path, deopt_protein_abundance)
+    elif should_use_mrna_levels:
+        expression_csv_type = "mrna_levels"
+        opt_expression_csv = os.path.join(base_path, opt_mrna_levels)
+        deopt_expression_csv = os.path.join(base_path, deopt_mrna_levels)
+
     inp_dict['organisms'][opt_genome[:-3]] = {
         "genome_path": os.path.join(base_path, opt_genome),
         "optimized": True,
-        "expression_csv": os.path.join(base_path, opt_mrna_levels) if should_use_mrna_levels else None,
+        "expression_csv_type": expression_csv_type,
+        "expression_csv": opt_expression_csv,
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 
     inp_dict["organisms"][deopt_genome[:-2]] = {
         "genome_path": os.path.join(base_path, deopt_genome),
         "optimized": False,
-        "expression_csv": os.path.join(base_path, deopt_mrna_levels) if should_use_mrna_levels else None,
+        "expression_csv_type": expression_csv_type,
+        "expression_csv": deopt_expression_csv,
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 

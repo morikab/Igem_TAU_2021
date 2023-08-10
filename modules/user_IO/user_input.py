@@ -141,6 +141,7 @@ class UserInputModule(object):
 
         # FIXME - end
 
+        exp_cdv_type = organism_input['expression_csv_type']
         exp_csv_fid = organism_input['expression_csv']
         try:
             gb_file = SeqIO.read(gb_path, format='gb')
@@ -159,7 +160,8 @@ class UserInputModule(object):
             logger.info("Organism is deoptimized")
         optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
 
-        cds_dict, estimated_expression = extract_gene_data(gb_path, exp_csv_fid)
+        cds_dict, estimated_expression = extract_gene_data(genbank_path=gb_path,
+                                                           expression_csv_fid=exp_csv_fid)
         logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
 

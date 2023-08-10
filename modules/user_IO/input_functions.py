@@ -54,7 +54,6 @@ def extract_mrna_expression_levels(expression_csv_fid: str) -> typing.Tuple[typi
     return mrna_names, mrna_levels
 
 
-# TODO - create a flag that indicates whether input contains mRNA or PA levels
 def extract_protein_abundance_levels(expression_csv_fid: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
     expression_df = pd.read_json(expression_csv_fid)
 
@@ -71,7 +70,21 @@ def extract_protein_abundance_levels(expression_csv_fid: str) -> typing.Tuple[ty
     return protein_names, protein_levels
 
 
-def extract_gene_data(genbank_path: str, expression_csv_fid=None):
+def extract_expression_levels(expression_csv_fid: str,
+                              expression_csv_type: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_csv_type_mapping = {
+        "mrna_levels": extract_mrna_expression_levels,
+        "protein_abundance": extract_protein_abundance_levels,
+    }
+    if expression_csv_type not in expression_csv_type_mapping:
+        raise KeyError(F"Missing support for expression csv type: {expression_csv_type}")
+
+    return expression_csv_type_mapping[expression_csv_type](expression_csv_fid)
+
+
+def extract_gene_data(genbank_path: str,
+                      expression_csv_fid: typing.Optional[str] = None,
+                      expression_csv_type: typing.Optional[str] = None):
     genome = str(SeqIO.read(genbank_path, format='gb').seq)
     cds_seqs = []
     gene_names = []
@@ -80,13 +93,19 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
     ends = []
     strands = []
     gene_expression_levels = []
+    gene_expression_names = []
     estimated_expression = {}
 
-    if expression_csv_fid is not None:
+    should_use_expression_csv = expression_csv_fid is not None
+
+    if should_use_expression_csv:
         try:
-            gene_expression_names, gene_expression_levels = extract_protein_abundance_levels(expression_csv_fid)
+            gene_expression_names, gene_expression_levels = extract_expression_levels(
+                expression_csv_fid=expression_csv_fid,
+                expression_csv_type=expression_csv_type,
+            )
         except:
-            expression_csv_fid = None
+            should_use_expression_csv = False
             logger.info('Expression data file is corrupt. \nMake sure that: ')
             logger.info('1. File is in csv format')
             logger.info('2. Gene names fit their NCBI naming ')
@@ -119,9 +138,8 @@ def extract_gene_data(genbank_path: str, expression_csv_fid=None):
                         ends.append(feature.location.end)
                         strands.append(feature.location.strand)
 
-                        if expression_csv_fid is not None:
+                        if should_use_expression_csv:
                             try:
-                                # TODO - check the matching here - why we lose so much information?
                                 index = gene_expression_names.index(name.lower())
                                 expression_level = gene_expression_levels[index]
                                 estimated_expression[name + '|' + function] = expression_level
