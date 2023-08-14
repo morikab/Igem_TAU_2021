@@ -161,7 +161,8 @@ class UserInputModule(object):
         optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
 
         cds_dict, estimated_expression = extract_gene_data(genbank_path=gb_path,
-                                                           expression_csv_fid=exp_csv_fid)
+                                                           expression_csv_fid=exp_csv_fid,
+                                                           expression_csv_type=exp_cdv_type)
         logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
 

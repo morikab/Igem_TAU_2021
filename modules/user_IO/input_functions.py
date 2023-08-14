@@ -76,6 +76,7 @@ def extract_expression_levels(expression_csv_fid: str,
         "mrna_levels": extract_mrna_expression_levels,
         "protein_abundance": extract_protein_abundance_levels,
     }
+    logger.info(f"Extracting expression levels from: {expression_csv_type} file.")
     if expression_csv_type not in expression_csv_type_mapping:
         raise KeyError(F"Missing support for expression csv type: {expression_csv_type}")
 

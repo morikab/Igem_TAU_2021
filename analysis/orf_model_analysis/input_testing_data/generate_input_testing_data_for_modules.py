@@ -179,5 +179,4 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "expression_csv": deopt_expression_csv,
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
-
     return inp_dict
