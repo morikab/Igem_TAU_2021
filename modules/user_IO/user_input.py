@@ -177,10 +177,12 @@ class UserInputModule(object):
             cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
 
         if optimization_cub_index.is_trna_adaptation_index:
-            # TODO - move the location of tai calculation to user_input module
-            tai_weights = tai_from_tgcnDB(organism_name)
-            tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
-            tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
+            # tai_weights = tai_from_tgcnDB(organism_name)
+            # tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
+            # tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
+            tai = calculate_tai_weights(organism_name)
+            tai_weights = tai.weights.to_dict()
+            tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
 
         organism_object = models.Organism(name=organism_name,
                                           cai_profile=cai_weights,
@@ -204,6 +206,10 @@ class UserInputModule(object):
             json.dump(org_summary, organism_file)
         # FIXME - end
 
-        logger.info(
-            F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
+        if optimization_cub_index.is_codon_adaptation_index:
+            logger.info(
+                F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
+        if optimization_cub_index.is_trna_adaptation_index:
+            logger.info(
+                F"name={organism_object.name}, tai_std={organism_object.tai_std}, tai_avg={organism_object.tai_avg}")
         return organism_object

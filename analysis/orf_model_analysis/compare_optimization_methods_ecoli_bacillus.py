@@ -214,6 +214,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    import codonbias as cb
+
+    # bacillus_tai = cb.scores.TrnaAdaptationIndex(
+    #     url="http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/",
+    #     prokaryote=True,
+    # )
+
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry")
 
@@ -232,10 +239,10 @@ if __name__ == "__main__":
 
     results = run_single_method_for_orf_sequence(
         optimization_method="single_codon_diff",
-        optimization_cub_index="CAI",
+        optimization_cub_index="tAI",
         is_ecoli_optimized=False,
         output_path="endogenous",
-        orf_sequence=gene_sequence,
+        orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     )
     print(results)
 

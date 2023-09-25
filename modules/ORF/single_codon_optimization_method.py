@@ -57,11 +57,12 @@ def _get_max_organism_attribute_value(
         organism_attribute_name: str,
 ) -> float:
     all_organism_attribute_values = getattr(organism, organism_attribute_name)
-    codon_attribute_values = [all_organism_attribute_values[codon] for codon in codons]
+    # In case of missing entry per codon, assign 0 for the missing weight
+    codon_attribute_values = [all_organism_attribute_values.get(codon, 0) for codon in codons]
 
     max_value = max(codon_attribute_values)
     if max_value == 0:
-        max_value = 0.000001
+        max_value = 0.000001        # TODO - change this to the avg of the other values..?
 
     return max_value
 
@@ -70,10 +71,9 @@ def _get_max_organism_attribute_value(
 def _calculate_organism_loss_per_codon(organism: models.Organism,
                                        codon: str,
                                        max_value: float,
-                                       tuning_param: float,
                                        optimization_method: models.OptimizationMethod,
                                        organism_attribute_name: str) -> float:
-    organism_codon_weight = getattr(organism, organism_attribute_name)[codon]
+    organism_codon_weight = getattr(organism, organism_attribute_name).get(codon, 0)
 
     def _optimized_organism_diff_based_loss_function() -> float:
         return (max_value - organism_codon_weight) ** 2
@@ -137,7 +137,6 @@ def loss_function(organisms: typing.Sequence[models.Organism],
             organism_loss = _calculate_organism_loss_per_codon(organism=organism,
                                                                codon=codon,
                                                                max_value=max_value,
-                                                               tuning_param=tuning_param,
                                                                optimization_method=optimization_method,
                                                                organism_attribute_name=organism_attribute_name)
             if organism.is_optimized:
@@ -172,9 +171,6 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
         return tuning_parameter * mean_opt_index + (1 - tuning_parameter) * mean_deopt_index
 
     def _ratio_total_loss() -> float:
-        # mean_opt_index = average(optimized_organisms_loss, weights=optimized_organisms_weights)
-        # mean_deopt_index = average(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
-
         mean_opt_index = gmean(optimized_organisms_loss, weights=optimized_organisms_weights)
         mean_deopt_index = gmean(deoptimized_organisms_loss, weights=deoptimized_organisms_weights)
 

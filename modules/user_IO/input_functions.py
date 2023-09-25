@@ -4,6 +4,7 @@ import operator
 import typing
 
 from Bio import SeqIO
+import codonbias as cb
 import pandas as pd
 
 from logger_factory.logger_factory import LoggerFactory
@@ -193,6 +194,7 @@ def calculate_cai_weights_for_input(
         highly_expressed_genes_count = round(len(sorted_estimated_expression) * estimated_expression_threshold)
         logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
                     F"genes from estimated expression dictionary.")
+
         highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
         reference_genes = highly_expressed_names
         highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in
@@ -200,3 +202,18 @@ def calculate_cai_weights_for_input(
         cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
 
     return cai_weights, reference_genes
+
+
+def calculate_tai_weights(organism_name: str) -> typing.Optional[cb.scores.TrnaAdaptationIndex]:
+    # TODO - move to json file + pre load for multiple organisms or use the API to derive
+    #  taxonomy level from the .gb file
+    organism_name_to_url_mapping = {
+        "Escherichia coli": "http://gtrnadb.ucsc.edu/genomes/bacteria/Esch_coli_K_12_MG1655/",
+        "Bacillus subtilis": "http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/"
+    }
+    if organism_name not in organism_name_to_url_mapping:
+        logger.info(f"tGCN values were not found for {organism_name}, tAI profile was not calculated.")
+        return None
+    # TODO - consider using https://github.com/AliYoussef96/gtAI for better results
+    logger.info(f"tGCN values were found for {organism_name}. Calculating tAI profile.")
+    return cb.scores.TrnaAdaptationIndex(url=organism_name_to_url_mapping[organism_name], prokaryote=True)
