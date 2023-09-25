@@ -19,31 +19,6 @@ config = Configuration.get_config()
 
 
 # --------------------------------------------------------------
-def optimize_sequence_by_zscore_bulk_and_single_aa(
-        sequence: str,
-        user_input: models.UserInput,
-        optimization_cub_index: models.OptimizationCubIndex,
-        optimization_method: models.OptimizationMethod,
-        max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
-):
-    bulk_sequence = optimize_sequence_by_zscore_bulk_aa(
-        sequence=sequence,
-        user_input=user_input,
-        optimization_method=optimization_method,
-        optimization_cub_index=optimization_cub_index,
-        max_iterations=max_iterations,
-    )
-    return optimize_sequence_by_zscore_single_aa(
-        sequence=bulk_sequence,
-        user_input=user_input,
-        optimization_method=optimization_method,
-        optimization_cub_index=optimization_cub_index,
-        max_iterations=max_iterations,
-    )
-
-
-# TODO - need to modify single aa variation with the normalizd ratio variation..
-# --------------------------------------------------------------
 # In each round - check all single synonymous codon changes and calculate optimization score - take the best one
 def optimize_sequence_by_zscore_single_aa(
         sequence: str,
@@ -130,14 +105,16 @@ def optimize_sequence_by_zscore_single_aa(
                 previous_sequence_score = sequence_to_total_score[sequence]
 
     orf_summary = {
+        "initial_sequence": initial_sequence,
+        "final_sequence": new_sequence,
         "iterations_count": iterations_count,
         "aa_to_optimal_codon": aa_to_codon_mapping,
         "initial_sequence_optimization_score": initial_sequence_score,
-        "final_sequence_optimization_score": sequence_to_total_score[sequence],
+        "final_sequence_optimization_score": sequence_to_total_score[new_sequence],
         "run_time": timer.elapsed_time,
         "iterations_summary": iterations_summary,
     }
-    run_summary.add_to_run_summary("orf", orf_summary)
+    run_summary.append_to_run_summary("orf", orf_summary)
 
     return sequence
 
@@ -151,6 +128,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                                         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
 
     with Timer() as timer:
+        initial_sequence = sequence
         initial_sequence_zscore = _calculate_zscore_for_sequence(
             sequence=sequence,
             user_input=user_input,
@@ -234,6 +212,8 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 previous_sequence_score = score
 
     orf_summary = {
+        "initial_sequence": initial_sequence,
+        "final_sequence": new_sequence,
         "iterations_count": iterations_count,
         "aa_to_optimal_codon": aa_to_selected_codon,
         "initial_sequence_optimization_score": initial_sequence_score,
@@ -242,7 +222,7 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
         "iterations_summary": iterations_summary,
     }
 
-    run_summary.add_to_run_summary("orf", orf_summary)
+    run_summary.append_to_run_summary("orf", orf_summary)
 
     return sequence
 

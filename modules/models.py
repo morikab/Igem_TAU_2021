@@ -98,6 +98,10 @@ class OptimizationMethod(Enum):
                         OptimizationMethod.zscore_bulk_aa_weakest_link)
 
     @property
+    def is_zscore_optimization(self) -> bool:
+        return self.is_zscore_single_aa_optimization or self.is_zscore_bulk_aa_optimization
+
+    @property
     def is_zscore_ratio_score_optimization(self) -> bool:
         return self in (OptimizationMethod.zscore_single_aa_ratio, OptimizationMethod.zscore_bulk_aa_ratio)
 
