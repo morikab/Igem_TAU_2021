@@ -222,28 +222,27 @@ if __name__ == "__main__":
     # )
 
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                 output_path="mcherry")
+    #                 output_path="mcherry_debug")
 
-    # run_single_method_for_orf_sequence(optimization_method="zscore_bulk_aa_ratio",
-    #                                    optimization_cub_index="tAI",
-    #                                    is_ecoli_optimized=True,
-    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                                    output_path="mcherry_debug")
+    run_single_method_for_orf_sequence(optimization_method="zscore_bulk_aa_ratio",
+                                       optimization_cub_index="tAI",
+                                       is_ecoli_optimized=True,
+                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                                       output_path="mcherry_debug")
 
-    with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
-        genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
-    gene_name = "rpmJ|ribosomal"
-
-    gene_sequence = genome_dict[gene_name]
-    gene_sequence = str(gene_sequence.seq)
-
-    results = run_single_method_for_orf_sequence(
-        optimization_method="single_codon_diff",
-        optimization_cub_index="tAI",
-        is_ecoli_optimized=False,
-        output_path="endogenous",
-        orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    )
-    print(results)
+    # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
+    # gene_name = "rpmJ|ribosomal"
+    #
+    # gene_sequence = genome_dict[gene_name]
+    # gene_sequence = str(gene_sequence.seq)
+    #
+    # results = run_single_method_for_orf_sequence(
+    #     optimization_method="single_codon_diff",
+    #     optimization_cub_index="tAI",
+    #     is_ecoli_optimized=False,
+    #     output_path="endogenous",
+    #     orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    # )
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/

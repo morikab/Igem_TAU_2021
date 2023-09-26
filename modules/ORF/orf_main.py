@@ -34,7 +34,7 @@ class ORFModule(object):
                                                      optimization_cub_index=optimization_cub_index,
                                                      optimization_method=optimization_method,
                                                      tuning_param=user_input.tuning_parameter,
-                                                     run_summary=run_summary)
+                                                     run_summary=run_summary),
 
         if optimization_method.is_zscore_optimization:
             return ORFModule.optimize_sequence_by_zscore(
@@ -69,9 +69,10 @@ class ORFModule(object):
 
         results = []
         for target_gene in target_genes:
+            logger.info(f"Running ORF optimization for initial sequence: {target_gene}")
             results.append(partial_zscore_optimization_method(sequence=target_gene))
 
-        return results      # TODO - continue from here!!!!! , modify evaluation scheme to take the best option s
+        return results
 
     @staticmethod
     def get_zscore_optimization_method(optimization_method: models.OptimizationMethod) -> typing.Callable:

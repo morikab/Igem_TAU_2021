@@ -73,7 +73,7 @@ class EvaluationModule(object):
             "organisms": organisms_evaluation_summary,
             **evaluation_result.summary,
         }
-        run_summary.add_to_run_summary("evaluation", evaluation_summary)
+        run_summary.append_to_run_summary("evaluation", evaluation_summary)
 
         return evaluation_result
 
