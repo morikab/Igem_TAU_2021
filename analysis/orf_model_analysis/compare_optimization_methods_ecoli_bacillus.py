@@ -224,7 +224,7 @@ if __name__ == "__main__":
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry_debug")
 
-    run_single_method_for_orf_sequence(optimization_method="zscore_bulk_aa_ratio",
+    run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
                                        optimization_cub_index="tAI",
                                        is_ecoli_optimized=True,
                                        orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,

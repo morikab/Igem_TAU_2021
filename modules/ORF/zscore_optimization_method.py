@@ -54,6 +54,9 @@ def optimize_sequence_by_zscore_single_aa(
             sequence_to_zscore = {sequence: previous_sequence_score}
             tested_sequence_to_codon = defaultdict(list)
             for codon in nt_to_aa.keys():
+                if nt_to_aa[codon] == "_" and optimization_cub_index.is_trna_adaptation_index:
+                    # There is no point in optimizing stop codon by tAI weights, so keep the original codon
+                    continue
                 tested_sequence, _ = _change_all_codons_of_aa(sequence, codon)
                 tested_sequence_to_codon[tested_sequence].append(codon)
 
@@ -181,6 +184,9 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
             # create new sequence by replacing all synonymous codons
             new_sequence = sequence
             for aa in aa_to_selected_codon:
+                if aa == "_" and optimization_cub_index.is_trna_adaptation_index:
+                    # There is no point in optimizing stop codon by tAI weights, so keep the original codon
+                    continue
                 new_sequence, _ = _change_all_codons_of_aa(new_sequence, aa_to_selected_codon[aa])
 
             # Calculate score after all replacements
@@ -268,6 +274,7 @@ def _calculate_zscore_for_sequence(sequence: str,
         sigma = getattr(organism, std_key)
         miu = getattr(organism, average_key)
         profile = getattr(organism, weights)
+
         index_score = general_geomean([sequence], weights=profile)[0]
         organism_score = (index_score - miu) / sigma
         if organism.is_optimized:

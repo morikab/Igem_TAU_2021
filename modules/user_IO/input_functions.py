@@ -80,7 +80,7 @@ def extract_expression_levels(expression_csv_fid: str,
     return expression_csv_type_mapping[expression_csv_type](expression_csv_fid)
 
 
-def is_known_position_type(position: typing.Type[SeqFeature.AbstractPosition]) -> bool:
+def is_known_position_type(position: typing.Type[SeqFeature.Position]) -> bool:
     return isinstance(position, SeqFeature.ExactPosition) or isinstance(position, SeqFeature.BeforePosition) or \
            isinstance(position, SeqFeature.AfterPosition)
 

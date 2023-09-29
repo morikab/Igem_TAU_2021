@@ -172,7 +172,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "optimization_priority": DEFAULT_ORGANISM_PRIORITY,
     }
 
-    inp_dict["organisms"][deopt_genome[:-2]] = {
+    inp_dict["organisms"][deopt_genome[:-3]] = {
         "genome_path": os.path.join(base_path, deopt_genome),
         "optimized": False,
         "expression_csv_type": expression_csv_type,

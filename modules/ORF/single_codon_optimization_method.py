@@ -29,6 +29,9 @@ def optimize_sequence(target_gene: str,
                                                            run_summary=run_summary)
 
         target_protein = shared_functions_and_vars.translate(target_gene)
+        if target_protein.endswith("_") and optimization_cub_index.is_trna_adaptation_index:
+            # There is no point in optimizing stop codon by tAI, so leaving the original codon
+            aa_to_optimal_codon_mapping["_"] = target_gene[-3:]
         optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
 
     orf_summary = {
@@ -62,7 +65,7 @@ def _get_max_organism_attribute_value(
 
     max_value = max(codon_attribute_values)
     if max_value == 0:
-        max_value = 0.000001        # TODO - change this to the avg of the other values..?
+        max_value = average(list(all_organism_attribute_values.values()))
 
     return max_value
 

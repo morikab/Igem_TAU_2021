@@ -94,7 +94,6 @@ class UserInputModule(object):
         for organism_key, organism_input in organisms_input_list.items():
             try:
                 organism = cls._parse_single_organism_input(
-                    organism_name=organism_key,
                     organism_input=organism_input,
                     optimization_cub_index=optimization_cub_index)
             except Exception as e:
@@ -217,10 +216,9 @@ class UserInputModule(object):
     #     return organism_object
 
     @staticmethod
-    def _parse_single_organism_input(organism_name: str,
-                                     organism_input: typing.Dict[str, typing.Any],
+    def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
                                      optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
-        logger.info(f"Information about {organism_name}:")
+
         is_optimized = organism_input["optimized"]
         logger.info(f"Organism is {'optimized' if is_optimized else 'de-optimized'}")
 
@@ -244,6 +242,15 @@ class UserInputModule(object):
         #                                optimization_priority=organism_data["optimization_priority"])
 
         # FIXME - end
+        try:
+            gb_file = SeqIO.read(gb_path, format="gb")
+            organism_name = " ".join(gb_file.description.split()[:2])
+        except:
+            raise ValueError(
+                f'Error in genome GenBank file: {gb_path}, make sure you inserted an undamaged .gb file containing '
+                f'the full genome sequence and annotations'
+            )
+        logger.info(f"Information about {organism_name}:")
 
         cds = extract_gene_data(genbank_path=gb_path)
 
@@ -273,8 +280,9 @@ class UserInputModule(object):
             # tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
             # tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
             tai = calculate_tai_weights(organism_name)
-            tai_weights = tai.weights.to_dict()
-            tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
+            if tai is not None:
+                tai_weights = tai.weights.to_dict()
+                tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
 
         optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
         organism_object = models.Organism(name=organism_name,
@@ -282,7 +290,7 @@ class UserInputModule(object):
                                           tai_profile=tai_weights,
                                           cai_scores=cai_scores_dict,
                                           tai_scores=tai_scores_dict,
-                                          reference_genes=list(reference_genes.keys()),
+                                          reference_genes=list(reference_genes.keys()) if reference_genes else None,
                                           is_optimized=is_optimized,
                                           optimization_priority=optimization_priority)
 

@@ -170,9 +170,8 @@ def relative_adaptiveness(sequences=None, RSCUs=None, genetic_code='genetic_code
     return weights
 
 
-# TODO - fix method to be more generic
 def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
-    cai_scores = []
+    scores = []
     for sequence in sequence_lst:
         sequence = sequence.upper()
         sequence = [sequence[i: i + 3] for i in range(0, len(sequence) - len(sequence) % 3, 3)]
@@ -185,9 +184,8 @@ def general_geomean(sequence_lst, weights, genetic_code='genetic_code'):
                     else:
                         ValueError()
                 except:
-                    sequence_weights.append(sum(weights.values()) / len(weights.values()))    #if codon not in table (like if it conatians N or other ambigous chars- it will be ignored (not counted in the seq length)
-        cai_scores.append(float(gmean(sequence_weights)))
-        if float(gmean(sequence_weights)) == 0:
-            print(''.join(sequence))
-            print(sequence_weights)
-    return cai_scores
+                    # if codon not in table (like if it conatians N or other ambigous chars) - it will be ignored
+                    # (not counted in the seq length)
+                    sequence_weights.append(sum(weights.values()) / len(weights.values()))
+        scores.append(float(gmean(sequence_weights)))
+    return scores
