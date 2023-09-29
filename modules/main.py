@@ -127,7 +127,8 @@ def run_orf_optimization(user_input: models.UserInput,
     evaluation_result = choose_orf_optimization_result(tai_evaluation_results=tai_evaluation_results,
                                                        cai_evaluation_results=cai_evaluation_results)
 
-    logger.info(f"Evaluation result: {evaluation_result.summary}")
+    logger.info(f"Final evaluation result: {evaluation_result.summary}")
+    run_summary.add_to_run_summary("final_evaluation", evaluation_result.summary)
     return evaluation_result
 
 

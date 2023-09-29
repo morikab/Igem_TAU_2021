@@ -3,25 +3,21 @@ import os
 import operator
 import typing
 
+from Bio import SeqFeature
 from Bio import SeqIO
+from Bio.Seq import Seq
 import codonbias as cb
 import pandas as pd
 
 from logger_factory.logger_factory import LoggerFactory
+from modules import models
 from modules.configuration import Configuration
 from modules.ORF.calculating_cai import relative_adaptiveness
 from modules.ORF.TAI import TAI
-from modules.shared_functions_and_vars import *
 
 
 logger = LoggerFactory.get_logger()
 config = Configuration.get_config()
-
-
-# RE model
-def find_org_name(gb_file):
-    org_name = gb_file.description
-    return ' '.join(org_name.split()[:2])
 
 
 def tai_from_tgcnDB(org_name):
@@ -84,78 +80,106 @@ def extract_expression_levels(expression_csv_fid: str,
     return expression_csv_type_mapping[expression_csv_type](expression_csv_fid)
 
 
-def extract_gene_data(genbank_path: str,
-                      expression_csv_fid: typing.Optional[str] = None,
-                      expression_csv_type: typing.Optional[str] = None):
-    genome = str(SeqIO.read(genbank_path, format='gb').seq)
-    cds_seqs = []
-    gene_names = []
-    functions = []
-    starts = []
-    ends = []
-    strands = []
-    gene_expression_levels = []
-    gene_expression_names = []
-    estimated_expression = {}
+def is_known_position_type(position: typing.Type[SeqFeature.AbstractPosition]) -> bool:
+    return isinstance(position, SeqFeature.ExactPosition) or isinstance(position, SeqFeature.BeforePosition) or \
+           isinstance(position, SeqFeature.AfterPosition)
 
+
+def is_known_location_type(feature) -> bool:
+    for location_part in feature.location.parts:
+        is_known_start_index = is_known_position_type(location_part.start)
+        is_known_end_index = is_known_position_type(location_part.end)
+        is_known_location_part = is_known_start_index and is_known_end_index
+
+        if not is_known_location_part:
+            return False
+
+    return True
+
+
+def does_have_only_exact_positions(feature) -> bool:
+    return all(
+        isinstance(location_part.start, SeqFeature.ExactPosition) and
+        isinstance(location_part.end, SeqFeature.ExactPosition) for location_part in feature.location.parts
+    )
+
+
+def extract_gene_name(feature) -> typing.Optional[str]:
+    name = feature.qualifiers.get("gene") or feature.qualifiers.get("locus_tag")
+    if name is None:
+        return name
+    # TODO - should return only name[0]?
+    return "-".join(list(name))
+
+
+def extract_cds(cds_features: typing.List, sequence: Seq) -> typing.Sequence[models.Cds]:
+    cds_list = []
+    for feature in cds_features:
+        gene_name = extract_gene_name(feature)
+        if gene_name is None:
+            continue
+
+        cds = str(feature.extract(sequence))
+        if len(cds) % 3 != 0:
+            continue
+
+        gene_function = " ".join(feature.qualifiers.get("product", []))
+        cds_list.append(models.Cds(
+            gene_name=gene_name,
+            function=gene_function,
+            sequence=cds,
+        ))
+
+    return cds_list
+
+
+def extract_gene_data(genbank_path: str):
+    gb_file = SeqIO.read(genbank_path, format="gb")
+    if any(not is_known_location_type(x) for x in gb_file.features):
+        raise RuntimeError(f"Unknown location type found in {genbank_path}")
+
+    genome = gb_file.seq
+
+    cds_features: typing.List[SeqFeature] = [
+        x for x in gb_file.features if x.type == "CDS" and does_have_only_exact_positions(x)
+    ]
+    return extract_cds(cds_features, genome)
+
+
+def extract_gene_expression(
+        cds: typing.Sequence[models.Cds],
+        expression_csv_fid: typing.Optional[str] = None,
+        expression_csv_type: typing.Optional[str] = None,
+) -> typing.Optional[typing.Dict[str, float]]:
     should_use_expression_csv = expression_csv_fid is not None
+    if not should_use_expression_csv:
+        return None
 
-    if should_use_expression_csv:
+    try:
+        gene_expression_names, gene_expression_levels = extract_expression_levels(
+            expression_csv_fid=expression_csv_fid,
+            expression_csv_type=expression_csv_type,
+        )
+    except:
+        logger.info("Expression data file is corrupt. \nMake sure that: ")
+        logger.info("1. File is in csv format")
+        logger.info("2. Gene names fit their NCBI naming ")
+        logger.info("3. Column with the gene names is labeled 'gene' for mrna levels or 'name' for protein abundance ")
+        logger.info("4. Column with the gene expression levels is labeled 'mRNA_level' or 'abundance', accordingly")
+        return None
+
+    estimated_expression = {}
+    for cds_record in cds:
         try:
-            gene_expression_names, gene_expression_levels = extract_expression_levels(
-                expression_csv_fid=expression_csv_fid,
-                expression_csv_type=expression_csv_type,
-            )
-        except:
-            should_use_expression_csv = False
-            logger.info('Expression data file is corrupt. \nMake sure that: ')
-            logger.info('1. File is in csv format')
-            logger.info('2. Gene names fit their NCBI naming ')
-            logger.info('3. Column with the gene names is labeled "gene"  ')
-            logger.info('4. Column with the gene expression levels is labeled "mRNA_level" ')
-
-    with open(genbank_path) as input_handle:
-        for record in SeqIO.parse(input_handle, "genbank"):
-            for feature in record.features:
-                if feature.type == "CDS":
-                    if "gene" in feature.qualifiers.keys():
-                        name = feature.qualifiers['gene'][0]
-                    elif "locus_tag" in feature.qualifiers.keys():
-                        name = feature.qualifiers["locus_tag"][0]
-                    else:
-                        continue
-                    if feature.location is not None and name not in gene_names:
-                        cds = genome[feature.location.start: feature.location.end]
-                        function = " ".join(feature.qualifiers["product"])
-                        if feature.location.strand == -1:
-                            cds = reverse_complement(cds)
-
-                        if len(cds) % 3 != 0:
-                            continue
-
-                        gene_names.append(name)
-                        cds_seqs.append(cds)
-                        functions.append(function)
-                        starts.append(feature.location.start)
-                        ends.append(feature.location.end)
-                        strands.append(feature.location.strand)
-
-                        if should_use_expression_csv:
-                            try:
-                                index = gene_expression_names.index(name.lower())
-                                expression_level = gene_expression_levels[index]
-                                estimated_expression[name + '|' + function] = expression_level
-                            except ValueError:
-                                continue
-
-    entry_num = len(gene_names)
-    name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
-    cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
-
-    return cds_dict, estimated_expression
+            index = gene_expression_names.index(cds_record.gene_name.lower())
+            expression_level = gene_expression_levels[index]
+            estimated_expression[cds_record.name_and_function] = expression_level
+        except ValueError:
+            continue
+    return estimated_expression
 
 
-def calculate_cai_weights_for_input(
+def calculate_cai_weights(
         cds_dict: typing.Dict[str, typing.Any],
         estimated_expression_dict: typing.Dict[str, float],
 ) -> typing.Tuple[typing.Dict[str, float], typing.Sequence[str]]:

@@ -4,6 +4,17 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+@dataclass
+class Cds:
+    gene_name: str
+    function: str
+    sequence: str
+
+    @property
+    def name_and_function(self) -> str:
+        return f"{self.gene_name}|{self.function}"
+
+
 class Organism(object):
     CAI_PROFILE_ATTRIBUTE_NAME = "cai_profile"
     TAI_PROFILE_ATTRIBUTE_NAME = "tai_profile"

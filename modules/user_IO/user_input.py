@@ -1,9 +1,7 @@
 import json
 
-from modules import models
 from modules.run_summary import RunSummary
 from modules.user_IO.input_functions import *
-from modules.ORF.TAI import TAI
 from modules.ORF.calculating_cai import general_geomean
 
 logger = LoggerFactory.get_logger()
@@ -93,8 +91,10 @@ class UserInputModule(object):
         organisms_names = set()
         for organism_key, organism_input in organisms_input_list.items():
             try:
-                organism = cls._parse_single_organism_input(organism_input=organism_input,
-                                                            optimization_cub_index=optimization_cub_index)
+                organism = cls._parse_single_organism_input(
+                    organism_name=organism_key,
+                    organism_input=organism_input,
+                    optimization_cub_index=optimization_cub_index)
             except Exception as e:
                 raise ValueError(f"Error in organism input: {organism_key}, re-check your input")
             if organism.name in organisms_names:
@@ -117,8 +117,8 @@ class UserInputModule(object):
         return organisms_list
 
     @staticmethod
-    def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
-                                     optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
+    def _parse_single_organism_input_old(organism_input: typing.Dict[str, typing.Any],
+                                         optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
         gb_path = organism_input["genome_path"]
 
         # FIXME - delete
@@ -141,7 +141,7 @@ class UserInputModule(object):
 
         # FIXME - end
 
-        exp_cdv_type = organism_input['expression_csv_type']
+        exp_csv_type = organism_input['expression_csv_type']
         exp_csv_fid = organism_input['expression_csv']
         try:
             gb_file = SeqIO.read(gb_path, format='gb')
@@ -162,7 +162,7 @@ class UserInputModule(object):
 
         cds_dict, estimated_expression = extract_gene_data(genbank_path=gb_path,
                                                            expression_csv_fid=exp_csv_fid,
-                                                           expression_csv_type=exp_cdv_type)
+                                                           expression_csv_type=exp_csv_type)
         logger.info(f'Number of genes: {len(cds_dict)}')
         gene_names = list(cds_dict.keys())
 
@@ -172,7 +172,7 @@ class UserInputModule(object):
         tai_scores_dict = None
         reference_genes = None
         if optimization_cub_index.is_codon_adaptation_index:
-            cai_weights, reference_genes = calculate_cai_weights_for_input(cds_dict, estimated_expression)
+            cai_weights, reference_genes = calculate_cai_weights(cds_dict, estimated_expression)
             cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
             cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
 
@@ -200,6 +200,94 @@ class UserInputModule(object):
         org_summary["cds_dict"] = cds_dict
         org_summary["reference_genes"] = reference_genes
         # with open(parsed_organism_file_name+".fasta", "w") as organism_fasta_file:
+        write_fasta(fid=parsed_organism_file_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
+
+        with open(parsed_organism_file, "w") as organism_file:
+            json.dump(org_summary, organism_file)
+        # FIXME - end
+
+        if optimization_cub_index.is_codon_adaptation_index:
+            logger.info(
+                F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
+        if optimization_cub_index.is_trna_adaptation_index:
+            logger.info(
+                F"name={organism_object.name}, tai_std={organism_object.tai_std}, tai_avg={organism_object.tai_avg}")
+        return organism_object
+
+    @staticmethod
+    def _parse_single_organism_input(organism_name: str,
+                                     organism_input: typing.Dict[str, typing.Any],
+                                     optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
+        logger.info(f"Information about {organism_name}:")
+        is_optimized = organism_input["optimized"]
+        logger.info(f"Organism is {'optimized' if is_optimized else 'de-optimized'}")
+
+        gb_path = organism_input["genome_path"]
+
+        # FIXME - delete
+        parsed_organism_file_name = f"{gb_path.strip('.gb')}_{is_optimized}_parsed"
+        parsed_organism_file = parsed_organism_file_name + ".json"
+
+        # FIXME - delete
+        # if os.path.exists(parsed_organism_file):
+        #     with open(parsed_organism_file) as org_file:
+        #         organism_data = json.load(org_file)
+        #         return models.Organism(name=organism_data["name"],
+        #                                cai_profile=organism_data["cai_weights"],
+        #                                tai_profile=organism_data["tai_weights"],
+        #                                cai_scores=organism_data["cai_scores"],
+        #                                tai_scores=organism_data["tai_scores"],
+        #                                reference_genes=organism_data["reference_genes"],
+        #                                is_optimized=organism_data["is_wanted"],
+        #                                optimization_priority=organism_data["optimization_priority"])
+
+        # FIXME - end
+
+        cds = extract_gene_data(genbank_path=gb_path)
+
+        exp_csv_type = organism_input['expression_csv_type']
+        exp_csv_fid = organism_input['expression_csv']
+        estimated_expression = extract_gene_expression(cds=cds,
+                                                       expression_csv_fid=exp_csv_fid,
+                                                       expression_csv_type=exp_csv_type)
+
+        cds_dict = {cds_record.name_and_function: cds_record.sequence for cds_record in cds}
+        gene_names = list(cds_dict.keys())
+
+        cai_weights = None
+        cai_scores_dict = None
+        tai_weights = None
+        tai_scores_dict = None
+        reference_genes = None
+        if optimization_cub_index.is_codon_adaptation_index:
+            cai_weights, reference_genes = calculate_cai_weights(cds_dict, estimated_expression)
+            cai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=cai_weights)
+            cai_scores_dict = {gene_names[i]: cai_scores[i] for i in range(len(gene_names))}
+
+        if optimization_cub_index.is_trna_adaptation_index:
+            # tai_weights = tai_from_tgcnDB(organism_name)
+            # tai_scores = general_geomean(sequence_lst=cds_dict.values(), weights=tai_weights)
+            # tai_scores_dict = {gene_names[i]: tai_scores[i] for i in range(len(gene_names))}
+            tai = calculate_tai_weights(organism_name)
+            tai_weights = tai.weights.to_dict()
+            tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
+
+        optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
+        organism_object = models.Organism(name=organism_name,
+                                          cai_profile=cai_weights,
+                                          tai_profile=tai_weights,
+                                          cai_scores=cai_scores_dict,
+                                          tai_scores=tai_scores_dict,
+                                          reference_genes=reference_genes,
+                                          is_optimized=is_optimized,
+                                          optimization_priority=optimization_priority)
+
+        # FIXME - delete
+        org_summary = organism_object.summary
+        org_summary["cai_scores"] = cai_scores_dict
+        org_summary["tai_scores"] = tai_scores_dict
+        org_summary["cds_dict"] = cds_dict
+        org_summary["reference_genes"] = reference_genes
         write_fasta(fid=parsed_organism_file_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
         with open(parsed_organism_file, "w") as organism_file:
