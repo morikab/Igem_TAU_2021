@@ -179,10 +179,10 @@ def extract_gene_expression(
     return estimated_expression
 
 
-def calculate_cai_weights(
+def get_reference_genes_for_cai(
         cds_dict: typing.Dict[str, typing.Any],
         estimated_expression_dict: typing.Dict[str, float],
-) -> typing.Tuple[typing.Dict[str, float], typing.Sequence[str]]:
+) -> typing.Dict[str, str]:
     """
     calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.
@@ -193,8 +193,6 @@ def calculate_cai_weights(
     ribosomal_proteins_count = len(ribosomal_proteins)
     logger.info(F"Found {ribosomal_proteins_count} ribosomal proteins in input genome.")
 
-    reference_genes = []
-
     if len(estimated_expression_dict) < max(ribosomal_proteins_count, ribosomal_proteins_count_threshold) * 3:
         logger.info("Estimated expression dictionary does not have enough expression levels. CAI will be calculated "
                     "from a reference set of ribosomal proteins or the entire genome.")
@@ -203,29 +201,25 @@ def calculate_cai_weights(
             logger.warning(F"Less than {ribosomal_proteins_count_threshold} ribosomal genes were found. This "
                            F"annotation is likely to be of low quality and therefore results may be less accurate."
                            F"CAI will be calculated from the entire genome as a reference set.")
-            cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
-        else:
-            logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
-            cai_weights = relative_adaptiveness(ribosomal_proteins.values())
-            reference_genes = list(ribosomal_proteins.keys())
-    else:
-        logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
-        logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
-        estimated_expression_threshold = config["INPUT"]["EXPRESSION_PERCENTAGE_THRESHOLD"]
-        sorted_estimated_expression = dict(
-            sorted(estimated_expression_dict.items(), key=operator.itemgetter(1), reverse=True)
-        )
-        highly_expressed_genes_count = round(len(sorted_estimated_expression) * estimated_expression_threshold)
-        logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
-                    F"genes from estimated expression dictionary.")
+            return cds_dict
 
-        highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
-        reference_genes = highly_expressed_names
-        highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in
-                                     highly_expressed_names]
-        cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
+        logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
+        return ribosomal_proteins
 
-    return cai_weights, reference_genes
+    logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
+    logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
+    estimated_expression_threshold = config["INPUT"]["EXPRESSION_PERCENTAGE_THRESHOLD"]
+    sorted_estimated_expression = dict(
+        sorted(estimated_expression_dict.items(), key=operator.itemgetter(1), reverse=True)
+    )
+    highly_expressed_genes_count = round(len(sorted_estimated_expression) * estimated_expression_threshold)
+    logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
+                F"genes from estimated expression dictionary.")
+
+    highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
+    reference_genes = {description: cds for description, cds in cds_dict.items() if description in
+                       highly_expressed_names}
+    return reference_genes
 
 
 def calculate_tai_weights(organism_name: str) -> typing.Optional[cb.scores.TrnaAdaptationIndex]:
