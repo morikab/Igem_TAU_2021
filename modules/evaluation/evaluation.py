@@ -19,8 +19,10 @@ class EvaluationModule(object):
         weights = f"{optimization_cub_index_value}_profile"
 
         optimized_organisms_scores = []
+        optimized_organisms_non_normalized_scores = []
         optimized_organisms_weights = []
         deoptimized_organisms_scores = []
+        deoptimized_organisms_non_normalized_scores = []
         deoptimized_organisms_weights = []
 
         organisms_evaluation_summary = []
@@ -33,9 +35,11 @@ class EvaluationModule(object):
             organism_score = (final_score - initial_score) / sigma
             if organism.is_optimized:
                 optimized_organisms_scores.append(organism_score)
+                optimized_organisms_non_normalized_scores.append(final_score - initial_score)
                 optimized_organisms_weights.append(organism.optimization_priority)
             else:
                 deoptimized_organisms_scores.append(organism_score)
+                deoptimized_organisms_non_normalized_scores.append(final_score - initial_score)
                 deoptimized_organisms_weights.append(organism.optimization_priority)
 
             organism_summary = {
@@ -55,6 +59,14 @@ class EvaluationModule(object):
             tuning_parameter=user_input.tuning_parameter,
         )
 
+        average_distance_non_normalized_score = EvaluationModule._calculate_average_distance_score(
+            optimized_organisms_scores=optimized_organisms_non_normalized_scores,
+            deoptimized_organisms_scores=deoptimized_organisms_non_normalized_scores,
+            optimized_organisms_weights=optimized_organisms_weights,
+            deoptimized_organisms_weights=deoptimized_organisms_weights,
+            tuning_parameter=user_input.tuning_parameter,
+        )
+
         weakest_link_score = EvaluationModule._calculate_weakest_link_score(
             optimized_organisms_scores=optimized_organisms_scores,
             deoptimized_organisms_scores=deoptimized_organisms_scores,
@@ -66,6 +78,7 @@ class EvaluationModule(object):
         evaluation_result = models.EvaluationModuleResult(
             sequence=final_sequence,
             average_distance_score=average_distance_score,
+            average_distance_non_normalized_score=average_distance_non_normalized_score,
             weakest_link_score=weakest_link_score,
         )
 

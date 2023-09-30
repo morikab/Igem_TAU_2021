@@ -7,6 +7,7 @@ class EvaluationModuleResult:
     # TODO - Add additional stats (% optimized, % deoptimized, etc.)
     sequence: str
     average_distance_score: float
+    average_distance_non_normalized_score: float
     weakest_link_score: float
 
     @property
@@ -14,5 +15,6 @@ class EvaluationModuleResult:
         return {
             "final_sequence": self.sequence,
             "average_distance_score": self.average_distance_score,
+            "average_distance_non_normalized_score": self.average_distance_non_normalized_score,
             "weakest_link_score": self.weakest_link_score,
         }

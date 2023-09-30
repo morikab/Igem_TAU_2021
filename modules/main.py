@@ -53,15 +53,15 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
         if run_summary_content.get("orf") is None:
             raise ValueError(run_summary_content)
         
-        final_output = {
-            "initial_optimization_score": run_summary_content["orf"].get("initial_sequence_optimization_score"),
-            "final_optimization_score": run_summary_content["orf"].get("final_sequence_optimization_score"),
-            "average_distance_score": run_summary_content["evaluation"]["average_distance_score"],
-            "weakest_link_score": run_summary_content["evaluation"]["weakest_link_score"],
-        }
+        # final_output = {
+        #     "initial_optimization_score": run_summary_content["orf"].get("initial_sequence_optimization_score"),
+        #     "final_optimization_score": run_summary_content["orf"].get("final_sequence_optimization_score"),
+        #     "average_distance_score": run_summary_content["evaluation"]["average_distance_score"],
+        #     "weakest_link_score": run_summary_content["evaluation"]["weakest_link_score"],
+        # }
         
         # run_summary.save_run_summary(output_path)
-        # final_output = run_summary.get()
+        final_output = run_summary.get()
         # FIXME - end 
 
         # TODO - handle multiple results in output generation module
