@@ -234,6 +234,25 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
     return [organism["name"] for organism in organisms]
 
 
+def get_evaluation_summary(summary: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+    final_evaluation = summary["final_evaluation"]
+    for evaluation_summary in summary["evaluation"]:
+        if evaluation_summary["average_distance_score"] == final_evaluation["average_distance_score"]:
+            return evaluation_summary
+    raise RuntimeError(F"Did not find a final evaluation for: {summary}")
+
+
+def get_orf_summary(summary: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+    if type(summary["orf"]) != list:
+        return summary["orf"]
+
+    final_evaluation = summary["final_evaluation"]
+    for orf_summary in summary["orf"]:
+        if orf_summary["final_sequence"] == final_evaluation["final_sequence"]:
+            return orf_summary
+    raise RuntimeError(F"Did not find an orf summary for: {summary}")
+
+
 def update_from_summary(
         file_path: str,
         worksheet,
@@ -250,7 +269,8 @@ def update_from_summary(
     formatted_optimization_cub_index = optimization_cub_index.lower()
     summary_row = [optimization_method, optimization_cub_index]
 
-    organisms = summary["evaluation"]["organisms"]
+    evaluation_summary = get_evaluation_summary(summary)
+    organisms = evaluation_summary["organisms"]
     # organisms.sort(key=lambda x: x.get("is_wanted"))
     for organism_name in ordered_organisms:
         organism = [matched_organism for matched_organism in organisms if
@@ -260,10 +280,10 @@ def update_from_summary(
         summary_row.append(organism[f"{formatted_optimization_cub_index}_final_score"])
         summary_row.append(organism["dist_score"])
 
-    summary_row.append(summary["evaluation"]["average_distance_score"])
-    summary_row.append(summary["evaluation"]["weakest_link_score"])
+    summary_row.append(evaluation_summary["average_distance_score"])
+    summary_row.append(evaluation_summary["weakest_link_score"])
 
-    orf_summary = summary["orf"]
+    orf_summary = get_orf_summary(summary)
     aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
     for aa in aa_list:
         summary_row.append(aa_to_optimal_codon.get(aa) or "")

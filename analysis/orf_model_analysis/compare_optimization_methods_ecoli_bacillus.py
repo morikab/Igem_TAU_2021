@@ -224,11 +224,15 @@ if __name__ == "__main__":
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry_debug")
 
-    run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
-                                       optimization_cub_index="tAI",
-                                       is_ecoli_optimized=True,
-                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-                                       output_path="mcherry_debug")
+    # run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
+    #                                    optimization_cub_index="tAI",
+    #                                    is_ecoli_optimized=True,
+    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    #                                    output_path="mcherry_debug")
+
+    mcherry_root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results\mcherry_debug"
+    from analysis.orf_model_analysis.generate_summary_file import generate_summary
+    generate_summary(results_directory=mcherry_root_dir)
 
     # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
     #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
