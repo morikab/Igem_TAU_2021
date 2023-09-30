@@ -3,24 +3,21 @@ import os
 import operator
 import typing
 
+from Bio import SeqFeature
 from Bio import SeqIO
+from Bio.Seq import Seq
+import codonbias as cb
 import pandas as pd
 
 from logger_factory.logger_factory import LoggerFactory
+from modules import models
 from modules.configuration import Configuration
 from modules.ORF.calculating_cai import relative_adaptiveness
 from modules.ORF.TAI import TAI
-from modules.shared_functions_and_vars import *
 
 
 logger = LoggerFactory.get_logger()
 config = Configuration.get_config()
-
-
-# RE model
-def find_org_name(gb_file):
-    org_name = gb_file.description
-    return ' '.join(org_name.split()[:2])
 
 
 def tai_from_tgcnDB(org_name):
@@ -38,83 +35,154 @@ def tai_from_tgcnDB(org_name):
     return tai_weights
 
 
-def extract_gene_data(genbank_path: str, expression_csv_fid=None):
-    genome = str(SeqIO.read(genbank_path, format='gb').seq)
-    cds_seqs = []
-    gene_names = []
-    functions = []
-    starts = []
-    ends = []
-    strands = []
-    estimated_expression = {}
+def extract_mrna_expression_levels(expression_csv_fid: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_df = pd.read_csv(expression_csv_fid)
 
-    if expression_csv_fid is not None:
+    gene_name_to_mrna_level = {}
+    for idx, pair in enumerate(zip(expression_df.gene.to_list(), expression_df.mRNA_level.to_list())):
+        measured_gene_name, expression_level = pair
         try:
-            expression_df = pd.read_csv(expression_csv_fid)
-
-            gene_name_to_mrna_level = {}
-            for idx, pair in enumerate(zip(expression_df.gene.to_list(), expression_df.mRNA_level.to_list())):
-                measured_gene_name, expression_level = pair
-                try:
-                    gene_name_to_mrna_level[measured_gene_name.lower()] = float(expression_level)
-                except:
-                    continue
-            mrna_levels = list(gene_name_to_mrna_level.values())
-            mrna_names = list(gene_name_to_mrna_level.keys())
+            gene_name_to_mrna_level[measured_gene_name.lower()] = float(expression_level)
         except:
-            expression_csv_fid = None
-            logger.info('Expression data file is corrupt. \nMake sure that: ')
-            logger.info('1. File is in csv format')
-            logger.info('2. Gene names fit their NCBI naming ')
-            logger.info('3. Column with the gene names is labeled "gene"  ')
-            logger.info('4. Column with the gene expression levels is labeled "mRNA_level" ')
+            continue
+    mrna_levels = list(gene_name_to_mrna_level.values())
+    mrna_names = list(gene_name_to_mrna_level.keys())
 
-    with open(genbank_path) as input_handle:
-        for record in SeqIO.parse(input_handle, "genbank"):
-            for feature in record.features:
-                if feature.type == "CDS":
-                    if "gene" in feature.qualifiers.keys():
-                        name = feature.qualifiers['gene'][0]
-                    elif "locus_tag" in feature.qualifiers.keys():
-                        name = feature.qualifiers["locus_tag"][0]
-                    else:
-                        continue
-                    if feature.location is not None and name not in gene_names:
-                        cds = genome[feature.location.start: feature.location.end]
-                        function = " ".join(feature.qualifiers["product"])
-                        if feature.location.strand == -1:
-                            cds = reverse_complement(cds)
-
-                        if len(cds) % 3 != 0:
-                            continue
-
-                        gene_names.append(name)
-                        cds_seqs.append(cds)
-                        functions.append(function)
-                        starts.append(feature.location.start)
-                        ends.append(feature.location.end)
-                        strands.append(feature.location.strand)
-
-                        if expression_csv_fid is not None:
-                            try:
-                                mrna_level = [mrna_levels[index] for index in range(len(mrna_names)) if mrna_names[index] == name.lower()][0]
-                                estimated_expression[name + '|'+ function] = mrna_level
-                            except:
-                                continue
-
-    entry_num = len(gene_names)
-    name_and_function = [gene_names[i] + '|' + functions[i] for i in range(entry_num)]
-    # prom200_dict = extract_prom(starts, ends, strands, name_and_function, prom_length=200, genome=genome)  # fix!!
-    cds_dict = {name_and_function[i]: cds_seqs[i] for i in range(entry_num)}
-
-    # return prom200_dict, cds_dict, intergenic_dict, estimated_expression
-    return cds_dict, estimated_expression
+    return mrna_names, mrna_levels
 
 
-def calculate_cai_weights_for_input(
+def extract_protein_abundance_levels(expression_csv_fid: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_df = pd.read_json(expression_csv_fid)
+
+    gene_name_to_expression_level = {}
+    for idx, pair in enumerate(zip(expression_df.name.to_list(), expression_df.abundance.to_list())):
+        measured_gene_name, expression_level = pair
+        try:
+            gene_name_to_expression_level[measured_gene_name.lower()] = float(expression_level)
+        except:
+            continue
+    protein_levels = list(gene_name_to_expression_level.values())
+    protein_names = list(gene_name_to_expression_level.keys())
+
+    return protein_names, protein_levels
+
+
+def extract_expression_levels(expression_csv_fid: str,
+                              expression_csv_type: str) -> typing.Tuple[typing.List[str], typing.List[float]]:
+    expression_csv_type_mapping = {
+        "mrna_levels": extract_mrna_expression_levels,
+        "protein_abundance": extract_protein_abundance_levels,
+    }
+    logger.info(f"Extracting expression levels from: {expression_csv_type} file.")
+    if expression_csv_type not in expression_csv_type_mapping:
+        raise KeyError(F"Missing support for expression csv type: {expression_csv_type}")
+
+    return expression_csv_type_mapping[expression_csv_type](expression_csv_fid)
+
+
+def is_known_position_type(position: typing.Type[SeqFeature.Position]) -> bool:
+    return isinstance(position, SeqFeature.ExactPosition) or isinstance(position, SeqFeature.BeforePosition) or \
+           isinstance(position, SeqFeature.AfterPosition)
+
+
+def is_known_location_type(feature) -> bool:
+    for location_part in feature.location.parts:
+        is_known_start_index = is_known_position_type(location_part.start)
+        is_known_end_index = is_known_position_type(location_part.end)
+        is_known_location_part = is_known_start_index and is_known_end_index
+
+        if not is_known_location_part:
+            return False
+
+    return True
+
+
+def does_have_only_exact_positions(feature) -> bool:
+    return all(
+        isinstance(location_part.start, SeqFeature.ExactPosition) and
+        isinstance(location_part.end, SeqFeature.ExactPosition) for location_part in feature.location.parts
+    )
+
+
+def extract_gene_name(feature) -> typing.Optional[str]:
+    name = feature.qualifiers.get("gene") or feature.qualifiers.get("locus_tag")
+    if name is None:
+        return name
+    # TODO - should return only name[0]?
+    return "-".join(list(name))
+
+
+def extract_cds(cds_features: typing.List, sequence: Seq) -> typing.Sequence[models.Cds]:
+    cds_list = []
+    for feature in cds_features:
+        gene_name = extract_gene_name(feature)
+        if gene_name is None:
+            continue
+
+        cds = str(feature.extract(sequence))
+        if len(cds) % 3 != 0:
+            continue
+
+        gene_function = " ".join(feature.qualifiers.get("product", []))
+        cds_list.append(models.Cds(
+            gene_name=gene_name,
+            function=gene_function,
+            sequence=cds,
+        ))
+
+    return cds_list
+
+
+def extract_gene_data(genbank_path: str):
+    gb_file = SeqIO.read(genbank_path, format="gb")
+    if any(not is_known_location_type(x) for x in gb_file.features):
+        raise RuntimeError(f"Unknown location type found in {genbank_path}")
+
+    genome = gb_file.seq
+
+    cds_features: typing.List[SeqFeature] = [
+        x for x in gb_file.features if x.type == "CDS" and does_have_only_exact_positions(x)
+    ]
+    return extract_cds(cds_features, genome)
+
+
+def extract_gene_expression(
+        cds: typing.Sequence[models.Cds],
+        expression_csv_fid: typing.Optional[str] = None,
+        expression_csv_type: typing.Optional[str] = None,
+) -> typing.Optional[typing.Dict[str, float]]:
+    should_use_expression_csv = expression_csv_fid is not None
+    if not should_use_expression_csv:
+        return None
+
+    try:
+        gene_expression_names, gene_expression_levels = extract_expression_levels(
+            expression_csv_fid=expression_csv_fid,
+            expression_csv_type=expression_csv_type,
+        )
+    except:
+        logger.info("Expression data file is corrupt. \nMake sure that: ")
+        logger.info("1. File is in csv format")
+        logger.info("2. Gene names fit their NCBI naming ")
+        logger.info("3. Column with the gene names is labeled 'gene' for mrna levels or 'name' for protein abundance ")
+        logger.info("4. Column with the gene expression levels is labeled 'mRNA_level' or 'abundance', accordingly")
+        return None
+
+    estimated_expression = {}
+    for cds_record in cds:
+        try:
+            index = gene_expression_names.index(cds_record.gene_name.lower())
+            expression_level = gene_expression_levels[index]
+            estimated_expression[cds_record.name_and_function] = expression_level
+        except ValueError:
+            continue
+    return estimated_expression
+
+
+def get_reference_genes_for_cai(
         cds_dict: typing.Dict[str, typing.Any],
         estimated_expression_dict: typing.Dict[str, float],
-) -> typing.Tuple[typing.Dict[str, float], typing.Sequence[str]]:
+) -> typing.Dict[str, str]:
     """
     calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
     30% most highly expressed genes will be used as reference set.
@@ -125,8 +193,6 @@ def calculate_cai_weights_for_input(
     ribosomal_proteins_count = len(ribosomal_proteins)
     logger.info(F"Found {ribosomal_proteins_count} ribosomal proteins in input genome.")
 
-    reference_genes = []
-
     if len(estimated_expression_dict) < max(ribosomal_proteins_count, ribosomal_proteins_count_threshold) * 3:
         logger.info("Estimated expression dictionary does not have enough expression levels. CAI will be calculated "
                     "from a reference set of ribosomal proteins or the entire genome.")
@@ -135,24 +201,37 @@ def calculate_cai_weights_for_input(
             logger.warning(F"Less than {ribosomal_proteins_count_threshold} ribosomal genes were found. This "
                            F"annotation is likely to be of low quality and therefore results may be less accurate."
                            F"CAI will be calculated from the entire genome as a reference set.")
-            cai_weights = relative_adaptiveness(sequences=list(cds_dict.values()))
-        else:
-            logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
-            cai_weights = relative_adaptiveness(ribosomal_proteins.values())
-            reference_genes = list(ribosomal_proteins.keys())
-    else:
-        logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
-        logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
-        estimated_expression_threshold = config["INPUT"]["EXPRESSION_PERCENTAGE_THRESHOLD"]
-        sorted_estimated_expression = dict(
-            sorted(estimated_expression_dict.items(), key=operator.itemgetter(1), reverse=True)
-        )
-        highly_expressed_genes_count = round(len(sorted_estimated_expression) * estimated_expression_threshold)
-        logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
-                    F"genes from estimated expression dictionary.")
-        highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
-        highly_expressed_cds_seqs = [cds for description, cds in cds_dict.items() if description in
-                                     highly_expressed_names]
-        cai_weights = relative_adaptiveness(sequences=highly_expressed_cds_seqs)
+            return cds_dict
 
-    return cai_weights, reference_genes
+        logger.info("CAI will be calculated from a reference set of ribosomal proteins.")
+        return ribosomal_proteins
+
+    logger.info("CAI will be calculated from a reference set of estimated expression dictionary.")
+    logger.info(F"Expression levels were found for {len(estimated_expression_dict)}")
+    estimated_expression_threshold = config["INPUT"]["EXPRESSION_PERCENTAGE_THRESHOLD"]
+    sorted_estimated_expression = dict(
+        sorted(estimated_expression_dict.items(), key=operator.itemgetter(1), reverse=True)
+    )
+    highly_expressed_genes_count = round(len(sorted_estimated_expression) * estimated_expression_threshold)
+    logger.info(F"Calculate CAI weights from a reference set of {highly_expressed_genes_count} highly expressed "
+                F"genes from estimated expression dictionary.")
+
+    highly_expressed_names = list(sorted_estimated_expression.keys())[:highly_expressed_genes_count]
+    reference_genes = {description: cds for description, cds in cds_dict.items() if description in
+                       highly_expressed_names}
+    return reference_genes
+
+
+def calculate_tai_weights(organism_name: str) -> typing.Optional[cb.scores.TrnaAdaptationIndex]:
+    # TODO - move to json file + pre load for multiple organisms or use the API to derive
+    #  taxonomy level from the .gb file
+    organism_name_to_url_mapping = {
+        "Escherichia coli": "http://gtrnadb.ucsc.edu/genomes/bacteria/Esch_coli_K_12_MG1655/",
+        "Bacillus subtilis": "http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/"
+    }
+    if organism_name not in organism_name_to_url_mapping:
+        logger.info(f"tGCN values were not found for {organism_name}, tAI profile was not calculated.")
+        return None
+    # TODO - consider using https://github.com/AliYoussef96/gtAI for better results
+    logger.info(f"tGCN values were found for {organism_name}. Calculating tAI profile.")
+    return cb.scores.TrnaAdaptationIndex(url=organism_name_to_url_mapping[organism_name], prokaryote=True)

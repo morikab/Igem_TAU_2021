@@ -31,7 +31,7 @@ def weight_cal(Sij, tGCN):
 
     W_dict = {}
     codon_list = ['ATA', 'ATC', 'ATT', 'ATG', 'ACA', 'ACC', 'ACG', 'ACT', 'AAC', 'AAT', 'AAA', 'AAG', 'AGC', 'AGT', 'AGA', 'AGG', 'CTA', 'CTC', 'CTG', 'CTT', 'CCA', 'CCC', 'CCG', 'CCT', 'CAC', 'CAT', 'CAA', 'CAG', 'CGA', 'CGC', 'CGG', 'CGT', 'GTA', 'GTC', 'GTG', 'GTT', 'GCA', 'GCC', 'GCG', 'GCT', 'GAC', 'GAT', 'GAA', 'GAG', 'GGA', 'GGC', 'GGG', 'GGT', 'TCA', 'TCC', 'TCG', 'TCT', 'TTC', 'TTT', 'TTA', 'TTG', 'TAC', 'TAT', 'TGC', 'TGT', 'TGG', 'TAG', 'TGA', 'TAA']
-    for codon in codon_list:  # where to start scanning len%3!=0 - waiting for liyam answer
+    for codon in codon_list:
         W = 0
         for key in Sij.keys():
             if key[2] == codon[-1]:
@@ -48,7 +48,7 @@ def weight_cal(Sij, tGCN):
                     W += (1-S)*tGC_curr
 
         W_dict[codon] = W
-    #todo: what to do when the tgcn_dict is empty
+
     factor = max(W_dict.values())
     for k in W_dict:
         W_dict[k] = W_dict[k]/factor

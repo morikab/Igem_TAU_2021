@@ -1,3 +1,5 @@
+import random
+
 nt_to_aa = {
     'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
     'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
@@ -43,6 +45,21 @@ synonymous_codons = {
 }
 
 DEFAULT_ORGANISM_PRIORITY = 50
+
+
+def random_synonymous_codon(codon: str) -> str:
+    possible_codons = synonymous_codons[nt_to_aa[codon]]
+    return random.choice(possible_codons)
+
+
+def synonymous_codon_permutation(seq: str) -> str:
+    if len(seq) % 3 != 0:
+        raise ValueError(f"len of seq {seq} is {len(seq)} which is not divisible by 3")
+    permutation = ""
+    for i in range(0, len(seq), 3):
+        codon = seq[i:i + 3]
+        permutation += random_synonymous_codon(codon)
+    return permutation
 
 
 def write_fasta(fid, list_seq, list_name):

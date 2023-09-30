@@ -4,6 +4,17 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+@dataclass
+class Cds:
+    gene_name: str
+    function: str
+    sequence: str
+
+    @property
+    def name_and_function(self) -> str:
+        return f"{self.gene_name}|{self.function}"
+
+
 class Organism(object):
     CAI_PROFILE_ATTRIBUTE_NAME = "cai_profile"
     TAI_PROFILE_ATTRIBUTE_NAME = "tai_profile"
@@ -33,8 +44,9 @@ class Organism(object):
     def cai_avg(self) -> typing.Optional[float]:
         if self.cai_scores is None:
             return None
-        scores = self.filter_reference_genes(self.cai_scores)
-        return statistics.mean(scores)
+        # scores = self.filter_reference_genes(self.cai_scores)
+        scores = self.cai_scores
+        return statistics.mean(scores.values())
 
     @property
     def tai_avg(self) -> float:
@@ -44,8 +56,9 @@ class Organism(object):
     def cai_std(self) -> typing.Optional[float]:
         if self.cai_scores is None:
             return None
-        scores = self.filter_reference_genes(self.cai_scores)
-        return statistics.stdev(scores)
+        # scores = self.filter_reference_genes(self.cai_scores)
+        scores = self.cai_scores
+        return statistics.stdev(scores.values())
 
     @property
     def tai_std(self) -> float:
@@ -94,6 +107,10 @@ class OptimizationMethod(Enum):
         return self in (OptimizationMethod.zscore_bulk_aa_ratio,
                         OptimizationMethod.zscore_bulk_aa_diff,
                         OptimizationMethod.zscore_bulk_aa_weakest_link)
+
+    @property
+    def is_zscore_optimization(self) -> bool:
+        return self.is_zscore_single_aa_optimization or self.is_zscore_bulk_aa_optimization
 
     @property
     def is_zscore_ratio_score_optimization(self) -> bool:

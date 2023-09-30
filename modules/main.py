@@ -84,60 +84,65 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
 
 
 def choose_orf_optimization_result(
-        tai_evaluation_result: typing.Optional[evaluation_models.EvaluationModuleResult],
-        cai_evaluation_result: typing.Optional[evaluation_models.EvaluationModuleResult],
+        tai_evaluation_results: typing.Optional[typing.Sequence[evaluation_models.EvaluationModuleResult]],
+        cai_evaluation_results: typing.Optional[typing.Sequence[evaluation_models.EvaluationModuleResult]],
 ) -> evaluation_models.EvaluationModuleResult:
-    if tai_evaluation_result is None:
-        return cai_evaluation_result
-    if cai_evaluation_result is None:
-        return tai_evaluation_result
-    return cai_evaluation_result if cai_evaluation_result.average_distance_score > tai_evaluation_result.average_distance_score\
-        else tai_evaluation_result
+    tai_evaluation_results = tai_evaluation_results or []
+    cai_evaluation_results = cai_evaluation_results or []
+    evaluation_results = tai_evaluation_results + cai_evaluation_results
+
+    best_evaluation_result = None
+    for evaluation_result in evaluation_results:
+        logger.info(F"Analyzing evaluation result: {evaluation_result.summary}")
+        if best_evaluation_result is None:
+            best_evaluation_result = evaluation_result
+            continue
+        # TODO - extend to allow comparison by other scores (make it an argument)
+        if evaluation_result.average_distance_score > best_evaluation_result.average_distance_score:
+            best_evaluation_result = evaluation_result
+
+    return best_evaluation_result
 
 
 def run_orf_optimization(user_input: models.UserInput,
                          run_summary: RunSummary) -> evaluation_models.EvaluationModuleResult:
     optimization_cub_index = user_input.optimization_cub_index
     optimization_method = user_input.optimization_method
-    tai_evaluation_result = None
-    cai_evaluation_result = None
+    tai_evaluation_results = None
+    cai_evaluation_results = None
 
     if optimization_cub_index.is_trna_adaptation_index:
-        logger.info("tAI information:")
         trna_adaptation_index = optimization_cub_index.trna_adaptation_index
         cds_nt_final_tai = ORF.ORFModule.run_module(user_input=user_input,
                                                     optimization_cub_index=trna_adaptation_index,
                                                     optimization_method=optimization_method,
                                                     run_summary=run_summary)
-        tai_evaluation_result = EvaluationModule.run_module(final_sequence=cds_nt_final_tai,
-                                                            user_input=user_input,
-                                                            optimization_cub_index=trna_adaptation_index,
-                                                            run_summary=run_summary)
-
-        logger.info(f"Sequence:\n{cds_nt_final_tai}")
-        logger.info(f"Final optimization score: {tai_evaluation_result.average_distance_score}")
+        tai_evaluation_results = [
+            EvaluationModule.run_module(final_sequence=cds_nt_tai,
+                                        user_input=user_input,
+                                        optimization_cub_index=trna_adaptation_index,
+                                        run_summary=run_summary) for cds_nt_tai in cds_nt_final_tai
+        ]
 
     if optimization_cub_index.is_codon_adaptation_index:
-        logger.info("CAI information:")
         codon_adaptation_index = optimization_cub_index.codon_adaptation_index
         cds_nt_final_cai = ORF.ORFModule.run_module(user_input=user_input,
                                                     optimization_cub_index=codon_adaptation_index,
                                                     optimization_method=optimization_method,
                                                     run_summary=run_summary)
-        cai_evaluation_result = EvaluationModule.run_module(final_sequence=cds_nt_final_cai,
-                                                            user_input=user_input,
-                                                            optimization_cub_index=codon_adaptation_index,
-                                                            run_summary=run_summary)
 
-        logger.info(f"Sequence:\n{cds_nt_final_cai}")
-        logger.info(f"Final optimization score: {cai_evaluation_result.average_distance_score}")
+        cai_evaluation_results = [
+            EvaluationModule.run_module(final_sequence=cds_nt_cai,
+                                        user_input=user_input,
+                                        optimization_cub_index=codon_adaptation_index,
+                                        run_summary=run_summary) for cds_nt_cai in cds_nt_final_cai
+        ]
 
-    evaluation_result = choose_orf_optimization_result(tai_evaluation_result=tai_evaluation_result,
-                                                       cai_evaluation_result=cai_evaluation_result)
+    evaluation_result = choose_orf_optimization_result(tai_evaluation_results=tai_evaluation_results,
+                                                       cai_evaluation_results=cai_evaluation_results)
 
-    logger.info(f"Sequence:\n{evaluation_result.sequence}")
-    logger.info(f"Weakest link score: {evaluation_result.weakest_link_score}")
-    logger.info(f"Final optimization score: {evaluation_result.average_distance_score}")
+    logger.info(f"Final evaluation result: {evaluation_result.summary}")
+    run_summary.add_to_run_summary("final_evaluation", evaluation_result.summary)
     return evaluation_result
 
 

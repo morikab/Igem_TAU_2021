@@ -15,6 +15,11 @@ class RunSummary(object):
     def put_in_run_summary(self, key: str, value: typing.Any) -> None:
         self._run_summary[key] = value
 
+    def append_to_run_summary(self, key: str, value: typing.Any) -> None:
+        entry = self._run_summary.get(key, [])
+        entry.append(value)
+        self.put_in_run_summary(key=key, value=entry)
+
     def delete_from_run_summary(self, key:str) -> None:
         self._run_summary.pop(key)
 

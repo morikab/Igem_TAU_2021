@@ -214,30 +214,39 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    import codonbias as cb
+
+    # bacillus_tai = cb.scores.TrnaAdaptationIndex(
+    #     url="http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/",
+    #     prokaryote=True,
+    # )
+
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                 output_path="mcherry")
+    #                 output_path="mcherry_debug")
 
-    run_single_method_for_orf_sequence(optimization_method="zscore_bulk_aa_ratio",
-                                       optimization_cub_index="tAI",
-                                       is_ecoli_optimized=True,
-                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-                                       output_path="mcherry_debug")
+    # run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
+    #                                    optimization_cub_index="tAI",
+    #                                    is_ecoli_optimized=True,
+    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    #                                    output_path="mcherry_debug")
 
-    # generate_sequences_fasta_file(r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results")
-    # run_for_endogenous_genes(fasta_file_path=args.fasta,
-    #                          optimization_method=args.method,
-    #                          optimization_cub_index=args.index,
-    #                          is_ecoli_optimized=args.opt,
-    #                          output_path=args.output)
+    mcherry_root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results\mcherry_debug"
+    from analysis.orf_model_analysis.generate_summary_file import generate_summary
+    generate_summary(results_directory=mcherry_root_dir)
+
+    # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
+    # gene_name = "rpmJ|ribosomal"
+    #
+    # gene_sequence = genome_dict[gene_name]
+    # gene_sequence = str(gene_sequence.seq)
+    #
+    # results = run_single_method_for_orf_sequence(
+    #     optimization_method="single_codon_diff",
+    #     optimization_cub_index="tAI",
+    #     is_ecoli_optimized=False,
+    #     output_path="endogenous",
+    #     orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    # )
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/
-
-    # extract_ncbi_sequences_for_analysis(
-    #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna")
-
-    # run_from_fasta_file(
-    #     fasta_file_path=r"C:\Users\Kama\Documents\Moran\biomedical-engineering\microbiome-optimization\articles\ORF\ncbi_homo_sapiens_dataset\ncbi_dataset\data\GCF_000001405.40\cds_from_genomic.fna",
-    #     records_file_path="gene_to_longest_sequence.json",
-    #     start_record=args.start,
-    #     max_records_count=args.number or 500,
-    # )
