@@ -300,7 +300,7 @@ class UserInputModule(object):
         org_summary["tai_scores"] = tai_scores_dict
         org_summary["cds_dict"] = cds_dict
         org_summary["reference_genes"] = reference_genes
-        write_fasta(fid=parsed_organism_file_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
+        write_fasta(fid=organism_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
         with open(parsed_organism_file, "w") as organism_file:
             json.dump(org_summary, organism_file)
