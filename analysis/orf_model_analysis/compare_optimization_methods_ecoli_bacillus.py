@@ -214,21 +214,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    import codonbias as cb
-
-    # bacillus_tai = cb.scores.TrnaAdaptationIndex(
-    #     url="http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/",
-    #     prokaryote=True,
-    # )
-
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry_debug")
 
-    run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
-                                       optimization_cub_index="CAI",
-                                       is_ecoli_optimized=True,
-                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-                                       output_path="mcherry_debug")
+    # run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
+    #                                    optimization_cub_index="CAI",
+    #                                    is_ecoli_optimized=True,
+    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    #                                    output_path="mcherry_debug")
 
     # fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta"
     # with open(fasta_file_path, "r") as fasta_handle:

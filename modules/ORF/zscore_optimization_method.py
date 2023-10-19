@@ -109,7 +109,7 @@ def optimize_sequence_by_zscore_single_aa(
 
     orf_summary = {
         "initial_sequence": initial_sequence,
-        "final_sequence": new_sequence,
+        "final_sequence": sequence,
         "iterations_count": iterations_count,
         "aa_to_optimal_codon": aa_to_codon_mapping,
         "initial_sequence_optimization_score": initial_sequence_score,
@@ -217,13 +217,15 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 sequence = new_sequence
                 previous_sequence_score = score
 
+    aa_to_optimal_codon = aa_to_selected_codon if new_sequence == sequence else \
+        iterations_summary[-2]["aa_to_selected_codon"]
     orf_summary = {
         "initial_sequence": initial_sequence,
-        "final_sequence": new_sequence,
+        "final_sequence": sequence,
         "iterations_count": iterations_count,
-        "aa_to_optimal_codon": aa_to_selected_codon,
+        "aa_to_optimal_codon": aa_to_optimal_codon,
         "initial_sequence_optimization_score": initial_sequence_score,
-        "final_sequence_optimization_score": score,
+        "final_sequence_optimization_score": previous_sequence_score,
         "run_time": timer.elapsed_time,
         "iterations_summary": iterations_summary,
     }
