@@ -138,7 +138,6 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
             optimization_cub_index=optimization_cub_index,
         )
         initial_sequence_score = None
-        aa_to_selected_codon = {}
         iterations_count = 0
         iterations_summary = []
         for run in range(max_iterations):
@@ -217,8 +216,14 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 sequence = new_sequence
                 previous_sequence_score = score
 
-    aa_to_optimal_codon = aa_to_selected_codon if new_sequence == sequence else \
-        iterations_summary[-2]["aa_to_selected_codon"]
+    if new_sequence == sequence:
+        aa_to_optimal_codon = aa_to_selected_codon
+    elif len(iterations_summary) > 1:
+        aa_to_optimal_codon = iterations_summary[-2]["aa_to_selected_codon"]
+    else:
+        aa_to_optimal_codon = []
+        print(aa_to_optimal_codon)
+
     orf_summary = {
         "initial_sequence": initial_sequence,
         "final_sequence": sequence,
