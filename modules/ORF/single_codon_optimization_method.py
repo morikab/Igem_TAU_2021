@@ -133,6 +133,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
         optimized_organisms_weights = []
         deoptimized_organisms_loss = []
         deoptimized_organisms_weights = []
+        logger.info(f"Loss summary for: {codon}")
         for organism in organisms:
             max_value = _get_max_organism_attribute_value(organism=organism,
                                                           codons=codons,
@@ -142,6 +143,8 @@ def loss_function(organisms: typing.Sequence[models.Organism],
                                                                max_value=max_value,
                                                                optimization_method=optimization_method,
                                                                organism_attribute_name=organism_attribute_name)
+            logger.info(f"loss for {organism.name}: {organism_loss}")
+            # TODO - create dict for the loss per codon for each organism, then include the frequency of each AA in the sequence to show the cancelling effect that eventually leads to the negtive score (in single codon approach).
             if organism.is_optimized:
                 optimized_organisms_loss.append(organism_loss)
                 optimized_organisms_weights.append(organism.optimization_priority)
