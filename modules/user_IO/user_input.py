@@ -54,6 +54,12 @@ class UserInputModule(object):
         orf_sequence = cls._parse_orf_sequence(user_input)
         logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
 
+        # TODO - remove
+        # import codonbias as cb
+        # nuc = cb.stats.BaseCounter(k_mer=3)
+        # freq = nuc.count(orf_sequence).get_table()
+        # run_summary.add_to_run_summary("orf_sequence_stats", freq.to_dict())
+
         organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
                                                    optimization_cub_index=optimization_cub_index)
 

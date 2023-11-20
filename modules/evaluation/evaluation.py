@@ -1,6 +1,8 @@
 import typing
 
 from numpy import average
+from scipy.stats.mstats import gmean
+
 from modules import models as main_models
 from modules.run_summary import RunSummary
 from modules.ORF.calculating_cai import general_geomean
@@ -23,6 +25,9 @@ class EvaluationModule(object):
         deoptimized_organisms_scores = []
         deoptimized_organisms_weights = []
 
+        # TODO - create random sequences for comparison: derive the best sequence for each organism separetely (based
+        #  on the weights from the user input, and calculate cub per organism for each sequence (should add two more
+        #  values for each param. Then calculate the normalized zscore per those parameters, and calculat the ratio.
         organisms_evaluation_summary = []
         for organism in user_input.organisms:
             sigma = getattr(organism, std)
@@ -63,10 +68,19 @@ class EvaluationModule(object):
             tuning_parameter=user_input.tuning_parameter,
         )
 
+        ratio_score = EvaluationModule._calculate_ratio_score(
+            optimized_organisms_scores=optimized_organisms_scores,
+            deoptimized_organisms_scores=deoptimized_organisms_scores,
+            optimized_organisms_weights=optimized_organisms_weights,
+            deoptimized_organisms_weights=deoptimized_organisms_weights,
+            tuning_parameter=user_input.tuning_parameter,
+        )
+
         evaluation_result = models.EvaluationModuleResult(
             sequence=final_sequence,
             average_distance_score=average_distance_score,
             weakest_link_score=weakest_link_score,
+            ratio_score=ratio_score,
         )
 
         evaluation_summary = {
@@ -87,6 +101,23 @@ class EvaluationModule(object):
         mean_opt_index = average(optimized_organisms_scores, weights=optimized_organisms_weights)
         mean_deopt_index = average(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
         return tuning_parameter * mean_opt_index - (1-tuning_parameter) * mean_deopt_index
+
+    # --------------------------------------------------------------
+    @staticmethod
+    def _calculate_ratio_score(optimized_organisms_scores: typing.Sequence[float],
+                               deoptimized_organisms_scores: typing.Sequence[float],
+                               optimized_organisms_weights: typing.Sequence[float],
+                               deoptimized_organisms_weights: typing.Sequence[float],
+                               tuning_parameter: float) -> float:
+
+        # TODO - normalize scores. Need to find the min and max scores for the range. This requires iterating through
+        #  all possible permutations of the sequence, calculating the CUB score for each and then finding the min
+        #  and max values.
+
+        mean_opt_index = gmean(optimized_organisms_scores, weights=optimized_organisms_weights)
+        mean_deopt_index = gmean(deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
+
+        return (mean_opt_index ** tuning_parameter) / (mean_deopt_index ** (1 - tuning_parameter))
 
     # --------------------------------------------------------------
     @staticmethod

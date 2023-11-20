@@ -327,9 +327,6 @@ def _calculate_zscore_diff_score(zscore: models.SequenceZscores,
 # --------------------------------------------------------------
 def _calculate_zscore_ratio_score(zscore: models.SequenceZscores,
                                   tuning_parameter: float) -> float:
-    # mean_opt_index = average(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
-    # mean_deopt_index = average(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
-
     mean_opt_index = gmean(zscore.wanted_hosts_scores, weights=zscore.wanted_hosts_weights)
     mean_deopt_index = gmean(zscore.unwanted_hosts_scores, weights=zscore.unwanted_hosts_weights)
 

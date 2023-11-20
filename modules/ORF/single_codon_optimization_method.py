@@ -121,12 +121,14 @@ def loss_function(organisms: typing.Sequence[models.Organism],
                   codons: typing.Sequence[str],
                   tuning_param: float,
                   optimization_method: models.OptimizationMethod,
-                  optimization_cub_index: models.OptimizationCubIndex) -> typing.Dict[str, float]:
+                  optimization_cub_index: models.OptimizationCubIndex) -> typing.Sequence[typing.Dict[str, float]]:
     """
     The function iterates through each organism and sums up loss for each codon.
     It returns a mapping from codon to its score.
     """
     loss_per_codon = defaultdict(float)
+    optimized_loss_per_codon = defaultdict(float)
+    deoptimized_loss_per_codon = defaultdict(float)
     organism_attribute_name = _get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index)
     for codon in codons:
         optimized_organisms_loss = []
@@ -148,9 +150,11 @@ def loss_function(organisms: typing.Sequence[models.Organism],
             if organism.is_optimized:
                 optimized_organisms_loss.append(organism_loss)
                 optimized_organisms_weights.append(organism.optimization_priority)
+                optimized_loss_per_codon[codon] = organism_loss
             else:
                 deoptimized_organisms_loss.append(organism_loss)
                 deoptimized_organisms_weights.append(organism.optimization_priority)
+                deoptimized_loss_per_codon[codon] = organism_loss
 
         loss_per_codon[codon] = _calculate_total_loss_per_codon(
             optimization_method=optimization_method,
@@ -161,7 +165,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
             tuning_parameter=tuning_param,
         )
 
-    return loss_per_codon
+    return loss_per_codon, optimized_loss_per_codon, deoptimized_loss_per_codon
 
 
 # --------------------------------------------------------------
@@ -216,18 +220,29 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
     """
     optimal_codons = {}
     codons_loss_score = {}
+    codons_loss_score_optimized = {}
+    codons_loss_score_deoptimized = {}
     for aa, codons in shared_functions_and_vars.synonymous_codons.items():
-        loss = loss_function(organisms=organisms,
-                             codons=codons,
-                             tuning_param=tuning_param,
-                             optimization_method=optimization_method,
-                             optimization_cub_index=optimization_cub_index)
+        loss, optimized_loss, deoptimized_loss = loss_function(
+            organisms=organisms,
+            codons=codons,
+            tuning_param=tuning_param,
+            optimization_method=optimization_method,
+            optimization_cub_index=optimization_cub_index,
+        )
         logger.info(F"Loss dict is: {loss}")
         optimal_codons[aa] = min(loss, key=loss.get)
         codons_loss_score[aa] = loss
+        codons_loss_score_optimized[aa] = optimized_loss
+        codons_loss_score_deoptimized[aa] = deoptimized_loss
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
 
-    run_summary.add_to_run_summary("orf_debug", codons_loss_score)
+    orf_debug = {
+        "total_loss": codons_loss_score,
+        "optimized_loss": codons_loss_score_optimized,
+        "deoptimized_loss": codons_loss_score_deoptimized,
+    }
+    run_summary.add_to_run_summary("orf_debug", orf_debug)
     return optimal_codons
 
 
