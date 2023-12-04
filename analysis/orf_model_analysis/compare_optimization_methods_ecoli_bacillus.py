@@ -218,30 +218,30 @@ if __name__ == "__main__":
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry_debug")
 
-    # run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
-    #                                    optimization_cub_index="CAI",
-    #                                    is_ecoli_optimized=True,
-    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                                    output_path="mcherry_debug")
+    run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
+                                       optimization_cub_index="CAI",
+                                       is_ecoli_optimized=True,
+                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                                       output_path="mcherry_debug")
 
     # fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta"
     # with open(fasta_file_path, "r") as fasta_handle:
     #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
-    with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
-        genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
-    gene_name = "yosI|hypothetical protein; phage SPbeta"
-
-    gene_sequence = genome_dict[gene_name]
-    gene_sequence = str(gene_sequence.seq)
-
-    results = run_single_method_for_orf_sequence(
-        optimization_method="single_codon_diff",
-        optimization_cub_index="CAI",
-        is_ecoli_optimized=False,
-        output_path="endogenous-remote-debug",
-        orf_sequence=gene_sequence,
-    )
+    # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
+    # gene_name = "yosI|hypothetical protein; phage SPbeta"
+    #
+    # gene_sequence = genome_dict[gene_name]
+    # gene_sequence = str(gene_sequence.seq)
+    #
+    # results = run_single_method_for_orf_sequence(
+    #     optimization_method="single_codon_diff",
+    #     optimization_cub_index="CAI",
+    #     is_ecoli_optimized=False,
+    #     output_path="endogenous-remote-debug",
+    #     orf_sequence=gene_sequence,
+    # )
 
     # results = run_single_method_for_orf_sequence(
     #     optimization_method="zscore_bulk_aa_ratio",
