@@ -47,18 +47,14 @@ class UserInputModule(object):
             user_input.get("optimization_cub_index") else None
         optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
             user_input.get("optimization_method") else None
+        evaluation_score = models.EvaluationScore(user_input["evaluation_score"]) if \
+            user_input.get("evaluation_score") else None
         tuning_parameter = user_input["tuning_param"]
         clusters_count = user_input["clusters_count"]
         output_path = user_input.get("output_path")
 
         orf_sequence = cls._parse_orf_sequence(user_input)
         logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
-
-        # TODO - remove
-        # import codonbias as cb
-        # nuc = cb.stats.BaseCounter(k_mer=3)
-        # freq = nuc.count(orf_sequence).get_table()
-        # run_summary.add_to_run_summary("orf_sequence_stats", freq.to_dict())
 
         organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
                                                    optimization_cub_index=optimization_cub_index)
@@ -68,6 +64,7 @@ class UserInputModule(object):
                                       tuning_parameter=tuning_parameter,
                                       optimization_method=optimization_method,
                                       optimization_cub_index=optimization_cub_index,
+                                      evaluation_score=evaluation_score,
                                       clusters_count=clusters_count,
                                       output_path=output_path)
 

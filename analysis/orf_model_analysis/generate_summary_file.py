@@ -224,6 +224,7 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
 
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_average_distance_score")
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_weakest_link_score")
+    add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_ratio_score")
 
     for aa in aa_list:
         add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value=aa)
@@ -271,7 +272,6 @@ def update_from_summary(
 
     evaluation_summary = get_evaluation_summary(summary)
     organisms = evaluation_summary["organisms"]
-    # organisms.sort(key=lambda x: x.get("is_wanted"))
     for organism_name in ordered_organisms:
         organism = [matched_organism for matched_organism in organisms if
                     matched_organism["name"] == organism_name][0]
@@ -282,6 +282,7 @@ def update_from_summary(
 
     summary_row.append(evaluation_summary["average_distance_score"])
     summary_row.append(evaluation_summary["weakest_link_score"])
+    summary_row.append(evaluation_summary.get("ratio_score"))
 
     orf_summary = get_orf_summary(summary)
     aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
