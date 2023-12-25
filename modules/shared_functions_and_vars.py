@@ -1,4 +1,5 @@
 import random
+import typing
 
 nt_to_aa = {
     'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
@@ -85,6 +86,19 @@ def translate(seq, table=nt_to_aa):  # DONE
         return protein
     else:
         return ValueError('len(seq)%3 !=0')
+
+
+def change_all_codons_of_aa(seq: str, selected_codon: str) -> typing.Tuple[str, int]:
+    split_seq = [seq[i:i+3].upper() for i in range(0, len(seq), 3)]
+    new_split_seq = []
+    changed_codons_count = 0
+    for codon in split_seq:
+        if nt_to_aa[codon] == nt_to_aa[selected_codon]:
+            new_split_seq.append(selected_codon)
+            changed_codons_count += 1
+        else:
+            new_split_seq.append(codon)
+    return ''.join(new_split_seq), changed_codons_count
 
 
 def unique(list1):

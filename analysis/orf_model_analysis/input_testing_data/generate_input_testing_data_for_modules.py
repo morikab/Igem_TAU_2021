@@ -115,8 +115,8 @@ def generate_testing_data_for_ecoli_and_bacillus(
         sequence_file_path: str = None,
         sequence: str = None,
         output_path: str = None,
-        should_use_mrna_levels: bool = True,
-        should_use_protein_abundance: bool = False,
+        should_use_mrna_levels: bool = False,
+        should_use_protein_abundance: bool = True,
 ):
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"

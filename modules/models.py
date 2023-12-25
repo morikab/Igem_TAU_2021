@@ -142,6 +142,12 @@ class OptimizationCubIndex(Enum):
                         OptimizationCubIndex.max_codon_trna_adaptation_index)
 
 
+class EvaluationScore(Enum):
+    average_distance = "average_distance"
+    weakest_link = "weakest_link"
+    ratio = "ratio"
+
+
 @dataclass
 class UserInput:
     organisms: typing.List[Organism]
@@ -151,6 +157,7 @@ class UserInput:
     clusters_count: int
     optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_ratio
     optimization_cub_index: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
+    evaluation_score: EvaluationScore = EvaluationScore.average_distance
 
     @property
     def summary(self) -> typing.Dict[str, typing.Any]:

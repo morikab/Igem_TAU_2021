@@ -142,12 +142,13 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        orf_sequence: typing.Optional[str] = None,
                                        orf_sequence_file: typing.Optional[str] = None,
                                        output_path: typing.Optional[str] = None,
-                                       optimization_cub_index: str = "CAI"):
+                                       optimization_cub_index: str = "CAI",
+                                       tuning_param: float = 0.5):
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         optimization_method=optimization_method,
         optimization_cub_index=optimization_cub_index,
         clusters_count=1,
-        tuning_param=0.5,
+        tuning_param=tuning_param,
         is_ecoli_optimized=is_ecoli_optimized,
         sequence=orf_sequence,
         sequence_file_path=orf_sequence_file,
@@ -214,39 +215,41 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    import codonbias as cb
-
-    # bacillus_tai = cb.scores.TrnaAdaptationIndex(
-    #     url="http://gtrnadb.ucsc.edu/genomes/bacteria/Baci_subt_subtilis_168/",
-    #     prokaryote=True,
-    # )
-
     # run_all_methods(orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                 output_path="mcherry_debug")
 
-    # run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
-    #                                    optimization_cub_index="tAI",
-    #                                    is_ecoli_optimized=True,
-    #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-    #                                    output_path="mcherry_debug")
+    run_single_method_for_orf_sequence(optimization_method="single_codon_diff",
+                                       optimization_cub_index="CAI",
+                                       is_ecoli_optimized=True,
+                                       orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+                                       output_path="mcherry_debug")
 
-    mcherry_root_dir = r"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results\mcherry_debug"
-    from analysis.orf_model_analysis.generate_summary_file import generate_summary
-    generate_summary(results_directory=mcherry_root_dir)
+    # fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta"
+    # with open(fasta_file_path, "r") as fasta_handle:
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
 
     # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
-    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
-    # gene_name = "rpmJ|ribosomal"
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
+    # gene_name = "yosI|hypothetical protein; phage SPbeta"
     #
     # gene_sequence = genome_dict[gene_name]
     # gene_sequence = str(gene_sequence.seq)
     #
     # results = run_single_method_for_orf_sequence(
     #     optimization_method="single_codon_diff",
-    #     optimization_cub_index="tAI",
+    #     optimization_cub_index="CAI",
     #     is_ecoli_optimized=False,
-    #     output_path="endogenous",
-    #     orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+    #     output_path="endogenous-remote-debug",
+    #     orf_sequence=gene_sequence,
+    # )
+
+    # results = run_single_method_for_orf_sequence(
+    #     optimization_method="zscore_bulk_aa_ratio",
+    #     optimization_cub_index="CAI",
+    #     is_ecoli_optimized=False,
+    #     output_path="endogenous-remote-debug",
+    #     orf_sequence="ATGATTGAGAACCGTCCGTGGCTGACGATATTCAGCCATACCATGCTGATCCTCGGGATCGCGGTGATCCTCTTCCCGCTGTACGTGGCGTTTGTCGCGGCGACGCTGGATAAACAGGCCGTCTATGCCGCGCCGATGACGCTCATCCCCGGCACACATCTGCTGGAAAACATCCACAACATCTGGGTGAACGGGGTAGGCACGAATAGCGCGCCGTTCTGGCGGATGTTGCTTAACAGCTTTGTGATGGCGTTCAGCATTACGCTCGGCAAAATTACCGTCTCGATGCTCTCGGCATTTGCCATTGTCTGGTTTCGTTTTCCGCTACGTAACCTCTTCTTCTGGATGATTTTTATCACCCTGATGCTGCCGGTTGAAGTACGTATCTTCCCGACGGTGGAAGTCATCGCCAACCTGCAGATGCTCGACAGCTACGCCGGTTTAACGCTGCCGCTGATGGCCTCGGCGACCGCTACTTTCCTGTTCCGCCAGTTCTTTATGACGCTGCCGGATGAGCTGGTGGAAGCCGCGCGGATCGACGGCGCATCGCCAATGCGCTTCTTTTGCGACATCGTTTTTCCGCTCTCCAAAACTAATCTGGCGGCGCTGTTTGTGATCACCTTTATCTACGGCTGGAATCAGTATTTGTGGCCGTTGTTGATTATTACCGATGTGGATCTCGGCACCACCGTGGCAGGGATCAAAGGGATGATCGCTACAGGCGAAGGCACCACGGAATGGAACTCAGTGATGGTGGCGATGTTGTTAACGCTTATCCCTCCGGTGGTGATTGTTTTAGTGATGCAGCGTGCCTTCGTGCGCGGCCTGGTCGATAGTGAGAAATAA",
+    #     tuning_param=0,
     # )
 
     # Reference - https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_000001405.40/

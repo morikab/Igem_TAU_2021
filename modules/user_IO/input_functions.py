@@ -108,8 +108,9 @@ def extract_gene_name(feature) -> typing.Optional[str]:
     name = feature.qualifiers.get("gene") or feature.qualifiers.get("locus_tag")
     if name is None:
         return name
-    # TODO - should return only name[0]?
-    return "-".join(list(name))
+    # TODO - should return the complete name?
+    return name[0]
+    # return "-".join(list(name))
 
 
 def extract_cds(cds_features: typing.List, sequence: Seq) -> typing.Sequence[models.Cds]:
@@ -117,6 +118,10 @@ def extract_cds(cds_features: typing.List, sequence: Seq) -> typing.Sequence[mod
     for feature in cds_features:
         gene_name = extract_gene_name(feature)
         if gene_name is None:
+            continue
+
+        # TODO - should we remove this?
+        if any(x.gene_name == gene_name for x in cds_list):
             continue
 
         cds = str(feature.extract(sequence))
@@ -185,7 +190,7 @@ def get_reference_genes_for_cai(
 ) -> typing.Dict[str, str]:
     """
     calculates the cai weights - if estimated_expression dictionary has more than 3 times the number of ribosomal genes,
-    30% most highly expressed genes will be used as reference set.
+    15% most highly expressed genes will be used as reference set.
     in any other case, ribosomal genes will be used
     """
     ribosomal_proteins_count_threshold = config["INPUT"]["RIBOSOMAL_PROTEINS_COUNT_THRESHOLD"]

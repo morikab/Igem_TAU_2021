@@ -84,6 +84,7 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
 
 
 def choose_orf_optimization_result(
+        evaluation_score: models.EvaluationScore,
         tai_evaluation_results: typing.Optional[typing.Sequence[evaluation_models.EvaluationModuleResult]],
         cai_evaluation_results: typing.Optional[typing.Sequence[evaluation_models.EvaluationModuleResult]],
 ) -> evaluation_models.EvaluationModuleResult:
@@ -97,8 +98,7 @@ def choose_orf_optimization_result(
         if best_evaluation_result is None:
             best_evaluation_result = evaluation_result
             continue
-        # TODO - extend to allow comparison by other scores (make it an argument)
-        if evaluation_result.average_distance_score > best_evaluation_result.average_distance_score:
+        if evaluation_result.get_score(evaluation_score) > best_evaluation_result.get_score(evaluation_score):
             best_evaluation_result = evaluation_result
 
     return best_evaluation_result
@@ -139,7 +139,8 @@ def run_orf_optimization(user_input: models.UserInput,
         ]
 
     evaluation_result = choose_orf_optimization_result(tai_evaluation_results=tai_evaluation_results,
-                                                       cai_evaluation_results=cai_evaluation_results)
+                                                       cai_evaluation_results=cai_evaluation_results,
+                                                       evaluation_score=user_input.evaluation_score)
 
     logger.info(f"Final evaluation result: {evaluation_result.summary}")
     run_summary.add_to_run_summary("final_evaluation", evaluation_result.summary)
