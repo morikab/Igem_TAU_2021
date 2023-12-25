@@ -105,6 +105,8 @@ class EvaluationModule(object):
             aa_to_codon = {}
             for aa, aa_codons in shared_functions_and_vars.synonymous_codons.items():
                 codon_weights = {codon: weights[codon] for codon in aa_codons if weights.get(codon)}
+                if not codon_weights:
+                    continue
                 aa_to_codon[aa] = aggregation_method(codon_weights, key=codon_weights.get)
             final_sequence = sequence
             for aa in aa_to_codon.keys():
