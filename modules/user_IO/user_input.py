@@ -2,7 +2,6 @@ import json
 
 from modules.run_summary import RunSummary
 from modules.user_IO.input_functions import *
-from modules.ORF.calculating_cai import general_geomean
 from modules.shared_functions_and_vars import DEFAULT_ORGANISM_PRIORITY
 from modules.shared_functions_and_vars import write_fasta
 
