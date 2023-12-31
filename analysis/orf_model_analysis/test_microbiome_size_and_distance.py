@@ -5,14 +5,13 @@ import pandas as pd
 import typing
 from pathlib import Path
 
+from Bio import Align
 from Bio import SeqIO
 
 
 from input_testing_data.generate_input_testing_data_for_modules import generate_testing_data
 from input_testing_data.generate_input_testing_data_for_modules import get_organisms_for_testing
-from modules.main import run_input_processing
 from modules.main import run_modules
-from modules.main import run_orf_module
 
 
 current_directory = Path(__file__).parent.resolve()
@@ -194,6 +193,43 @@ def group_summary_files(results_directory: str) -> None:
     summary_df.to_csv(os.path.join(results_directory, "summary.csv"))
 
 
+def generate_pairwise_alignments_file():
+    rna_16s_fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\arabidopsis_microbiome\soil_16_seqs.fasta"
+
+    with open(rna_16s_fasta_file_path, "r") as fasta_handle:
+        sequences_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"))
+
+    first_organism = []
+    second_organism = []
+    score = []
+    similarity = []
+
+    aligner = Align.PairwiseAligner()
+
+    for first_seq in sequences_dict.keys():
+        for second_seq in sequences_dict.keys():
+            if first_seq == second_seq:
+                continue
+
+            alignments = aligner.align(str(sequences_dict[first_seq].seq), str(sequences_dict[second_seq].seq))
+            print(f"Alignment of {first_seq} vs. {second_seq}")
+            alignment = alignments[0]
+            alignment_length = alignment.indices.shape[1]
+            similarity_score = alignment.score / alignment_length
+            first_organism.append(first_seq)
+            second_organism.append(second_seq)
+            score.append(alignment.score)
+            similarity.append(similarity_score)
+
+    alignment_dict = {
+        "first_organism": first_organism,
+        "second_organism": second_organism,
+        "score": score,
+        "similarity": similarity,
+    }
+    return pd.DataFrame(alignment_dict)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analysis script parser")
     parser.add_argument('-o', '--output', type=str, required=True, help="Output directory name")
@@ -205,15 +241,17 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--start', type=int, help="Start index from fasta file")
     args = parser.parse_args()
 
-    run_for_sub_microbiome(
-        output_path=args.output,
-        optimization_method=args.method,
-        optimization_cub_index=args.index,
-        fasta_file_path=args.fasta,
-        wanted_hosts=args.wanted,
-        unwanted_hosts=args.unwanted,
-        start_seq=args.start,
-    )
+    generate_pairwise_alignments_file()
+
+    # run_for_sub_microbiome(
+    #     output_path=args.output,
+    #     optimization_method=args.method,
+    #     optimization_cub_index=args.index,
+    #     fasta_file_path=args.fasta,
+    #     wanted_hosts=args.wanted,
+    #     unwanted_hosts=args.unwanted,
+    #     start_seq=args.start,
+    # )
 
     # analyze_per_microbiome_size(
     #     results_directory=rF"C:\projects\Igem_TAU_2021_moran\analysis\orf_model_analysis\results\arabidopsis\{args.output}",
