@@ -203,6 +203,7 @@ class UserInputModule(object):
         org_summary["reference_genes"] = reference_genes
         write_fasta(fid=organism_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
+        logger.info(f"parsed_organism_file: {parsed_organism_file}")
         with open(parsed_organism_file, "w") as organism_file:
             json.dump(org_summary, organism_file)
         # FIXME - end
