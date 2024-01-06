@@ -129,23 +129,27 @@ class UserInputModule(object):
         gb_path = organism_input["genome_path"]
 
         # FIXME - delete
-        parsed_organism_file_name = f"{gb_path.strip('.gb')}_{is_optimized}_parsed"
+        parsed_organism_file_name = f"{gb_path.strip('.gb')}_{optimization_cub_index.value}_parsed"
         parsed_organism_file = parsed_organism_file_name + ".json"
 
         # FIXME - delete
-        # if os.path.exists(parsed_organism_file):
-        #     with open(parsed_organism_file) as org_file:
-        #         organism_data = json.load(org_file)
-        #         return models.Organism(name=organism_data["name"],
-        #                                cai_profile=organism_data["cai_weights"],
-        #                                tai_profile=organism_data["tai_weights"],
-        #                                cai_scores=organism_data["cai_scores"],
-        #                                tai_scores=organism_data["tai_scores"],
-        #                                reference_genes=organism_data["reference_genes"],
-        #                                is_optimized=organism_data["is_wanted"],
-        #                                optimization_priority=organism_data["optimization_priority"])
-
+        if os.path.exists(parsed_organism_file):
+            with open(parsed_organism_file) as org_file:
+                organism_data = json.load(org_file)
+                parsed_organism = models.Organism(
+                    name=organism_data["name"], 
+                    cai_profile=organism_data["cai_weights"],
+                    tai_profile=organism_data["tai_weights"],
+                    cai_scores=organism_data["cai_scores"],
+                    tai_scores=organism_data["tai_scores"],
+                    reference_genes=organism_data["reference_genes"],
+                    is_optimized=organism_data["is_wanted"],
+                    optimization_priority=organism_data["optimization_priority"],
+                )
+                parsed_organism.is_optimized = is_optimized
+                return parsed_organism
         # FIXME - end
+                                         
         try:
             gb_file = SeqIO.read(gb_path, format="gb")
             organism_name = " ".join(gb_file.description.split()[:2])
@@ -201,7 +205,7 @@ class UserInputModule(object):
         org_summary["tai_scores"] = tai_scores_dict
         org_summary["cds_dict"] = cds_dict
         org_summary["reference_genes"] = reference_genes
-        write_fasta(fid=organism_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
+        # write_fasta(fid=organism_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
         logger.info(f"parsed_organism_file: {parsed_organism_file}")
         with open(parsed_organism_file, "w") as organism_file:

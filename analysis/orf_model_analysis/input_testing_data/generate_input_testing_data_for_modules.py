@@ -125,7 +125,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
     output_path = output_path or "results"
     output_directory = os.path.join(output_path, F"{optimization_cub_index}_{optimization_method}_ecoli_opt_"
                                                  F"{is_ecoli_optimized}_{generate_random_string(4)}")
-    Path(output_directory).mkdir(parents=True, exist_ok=True)
+    # Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     if is_ecoli_optimized:
         opt_genome = "Escherichia-coli.gb"
