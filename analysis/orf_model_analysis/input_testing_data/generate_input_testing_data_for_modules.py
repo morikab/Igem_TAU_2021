@@ -72,7 +72,7 @@ def generate_testing_data(
     output_directory = os.path.join(output_path, F"{optimization_cub_index}_{optimization_method}_"
                                                  F"{len(wanted_hosts) + len(unwanted_hosts)}_"
                                                  F"{generate_random_string(4)}")
-    Path(output_directory).mkdir(parents=True, exist_ok=True)
+    # Path(output_directory).mkdir(parents=True, exist_ok=True)
     input_dict = {
         "sequence_file_path": sequence_file_path,
         "sequence": sequence,
