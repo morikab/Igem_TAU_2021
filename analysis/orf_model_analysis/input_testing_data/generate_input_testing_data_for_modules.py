@@ -117,6 +117,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         output_path: str = None,
         should_use_mrna_levels: bool = False,
         should_use_protein_abundance: bool = True,
+        evaluation_score: str = None,
 ):
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
@@ -150,6 +151,7 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "optimization_method": optimization_method,
         "optimization_cub_index": optimization_cub_index,
         "output_path": output_directory,
+        "evaluation_score": evaluation_score or "average_distance",
     }
 
     expression_csv_type = None
