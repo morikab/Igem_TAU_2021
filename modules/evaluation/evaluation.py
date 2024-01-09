@@ -143,10 +143,10 @@ class EvaluationModule(object):
         scores_range = max_score-min_score
 
         normalized_optimized_organisms_scores = [
-            (score - min_score)/scores_range for score in optimized_organisms_scores
+            (score - min_score)/scores_range + 1 for score in optimized_organisms_scores
         ]
         normalized_deoptimized_organisms_scores = [
-            (score - min_score)/scores_range for score in deoptimized_organisms_scores
+            (score - min_score)/scores_range + 1 for score in deoptimized_organisms_scores
         ]
         mean_opt_index = gmean(normalized_optimized_organisms_scores, weights=optimized_organisms_weights)
         mean_deopt_index = gmean(normalized_deoptimized_organisms_scores, weights=deoptimized_organisms_weights)
