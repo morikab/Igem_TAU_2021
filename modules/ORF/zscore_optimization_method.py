@@ -26,6 +26,7 @@ def optimize_sequence_by_zscore_single_aa(
         module_input: models.ModuleInput,
         optimization_cub_index: models.OptimizationCubIndex,
         optimization_method: models.OptimizationMethod,
+        skipped_codons_num: int,
         run_summary: RunSummary,
         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
 ):
@@ -35,7 +36,6 @@ def optimize_sequence_by_zscore_single_aa(
     sequence after each iteration, select the sequence with the best zscore - if it was not changed since the last
     iteration, break. The maximum number of iterations allowed is "max_iter".
     """
-
     with Timer() as timer:
         initial_sequence = sequence
         previous_sequence_score = _calculate_zscore_for_sequence(
@@ -58,7 +58,11 @@ def optimize_sequence_by_zscore_single_aa(
                 if nt_to_aa[codon] == "_" and optimization_cub_index.is_trna_adaptation_index:
                     # There is no point in optimizing stop codon by tAI weights, so keep the original codon
                     continue
-                tested_sequence, _ = change_all_codons_of_aa(sequence, codon)
+                tested_sequence, _ = change_all_codons_of_aa(
+                    seq=sequence,
+                    selected_codon=codon,
+                    skipped_codons_num=skipped_codons_num,
+                )
                 tested_sequence_to_codon[tested_sequence].append(codon)
 
                 sequence_to_zscore[tested_sequence] = _calculate_zscore_for_sequence(
@@ -124,13 +128,15 @@ def optimize_sequence_by_zscore_single_aa(
 
 
 # --------------------------------------------------------------
-def optimize_sequence_by_zscore_bulk_aa(sequence: str,
-                                        module_input: models.ModuleInput,
-                                        optimization_method: models.OptimizationMethod,
-                                        optimization_cub_index: models.OptimizationCubIndex,
-                                        run_summary: RunSummary,
-                                        max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"]):
-
+def optimize_sequence_by_zscore_bulk_aa(
+        sequence: str,
+        module_input: models.ModuleInput,
+        optimization_method: models.OptimizationMethod,
+        optimization_cub_index: models.OptimizationCubIndex,
+        skipped_codons_num: int,
+        run_summary: RunSummary,
+        max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
+):
     with Timer() as timer:
         initial_sequence = sequence
         initial_sequence_zscore = _calculate_zscore_for_sequence(
@@ -146,7 +152,11 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
             iterations_count = run + 1
             codons_to_zscore = {}
             for codon in nt_to_aa.keys():
-                candidate_codon_sequence, candidate_codon_count = change_all_codons_of_aa(sequence, codon)
+                candidate_codon_sequence, candidate_codon_count = change_all_codons_of_aa(
+                    seq=sequence,
+                    selected_codon=codon,
+                    skipped_codons_num=skipped_codons_num,
+                )
                 codons_to_zscore[codon] = _calculate_zscore_for_sequence(
                     sequence=candidate_codon_sequence,
                     module_input=module_input,
@@ -187,7 +197,11 @@ def optimize_sequence_by_zscore_bulk_aa(sequence: str,
                 if aa == "_" and optimization_cub_index.is_trna_adaptation_index:
                     # There is no point in optimizing stop codon by tAI weights, so keep the original codon
                     continue
-                new_sequence, _ = change_all_codons_of_aa(new_sequence, aa_to_selected_codon[aa])
+                new_sequence, _ = change_all_codons_of_aa(
+                    seq=new_sequence,
+                    selected_codon=aa_to_selected_codon[aa],
+                    skipped_codons_num=skipped_codons_num,
+                )
 
             # Calculate score after all replacements
             zscore = _calculate_zscore_for_sequence(

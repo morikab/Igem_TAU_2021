@@ -1,3 +1,5 @@
+import typing
+
 from logger_factory.logger_factory import LoggerFactory
 from modules import models
 from modules.configuration import Configuration
@@ -14,13 +16,15 @@ class InitiationModule(object):
     def run_module(
             module_input: models.ModuleInput,
             run_summary: RunSummary,
-    ) -> str:
+    ) -> typing.Tuple[str, int]:
         logger.info("##########################")
         logger.info("# initiation #")
         logger.info("##########################\n")
 
-        return optimize_by_weak_folding(
+        codons_num = config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"]
+        optimized_sequence = optimize_by_weak_folding(
             sequence=module_input.sequence,
-            codons_num=config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"],
+            codons_num=codons_num,
             run_summary=run_summary,
         )
+        return optimized_sequence, codons_num

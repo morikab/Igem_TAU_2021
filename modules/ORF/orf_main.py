@@ -21,6 +21,7 @@ class ORFModule(object):
             module_input: models.ModuleInput,
             optimization_cub_index: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
+            skipped_codons_num: int,
             run_summary: RunSummary,
     ) -> typing.Sequence[str]:
         logger.info("##########################")
@@ -34,6 +35,7 @@ class ORFModule(object):
                                                      optimization_cub_index=optimization_cub_index,
                                                      optimization_method=optimization_method,
                                                      tuning_param=module_input.tuning_parameter,
+                                                     skipped_codons_num=skipped_codons_num,
                                                      run_summary=run_summary),
 
         if optimization_method.is_zscore_optimization:
@@ -41,6 +43,7 @@ class ORFModule(object):
                 module_input=module_input,
                 optimization_cub_index=optimization_cub_index,
                 optimization_method=optimization_method,
+                skipped_codons_num=skipped_codons_num,
                 run_summary=run_summary,
             )
 
@@ -51,6 +54,7 @@ class ORFModule(object):
             module_input: models.ModuleInput,
             optimization_cub_index: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
+            skipped_codons_num: int,
             run_summary: RunSummary,
     ):
         original_sequence = module_input.sequence
@@ -64,6 +68,7 @@ class ORFModule(object):
             module_input=module_input,
             optimization_method=optimization_method,
             optimization_cub_index=optimization_cub_index,
+            skipped_codons_num=skipped_codons_num,
             run_summary=run_summary,
         )
 

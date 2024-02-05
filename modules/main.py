@@ -41,16 +41,20 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
         # TODO - consider better structuring input and output per module
         # ####################################### Initiation Optimization #################################
-        module_input.sequence = initiation.InitiationModule.run_module(
+        initiation_optimized_sequence, initiation_optimized_codons_num = initiation.InitiationModule.run_module(
             module_input=module_input,
             run_summary=run_summary,
         )
+        module_input.sequence = initiation_optimized_sequence
         # ####################################### ORF Optimization ########################################
-        # in this part, module input is split into different inputs according to the sequence family theory
         clustered_module_inputs = sequence_family.SequenceFamilyModule.run_module(module_input)
         evaluation_results = []
         for module_input_cluster in clustered_module_inputs:
-            evaluation_result = run_orf_optimization(module_input=module_input_cluster, run_summary=run_summary)
+            evaluation_result = run_orf_optimization(
+                module_input=module_input_cluster,
+                skipped_codons_num=initiation_optimized_codons_num,
+                run_summary=run_summary,
+            )
             evaluation_results.append(evaluation_result)
         # ###################################### Output Handling ##########################################
         output_path = module_input.output_path or str(artifacts_directory)
@@ -98,8 +102,10 @@ def choose_orf_optimization_result(
     return best_evaluation_result
 
 
-def run_orf_optimization(module_input: models.ModuleInput,
-                         run_summary: RunSummary) -> evaluation_models.EvaluationModuleResult:
+def run_orf_optimization(
+        module_input: models.ModuleInput,
+        skipped_codons_num: int,
+        run_summary: RunSummary) -> evaluation_models.EvaluationModuleResult:
     optimization_cub_index = module_input.optimization_cub_index
     optimization_method = module_input.optimization_method
     tai_evaluation_results = None
@@ -110,6 +116,7 @@ def run_orf_optimization(module_input: models.ModuleInput,
         cds_nt_final_tai = ORF.ORFModule.run_module(module_input=module_input,
                                                     optimization_cub_index=trna_adaptation_index,
                                                     optimization_method=optimization_method,
+                                                    skipped_codons_num=skipped_codons_num,
                                                     run_summary=run_summary)
         tai_evaluation_results = [
             EvaluationModule.run_module(final_sequence=cds_nt_tai,
@@ -123,6 +130,7 @@ def run_orf_optimization(module_input: models.ModuleInput,
         cds_nt_final_cai = ORF.ORFModule.run_module(module_input=module_input,
                                                     optimization_cub_index=codon_adaptation_index,
                                                     optimization_method=optimization_method,
+                                                    skipped_codons_num=skipped_codons_num,
                                                     run_summary=run_summary)
 
         cai_evaluation_results = [

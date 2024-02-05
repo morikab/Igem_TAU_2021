@@ -15,12 +15,15 @@ config = Configuration.get_config()
 
 
 # --------------------------------------------------------------
-def optimize_sequence(target_gene: str,
-                      organisms: typing.Sequence[models.Organism],
-                      optimization_method: models.OptimizationMethod,
-                      optimization_cub_index: models.OptimizationCubIndex,
-                      tuning_param: float,
-                      run_summary: RunSummary) -> str:
+def optimize_sequence(
+        target_gene: str,
+        organisms: typing.Sequence[models.Organism],
+        optimization_method: models.OptimizationMethod,
+        optimization_cub_index: models.OptimizationCubIndex,
+        tuning_param: float,
+        skipped_codons_num: int,            # TODO - continue from here.....
+        run_summary: RunSummary,
+) -> str:
     with Timer() as timer:
         aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
                                                            tuning_param=tuning_param,
@@ -32,7 +35,9 @@ def optimize_sequence(target_gene: str,
         if target_protein.endswith("_") and optimization_cub_index.is_trna_adaptation_index:
             # There is no point in optimizing stop codon by tAI, so leaving the original codon
             aa_to_optimal_codon_mapping["_"] = target_gene[-3:]
-        optimized_sequence = "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein])
+
+        optimized_sequence = target_gene[:skipped_codons_num*3]
+        optimized_sequence += "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein[:skipped_codons_num]])
 
     orf_summary = {
         "aa_to_optimal_codon": aa_to_optimal_codon_mapping,

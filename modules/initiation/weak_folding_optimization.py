@@ -7,4 +7,6 @@ def optimize_by_weak_folding(
         run_summary: RunSummary,
 ) -> str:
     # TODO - think of the algorithm here (use the template from the server notebook)
+    # for every codon - look at all its synonymous options.
+    # 
     return sequence
