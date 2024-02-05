@@ -36,9 +36,9 @@ def compare_initial_and_final_cds_codons_cai_weights() -> None:
     with open(results_file, "r") as summary_file:
         summary = json.load(summary_file)
 
-    organisms_list = summary["user_input"]["organisms"]
+    organisms_list = summary["module_input"]["organisms"]
 
-    initial_sequence = summary["user_input"]["sequence"]
+    initial_sequence = summary["module_input"]["sequence"]
     initial_codons = [initial_sequence[i:i+3] for i in range(0, len(initial_sequence), 3)]
 
     # initial_scores = {i: [organism["cai_weights"][initial_codons[i]] for organism in organisms_list] for i
@@ -73,13 +73,13 @@ def compare_single_codon_method_scores() -> None:
                 with open(file_path, "r") as json_file:
                     summary = json.load(json_file)
                 if not are_initial_scores_initialized:
-                    for organism in summary["user_input"]["organisms"]:
+                    for organism in summary["module_input"]["organisms"]:
                         _update_initial_cub_scores(organism=organism, columns=columns, cub_index="CAI")
                         _update_initial_cub_scores(organism=organism, columns=columns, cub_index="tAI")
                     are_initial_scores_initialized = True
 
                 columns["name"].append(Path(root).name)
-                columns["cub_index"].append(summary["user_input"]["optimization_cub_index"])
+                columns["cub_index"].append(summary["module_input"]["optimization_cub_index"])
 
                 flattened_scores = {}
                 for dictionary in summary["orf_debug"].values():

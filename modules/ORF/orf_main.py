@@ -18,7 +18,7 @@ logger = LoggerFactory.get_logger()
 class ORFModule(object):
     @staticmethod
     def run_module(
-            user_input: models.UserInput,
+            module_input: models.ModuleInput,
             optimization_cub_index: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
             run_summary: RunSummary,
@@ -29,16 +29,16 @@ class ORFModule(object):
         logger.info(F"Optimization method used is: {optimization_method}")
 
         if optimization_method.is_single_codon_optimization:
-            return optimize_sequence_by_single_codon(target_gene=user_input.sequence,
-                                                     organisms=user_input.organisms,
+            return optimize_sequence_by_single_codon(target_gene=module_input.sequence,
+                                                     organisms=module_input.organisms,
                                                      optimization_cub_index=optimization_cub_index,
                                                      optimization_method=optimization_method,
-                                                     tuning_param=user_input.tuning_parameter,
+                                                     tuning_param=module_input.tuning_parameter,
                                                      run_summary=run_summary),
 
         if optimization_method.is_zscore_optimization:
             return ORFModule.optimize_sequence_by_zscore(
-                user_input=user_input,
+                module_input=module_input,
                 optimization_cub_index=optimization_cub_index,
                 optimization_method=optimization_method,
                 run_summary=run_summary,
@@ -48,12 +48,12 @@ class ORFModule(object):
 
     @staticmethod
     def optimize_sequence_by_zscore(
-            user_input: models.UserInput,
+            module_input: models.ModuleInput,
             optimization_cub_index: models.OptimizationCubIndex,
             optimization_method: models.OptimizationMethod,
             run_summary: RunSummary,
     ):
-        original_sequence = user_input.sequence
+        original_sequence = module_input.sequence
         target_genes = [original_sequence] + [
             synonymous_codon_permutation(original_sequence) for _ in
             range(config["ORF"]["ZSCORE_INITIAL_PERMUTATIONS_NUM"])
@@ -61,7 +61,7 @@ class ORFModule(object):
         zscore_optimization = ORFModule.get_zscore_optimization_method(optimization_method)
         partial_zscore_optimization_method = partial(
             zscore_optimization,
-            user_input=user_input,
+            module_input=module_input,
             optimization_method=optimization_method,
             optimization_cub_index=optimization_cub_index,
             run_summary=run_summary,

@@ -22,7 +22,7 @@ from modules import models
 logger = LoggerFactory.get_logger()
 
 
-def run_input_processing(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None) -> models.UserInput:
+def run_input_processing(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] = None) -> models.ModuleInput:
     run_summary = RunSummary()
     return user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
 
@@ -33,19 +33,20 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
     final_output = {}
     try:
         before_parsing_input = time.time()
-        user_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
+        module_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
         after_parsing_input = time.time()
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
         # ####################################### Family of sequences #####################################
-        # in this part, user input is split into different inputs according to the sequence family theory
-        clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
+        # in this part, module input is split into different inputs according to the sequence family theory
+
+        clustered_module_inputs = sequence_family.SequenceFamilyModule.run_module(module_input)
         evaluation_results = []
-        for input_cluster in clustered_user_inputs:
-            evaluation_result = run_orf_optimization(user_input=input_cluster, run_summary=run_summary)
+        for input_cluster in clustered_module_inputs:
+            evaluation_result = run_orf_optimization(module_input=input_cluster, run_summary=run_summary)
             evaluation_results.append(evaluation_result)
 
         # ###################################### Output Handling ##########################################
-        output_path = user_input.output_path or str(artifacts_directory)
+        output_path = module_input.output_path or str(artifacts_directory)
         run_summary.save_run_summary(output_path)
 
         final_output = run_summary.get()
@@ -90,43 +91,43 @@ def choose_orf_optimization_result(
     return best_evaluation_result
 
 
-def run_orf_optimization(user_input: models.UserInput,
+def run_orf_optimization(module_input: models.ModuleInput,
                          run_summary: RunSummary) -> evaluation_models.EvaluationModuleResult:
-    optimization_cub_index = user_input.optimization_cub_index
-    optimization_method = user_input.optimization_method
+    optimization_cub_index = module_input.optimization_cub_index
+    optimization_method = module_input.optimization_method
     tai_evaluation_results = None
     cai_evaluation_results = None
 
     if optimization_cub_index.is_trna_adaptation_index:
         trna_adaptation_index = optimization_cub_index.trna_adaptation_index
-        cds_nt_final_tai = ORF.ORFModule.run_module(user_input=user_input,
+        cds_nt_final_tai = ORF.ORFModule.run_module(module_input=module_input,
                                                     optimization_cub_index=trna_adaptation_index,
                                                     optimization_method=optimization_method,
                                                     run_summary=run_summary)
         tai_evaluation_results = [
             EvaluationModule.run_module(final_sequence=cds_nt_tai,
-                                        user_input=user_input,
+                                        module_input=module_input,
                                         optimization_cub_index=trna_adaptation_index,
                                         run_summary=run_summary) for cds_nt_tai in cds_nt_final_tai
         ]
 
     if optimization_cub_index.is_codon_adaptation_index:
         codon_adaptation_index = optimization_cub_index.codon_adaptation_index
-        cds_nt_final_cai = ORF.ORFModule.run_module(user_input=user_input,
+        cds_nt_final_cai = ORF.ORFModule.run_module(module_input=module_input,
                                                     optimization_cub_index=codon_adaptation_index,
                                                     optimization_method=optimization_method,
                                                     run_summary=run_summary)
 
         cai_evaluation_results = [
             EvaluationModule.run_module(final_sequence=cds_nt_cai,
-                                        user_input=user_input,
+                                        module_input=module_input,
                                         optimization_cub_index=codon_adaptation_index,
                                         run_summary=run_summary) for cds_nt_cai in cds_nt_final_cai
         ]
 
     evaluation_result = choose_orf_optimization_result(tai_evaluation_results=tai_evaluation_results,
                                                        cai_evaluation_results=cai_evaluation_results,
-                                                       evaluation_score=user_input.evaluation_score)
+                                                       evaluation_score=module_input.evaluation_score)
 
     logger.info(f"Final evaluation result: {evaluation_result.summary}")
     run_summary.add_to_run_summary("final_evaluation", evaluation_result.summary)
@@ -135,21 +136,21 @@ def run_orf_optimization(user_input: models.UserInput,
 
 def run_orf_module(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]]):
     run_summary = RunSummary()
-    user_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
+    module_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
 
-    optimization_cub_index = user_input.optimization_cub_index
-    optimization_method = user_input.optimization_method
+    optimization_cub_index = module_input.optimization_cub_index
+    optimization_method = module_input.optimization_method
 
     if optimization_cub_index.is_trna_adaptation_index:
         logger.info("tAI information:")
         trna_adaptation_index = optimization_cub_index.trna_adaptation_index
-        return ORF.ORFModule.run_module(user_input=user_input,
+        return ORF.ORFModule.run_module(module_input=module_input,
                                         optimization_cub_index=trna_adaptation_index,
                                         optimization_method=optimization_method,
                                         run_summary=run_summary)
 
     codon_adaptation_index = optimization_cub_index.codon_adaptation_index
-    return ORF.ORFModule.run_module(user_input=user_input,
+    return ORF.ORFModule.run_module(module_input=module_input,
                                     optimization_cub_index=codon_adaptation_index,
                                     optimization_method=optimization_method,
                                     run_summary=run_summary)

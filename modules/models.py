@@ -149,7 +149,7 @@ class EvaluationScore(Enum):
 
 
 @dataclass
-class UserInput:
+class ModuleInput:
     organisms: typing.List[Organism]
     sequence: str
     output_path: str

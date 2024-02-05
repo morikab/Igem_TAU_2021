@@ -9,7 +9,7 @@ from sklearn.cluster import AgglomerativeClustering, KMeans
 # TODO: try different clustering methods, and cluster eval methods- DBI, Silhouette- find min val
 # TODO: write efficiently
 
-def dict_to_cluster_np_array(user_input: models.UserInput): #todo: make this work on tai as well
+def dict_to_cluster_np_array(user_input: models.ModuleInput): #todo: make this work on tai as well
     clustering_mat = []
     opt_org_list = []
     for organism in user_input.organisms:
@@ -75,7 +75,7 @@ def create_n_clusters(clustering_mat, n_clus):
 #     return best_clusturing, best_score
 
 
-def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserInput):
+def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.ModuleInput):
     opt_org_list = [org.name for org in user_input.organisms if org.is_optimized]
     deopt_org_list =  [org.name for org in user_input.organisms if not org.is_optimized]
     c_assignment_dict = dict(zip(opt_org_list, best_clusturing))
@@ -85,10 +85,10 @@ def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.UserI
     inp_obj_list = []
     for c_opt_org_list in opt_org_clusters:
         opt_and_deopt = c_opt_org_list+deopt_org_list
-        new_user_input = models.UserInput(organisms=[],
-                                          sequence=user_input.sequence,
-                                          tuning_parameter=user_input.tuning_parameter,
-                                          clusters_count=user_input.clusters_count)
+        new_user_input = models.ModuleInput(organisms=[],
+                                            sequence=user_input.sequence,
+                                            tuning_parameter=user_input.tuning_parameter,
+                                            clusters_count=user_input.clusters_count)
 
         new_user_input.organisms = [user_input.organisms[i] for i in range(len(opt_org_list+deopt_org_list))
                                     if user_input.organisms[i].name in opt_and_deopt]

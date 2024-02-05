@@ -199,7 +199,7 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
                         column=worksheet.max_column,
                         value="optimization_cub_index")
 
-    organisms = summary["user_input"]["organisms"]
+    organisms = summary["module_input"]["organisms"]
     # Display unwanted organisms first
     organisms.sort(key=lambda x: x.get("is_wanted"))
     for organism in organisms:
@@ -265,8 +265,8 @@ def update_from_summary(
     if worksheet.max_row == 1:
         ordered_organisms = initialize_column_headers(summary=summary, worksheet=worksheet)
 
-    optimization_method = summary["user_input"]["optimization_method"]
-    optimization_cub_index = summary["user_input"]["optimization_cub_index"]
+    optimization_method = summary["module_input"]["optimization_method"]
+    optimization_cub_index = summary["module_input"]["optimization_cub_index"]
     formatted_optimization_cub_index = optimization_cub_index.lower()
     summary_row = [optimization_method, optimization_cub_index]
 

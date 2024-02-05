@@ -3,7 +3,7 @@ from modules.sequence_family.clustering_optimization import *
 
 class SequenceFamilyModule(object):
     @staticmethod
-    def run_module(user_input: models.UserInput):
+    def run_module(user_input: models.ModuleInput):
         object_list = []
         opt_org_list = [org.name for org in user_input.organisms if org.is_optimized]
 

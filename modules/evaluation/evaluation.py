@@ -14,11 +14,11 @@ from . import models
 class EvaluationModule(object):
     @staticmethod
     def run_module(final_sequence: str,
-                   user_input: main_models.UserInput,
+                   module_input: main_models.ModuleInput,
                    optimization_cub_index: main_models.OptimizationCubIndex,
                    run_summary: RunSummary) -> models.EvaluationModuleResult:
         optimization_cub_index_value = optimization_cub_index.value.lower()
-        initial_sequence = user_input.sequence
+        initial_sequence = module_input.sequence
         std = f"{optimization_cub_index_value}_std"
         weights = f"{optimization_cub_index_value}_profile"
 
@@ -29,7 +29,7 @@ class EvaluationModule(object):
         zscores_for_normalization = []
 
         organisms_evaluation_summary = []
-        for organism in user_input.organisms:
+        for organism in module_input.organisms:
             sigma = getattr(organism, std)
             profile = getattr(organism, weights)
             edge_case_sequences = EvaluationModule._get_sequences_for_normalization(
@@ -63,7 +63,7 @@ class EvaluationModule(object):
             deoptimized_organisms_scores=deoptimized_organisms_zscores,
             optimized_organisms_weights=optimized_organisms_weights,
             deoptimized_organisms_weights=deoptimized_organisms_weights,
-            tuning_parameter=user_input.tuning_parameter,
+            tuning_parameter=module_input.tuning_parameter,
         )
 
         weakest_link_score = EvaluationModule._calculate_weakest_link_score(
@@ -71,7 +71,7 @@ class EvaluationModule(object):
             deoptimized_organisms_scores=deoptimized_organisms_zscores,
             optimized_organisms_weights=optimized_organisms_weights,
             deoptimized_organisms_weights=deoptimized_organisms_weights,
-            tuning_parameter=user_input.tuning_parameter,
+            tuning_parameter=module_input.tuning_parameter,
         )
 
         ratio_score = EvaluationModule._calculate_ratio_score(
@@ -80,7 +80,7 @@ class EvaluationModule(object):
             scores_for_normalization=zscores_for_normalization,
             optimized_organisms_weights=optimized_organisms_weights,
             deoptimized_organisms_weights=deoptimized_organisms_weights,
-            tuning_parameter=user_input.tuning_parameter,
+            tuning_parameter=module_input.tuning_parameter,
         )
 
         evaluation_result = models.EvaluationModuleResult(
