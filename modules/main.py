@@ -14,7 +14,10 @@ artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "a
 #     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
 
-from modules import user_IO, ORF, sequence_family
+from modules import initiation
+from modules import ORF
+from modules import sequence_family
+from modules import user_IO
 from modules.evaluation import models as evaluation_models
 from modules.evaluation.evaluation import EvaluationModule
 from modules import models
@@ -36,15 +39,19 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
         module_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
         after_parsing_input = time.time()
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
-        # ####################################### Family of sequences #####################################
+        # TODO - consider better structuring input and output per module
+        # ####################################### Initiation Optimization #################################
+        module_input.sequence = initiation.InitiationModule.run_module(
+            module_input=module_input,
+            run_summary=run_summary,
+        )
+        # ####################################### ORF Optimization ########################################
         # in this part, module input is split into different inputs according to the sequence family theory
-
         clustered_module_inputs = sequence_family.SequenceFamilyModule.run_module(module_input)
         evaluation_results = []
-        for input_cluster in clustered_module_inputs:
-            evaluation_result = run_orf_optimization(module_input=input_cluster, run_summary=run_summary)
+        for module_input_cluster in clustered_module_inputs:
+            evaluation_result = run_orf_optimization(module_input=module_input_cluster, run_summary=run_summary)
             evaluation_results.append(evaluation_result)
-
         # ###################################### Output Handling ##########################################
         output_path = module_input.output_path or str(artifacts_directory)
         run_summary.save_run_summary(output_path)
