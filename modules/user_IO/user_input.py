@@ -14,16 +14,16 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, user_inp_raw: typing.Dict, run_summary: RunSummary) -> models.UserInput:
+    def run_module(cls, user_inp_raw: typing.Dict, run_summary: RunSummary) -> models.ModuleInput:
         logger.info('##########################')
         logger.info('# USER INPUT INFORMATION #')
         logger.info('##########################')
-        return cls._parse_input(user_input=user_inp_raw, run_summary=run_summary)
+        return cls._parse_input(module_input=user_inp_raw, run_summary=run_summary)
 
     @classmethod
-    def _parse_input(cls, user_input: typing.Dict[str, typing.Any], run_summary: RunSummary) -> models.UserInput:
+    def _parse_input(cls, module_input: typing.Dict[str, typing.Any], run_summary: RunSummary) -> models.ModuleInput:
         """
-        :param user_input: in the following format
+        :param module_input: in the following format
         {   'tuning_param': 0.5,
             'optimization_method': 'hill_climbing_average',
             'optimization_cub_index': 'CAI',
@@ -42,34 +42,34 @@ class UserInputModule(object):
             }
         }
         """
-        optimization_cub_index = models.OptimizationCubIndex(user_input["optimization_cub_index"]) if \
-            user_input.get("optimization_cub_index") else None
-        optimization_method = models.OptimizationMethod(user_input["optimization_method"]) if \
-            user_input.get("optimization_method") else None
-        evaluation_score = models.EvaluationScore(user_input["evaluation_score"]) if \
-            user_input.get("evaluation_score") else None
-        tuning_parameter = user_input["tuning_param"]
-        clusters_count = user_input["clusters_count"]
-        output_path = user_input.get("output_path")
+        optimization_cub_index = models.OptimizationCubIndex(module_input["optimization_cub_index"]) if \
+            module_input.get("optimization_cub_index") else None
+        optimization_method = models.OptimizationMethod(module_input["optimization_method"]) if \
+            module_input.get("optimization_method") else None
+        evaluation_score = models.EvaluationScore(module_input["evaluation_score"]) if \
+            module_input.get("evaluation_score") else None
+        tuning_parameter = module_input["tuning_param"]
+        clusters_count = module_input["clusters_count"]
+        output_path = module_input.get("output_path")
 
-        orf_sequence = cls._parse_orf_sequence(user_input)
+        orf_sequence = cls._parse_orf_sequence(module_input)
         logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
 
-        organisms_list = cls._parse_organisms_list(organisms_input_list=user_input["organisms"],
+        organisms_list = cls._parse_organisms_list(organisms_input_list=module_input["organisms"],
                                                    optimization_cub_index=optimization_cub_index)
 
-        user_input = models.UserInput(organisms=organisms_list,
-                                      sequence=orf_sequence,
-                                      tuning_parameter=tuning_parameter,
-                                      optimization_method=optimization_method,
-                                      optimization_cub_index=optimization_cub_index,
-                                      evaluation_score=evaluation_score,
-                                      clusters_count=clusters_count,
-                                      output_path=output_path)
+        module_input = models.ModuleInput(organisms=organisms_list,
+                                          sequence=orf_sequence,
+                                          tuning_parameter=tuning_parameter,
+                                          optimization_method=optimization_method,
+                                          optimization_cub_index=optimization_cub_index,
+                                          evaluation_score=evaluation_score,
+                                          clusters_count=clusters_count,
+                                          output_path=output_path)
 
-        run_summary.add_to_run_summary("user_input", user_input.summary)
+        run_summary.add_to_run_summary("module_input", module_input.summary)
 
-        return user_input
+        return module_input
 
     @classmethod
     def _parse_orf_sequence(cls, user_input: typing.Dict[str, typing.Any]) -> str:

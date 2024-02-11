@@ -149,7 +149,7 @@ class EvaluationScore(Enum):
 
 
 @dataclass
-class UserInput:
+class ModuleInput:
     organisms: typing.List[Organism]
     sequence: str
     output_path: str
@@ -166,6 +166,7 @@ class UserInput:
             "tuning_parameter": self.tuning_parameter,
             "optimization_method": self.optimization_method.value,
             "optimization_cub_index": self.optimization_cub_index.value,
+            "evaluation_score": self.evaluation_score,
             "organisms": [organism.summary for organism in self.organisms],
         }
 
