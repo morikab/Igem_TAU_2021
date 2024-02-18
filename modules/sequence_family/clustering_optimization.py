@@ -1,9 +1,7 @@
 from scipy.stats import spearmanr
 import numpy as np
 from modules import models
-from sklearn.metrics import silhouette_score, davies_bouldin_score
 from sklearn.cluster import AgglomerativeClustering, KMeans
-
 
 
 # TODO: try different clustering methods, and cluster eval methods- DBI, Silhouette- find min val
@@ -75,9 +73,9 @@ def create_n_clusters(clustering_mat, n_clus):
 #     return best_clusturing, best_score
 
 
-def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.ModuleInput):
-    opt_org_list = [org.name for org in user_input.organisms if org.is_optimized]
-    deopt_org_list =  [org.name for org in user_input.organisms if not org.is_optimized]
+def return_list_of_sub_microbiomes(best_clusturing: list, module_input: models.ModuleInput):
+    opt_org_list = [org.name for org in module_input.organisms if org.is_optimized]
+    deopt_org_list = [org.name for org in module_input.organisms if not org.is_optimized]
     c_assignment_dict = dict(zip(opt_org_list, best_clusturing))
     opt_org_clusters = list({n: [k for k in c_assignment_dict.keys() if c_assignment_dict[k] == n]
          for n in set(c_assignment_dict.values())}.values())
@@ -85,12 +83,14 @@ def return_list_of_sub_microbiomes(best_clusturing:list, user_input:models.Modul
     inp_obj_list = []
     for c_opt_org_list in opt_org_clusters:
         opt_and_deopt = c_opt_org_list+deopt_org_list
-        new_user_input = models.ModuleInput(organisms=[],
-                                            sequence=user_input.sequence,
-                                            tuning_parameter=user_input.tuning_parameter,
-                                            clusters_count=user_input.clusters_count)
+        new_module_input = models.ModuleInput(
+            organisms=[],
+            sequence=module_input.sequence,
+            tuning_parameter=module_input.tuning_parameter,
+            clusters_count=module_input.clusters_count,
+        )
 
-        new_user_input.organisms = [user_input.organisms[i] for i in range(len(opt_org_list+deopt_org_list))
-                                    if user_input.organisms[i].name in opt_and_deopt]
-        inp_obj_list.append(new_user_input)
+        new_module_input.organisms = [module_input.organisms[i] for i in range(len(opt_org_list + deopt_org_list))
+                                    if module_input.organisms[i].name in opt_and_deopt]
+        inp_obj_list.append(new_module_input)
     return inp_obj_list

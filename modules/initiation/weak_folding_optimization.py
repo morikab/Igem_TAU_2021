@@ -29,6 +29,7 @@ def optimize_by_weak_folding(
 ) -> str:
     with Timer() as timer:
         initial_prefix = sequence[:codons_num]
+        logger.info(f"Initial initiation sequence: \n {initial_prefix}")
         prefix = initial_prefix
         previous_mfe = _calculate_folding_strength_for_sequence(
             sequence=prefix,
@@ -65,6 +66,7 @@ def optimize_by_weak_folding(
                 prefix = new_prefix
                 previous_mfe = sequence_to_mfe[prefix]
 
+    logger.info(f"Final initiation sequence: \n {prefix}")
     new_sequence = prefix + sequence[codons_num:]
     assert len(new_sequence) == len(sequence), "Optimized sequence length is different than the initial sequence length"
     initiation_summary = {
