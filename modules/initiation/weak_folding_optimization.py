@@ -27,8 +27,10 @@ def optimize_by_weak_folding(
         run_summary: RunSummary,
         max_iterations: int = config["INITIATION"]["MAX_ITERATIONS"],
 ) -> str:
+    codon_size = 3
+    prefix_size_in_nt = codons_num * codon_size
     with Timer() as timer:
-        initial_prefix = sequence[:codons_num]
+        initial_prefix = sequence[:prefix_size_in_nt]
         logger.info(f"Initial initiation sequence: \n {initial_prefix}")
         prefix = initial_prefix
         previous_mfe = _calculate_folding_strength_for_sequence(
@@ -41,14 +43,14 @@ def optimize_by_weak_folding(
             iterations_count = run + 1
             # Include also the sequence from the previous iteration
             sequence_to_mfe = {prefix: previous_mfe}
-            for i in range(0, len(prefix), 3):
+            for i in range(0, len(prefix), codon_size):
                 codon = prefix[i:i+3]
                 synonymous_codons = shared_functions_and_vars.synonymous_codons[
                     shared_functions_and_vars.nt_to_aa[codon]
                 ]
                 for synonymous_codon in synonymous_codons:
                     if synonymous_codon != codon:
-                        candidate_prefix = prefix[:i] + synonymous_codon + prefix[i+3:]
+                        candidate_prefix = prefix[:i] + synonymous_codon + prefix[i+codon_size:]
                         sequence_to_mfe[candidate_prefix] = _calculate_folding_strength_for_sequence(
                             sequence=candidate_prefix,
                         )
