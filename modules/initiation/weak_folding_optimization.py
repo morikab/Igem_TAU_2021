@@ -69,7 +69,7 @@ def optimize_by_weak_folding(
                 previous_mfe = sequence_to_mfe[prefix]
 
     logger.info(f"Final initiation sequence: \n {prefix}")
-    new_sequence = prefix + sequence[codons_num:]
+    new_sequence = prefix + sequence[prefix_size_in_nt:]
     assert len(new_sequence) == len(sequence), "Optimized sequence length is different than the initial sequence length"
     initiation_summary = {
         "initial_sequence": sequence,
