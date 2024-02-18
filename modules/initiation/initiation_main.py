@@ -18,10 +18,11 @@ class InitiationModule(object):
             run_summary: RunSummary,
     ) -> typing.Tuple[str, int]:
         logger.info("##########################")
-        logger.info("# initiation #")
+        logger.info("# Initiation #")
         logger.info("##########################\n")
 
         codons_num = config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"]
+        logger.info(f"Running initiation optimization on {codons_num} codons at the start of the ORF")
         optimized_sequence = optimize_by_weak_folding(
             sequence=module_input.sequence,
             codons_num=codons_num,
