@@ -24,8 +24,8 @@ config = Configuration.get_config()
 def optimize_sequence_by_zscore_single_aa(
         sequence: str,
         module_input: models.ModuleInput,
-        optimization_cub_index: models.OptimizationCubIndex,
-        optimization_method: models.OptimizationMethod,
+        optimization_cub_index: models.ORFOptimizationCubIndex,
+        optimization_method: models.ORFOptimizationMethod,
         skipped_codons_num: int,
         run_summary: RunSummary,
         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
@@ -131,8 +131,8 @@ def optimize_sequence_by_zscore_single_aa(
 def optimize_sequence_by_zscore_bulk_aa(
         sequence: str,
         module_input: models.ModuleInput,
-        optimization_method: models.OptimizationMethod,
-        optimization_cub_index: models.OptimizationCubIndex,
+        optimization_method: models.ORFOptimizationMethod,
+        optimization_cub_index: models.ORFOptimizationCubIndex,
         skipped_codons_num: int,
         run_summary: RunSummary,
         max_iterations: int = config["ORF"]["ZSCORE_MAX_ITERATIONS"],
@@ -266,7 +266,7 @@ def _find_best_synonymous_codon_for_aa(codons_to_score: typing.Dict[str, float],
 # --------------------------------------------------------------
 def _calculate_zscore_for_sequence(sequence: str,
                                    module_input: models.ModuleInput,
-                                   optimization_cub_index: models.OptimizationCubIndex):
+                                   optimization_cub_index: models.ORFOptimizationCubIndex):
     optimization_cub_index_value = optimization_cub_index.value.lower()
 
     std_key = F"{optimization_cub_index_value}_std"
@@ -302,7 +302,7 @@ def _calculate_zscore_for_sequence(sequence: str,
 
 # --------------------------------------------------------------
 def get_total_score(zscore: models.SequenceZscores,
-                    optimization_method: models.OptimizationMethod,
+                    optimization_method: models.ORFOptimizationMethod,
                     tuning_parameter: float) -> float:
     if optimization_method.is_zscore_diff_score_optimization:
         return _calculate_zscore_diff_score(zscore=zscore,

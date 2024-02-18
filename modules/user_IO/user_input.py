@@ -15,37 +15,20 @@ class UserInputModule(object):
 
     @classmethod
     def run_module(cls, user_inp_raw: typing.Dict, run_summary: RunSummary) -> models.ModuleInput:
-        logger.info('##########################')
-        logger.info('# USER INPUT INFORMATION #')
+        logger.info('\n##########################')
+        logger.info('# User Input #')
         logger.info('##########################')
         return cls._parse_input(module_input=user_inp_raw, run_summary=run_summary)
 
     @classmethod
     def _parse_input(cls, module_input: typing.Dict[str, typing.Any], run_summary: RunSummary) -> models.ModuleInput:
-        """
-        :param module_input: in the following format
-        {   'tuning_param': 0.5,
-            'optimization_method': 'hill_climbing_average',
-            'optimization_cub_index': 'CAI',
-            'clustering_num': 3,
-            'organisms: {
-                'ecoli': {
-                    'genome_path': '.gb',
-                    'genes_HE': '.csv', ==> Optional
-                    'optimized': True,
-                },
-                'bacillus': {
-                    'genome_path': '.gb',
-                    'genes_HE': '.csv', ==> Optional
-                    'optimized': False,
-                }, ...
-            }
-        }
-        """
-        optimization_cub_index = models.OptimizationCubIndex(module_input["optimization_cub_index"]) if \
-            module_input.get("optimization_cub_index") else None
-        optimization_method = models.OptimizationMethod(module_input["optimization_method"]) if \
-            module_input.get("optimization_method") else None
+        orf_optimization_cub_index = models.ORFOptimizationCubIndex(module_input["orf_optimization_cub_index"]) if \
+            module_input.get("orf_optimization_cub_index") else None
+        orf_optimization_method = models.ORFOptimizationMethod(module_input["orf_optimization_method"]) if \
+            module_input.get("orf_optimization_method") else None
+        initiation_optimization_method = models.InitiationOptimizationMethod(
+            module_input["initiation_optimization_method"]
+        ) if module_input.get("initiation_optimization_method") else None
         evaluation_score = models.EvaluationScore(module_input["evaluation_score"]) if \
             module_input.get("evaluation_score") else None
         tuning_parameter = module_input["tuning_param"]
@@ -53,16 +36,17 @@ class UserInputModule(object):
         output_path = module_input.get("output_path")
 
         orf_sequence = cls._parse_orf_sequence(module_input)
-        logger.info(F"Open reading frame sequence for optimization is: {orf_sequence}")
+        logger.info(F"Open reading frame sequence for optimization is:\n{orf_sequence}")
 
         organisms_list = cls._parse_organisms_list(organisms_input_list=module_input["organisms"],
-                                                   optimization_cub_index=optimization_cub_index)
+                                                   optimization_cub_index=orf_optimization_cub_index)
 
         module_input = models.ModuleInput(organisms=organisms_list,
                                           sequence=orf_sequence,
                                           tuning_parameter=tuning_parameter,
-                                          optimization_method=optimization_method,
-                                          optimization_cub_index=optimization_cub_index,
+                                          orf_optimization_method=orf_optimization_method,
+                                          orf_optimization_cub_index=orf_optimization_cub_index,
+                                          initiation_optimization_method=initiation_optimization_method,
                                           evaluation_score=evaluation_score,
                                           clusters_count=clusters_count,
                                           output_path=output_path)
@@ -90,7 +74,7 @@ class UserInputModule(object):
     @classmethod
     def _parse_organisms_list(cls,
                               organisms_input_list: typing.Dict[str, typing.Any],
-                              optimization_cub_index: models.OptimizationCubIndex) -> typing.List[models.Organism]:
+                              optimization_cub_index: models.ORFOptimizationCubIndex) -> typing.List[models.Organism]:
         organisms_list = []
         organisms_names = set()
         for organism_key, organism_input in organisms_input_list.items():
@@ -106,6 +90,9 @@ class UserInputModule(object):
             organisms_names.add(organism.name)
 
         # Normalize prioritization weights - from user's defined values (1-100) to normalized values in range (0, 1)
+        logger.info("-----------------------------")
+        logger.info("Normalized Prioritization Weights")
+        logger.info("-----------------------------")
         total_optimized_weights = sum([organism.optimization_priority for organism in organisms_list if
                                        organism.is_optimized])
         total_deoptimized_weights = sum([organism.optimization_priority for organism in organisms_list if
@@ -115,17 +102,15 @@ class UserInputModule(object):
                 organism.optimization_priority /= total_optimized_weights
             else:
                 organism.optimization_priority /= total_deoptimized_weights
-            logger.info(f"{organism.name} has weight of {organism.optimization_priority}")
+            logger.info(f"{organism.name} : {organism.optimization_priority}")
 
         return organisms_list
 
     @staticmethod
     def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
-                                     optimization_cub_index: models.OptimizationCubIndex) -> models.Organism:
+                                     optimization_cub_index: models.ORFOptimizationCubIndex) -> models.Organism:
 
         is_optimized = organism_input["optimized"]
-        logger.info(f"Organism is {'optimized' if is_optimized else 'de-optimized'}")
-
         gb_path = organism_input["genome_path"]
 
         # FIXME - delete
@@ -154,8 +139,10 @@ class UserInputModule(object):
                 f'Error in genome GenBank file: {gb_path}, make sure you inserted an undamaged .gb file containing '
                 f'the full genome sequence and annotations'
             )
-        logger.info(f"Information about {organism_name}:")
-
+        logger.info("------------------------------------------")
+        logger.info(f"Parsing information for {organism_name}:")
+        logger.info("------------------------------------------")
+        logger.info(f"Organism is defined as {'wanted' if is_optimized else 'unwanted'}")
         cds = extract_gene_data(genbank_path=gb_path)
 
         exp_csv_type = organism_input['expression_csv_type']
@@ -203,15 +190,12 @@ class UserInputModule(object):
         org_summary["reference_genes"] = reference_genes
         write_fasta(fid=organism_name, list_seq=list(cds_dict.values()), list_name=list(cds_dict.keys()))
 
-        logger.info(f"parsed_organism_file: {parsed_organism_file}")
         with open(parsed_organism_file, "w") as organism_file:
             json.dump(org_summary, organism_file)
         # FIXME - end
 
         if optimization_cub_index.is_codon_adaptation_index:
-            logger.info(
-                F"name={organism_object.name}, cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
+            logger.info(F"cai_std={organism_object.cai_std}, cai_avg={organism_object.cai_avg}")
         if optimization_cub_index.is_trna_adaptation_index:
-            logger.info(
-                F"name={organism_object.name}, tai_std={organism_object.tai_std}, tai_avg={organism_object.tai_avg}")
+            logger.info(F"tai_std={organism_object.tai_std}, tai_avg={organism_object.tai_avg}")
         return organism_object

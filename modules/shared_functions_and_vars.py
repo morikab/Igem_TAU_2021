@@ -53,13 +53,16 @@ def random_synonymous_codon(codon: str) -> str:
     return random.choice(possible_codons)
 
 
-def synonymous_codon_permutation(seq: str) -> str:
+def synonymous_codon_permutation(seq: str, skipped_codons_num: int = 0) -> str:
     if len(seq) % 3 != 0:
         raise ValueError(f"len of seq {seq} is {len(seq)} which is not divisible by 3")
     permutation = ""
     for i in range(0, len(seq), 3):
         codon = seq[i:i + 3]
-        permutation += random_synonymous_codon(codon)
+        new_codon = codon
+        if i >= skipped_codons_num:
+            new_codon = random_synonymous_codon(codon)
+        permutation += new_codon
     return permutation
 
 
@@ -103,3 +106,15 @@ def change_all_codons_of_aa(seq: str, selected_codon: str, skipped_codons_num: i
 
 def unique(list1):
     return sorted(set(list1))
+
+
+def validate_module_output(original_sequence: str, new_sequence: str) -> None:
+    if len(original_sequence) != len(new_sequence):
+        raise RuntimeError(f"Optimized sequence length {len(new_sequence)} is different than the initial "
+                           f"sequence length {len(original_sequence)}")
+
+    translated_original_seq = translate(original_sequence)
+    translated_optimized_seq = translate(new_sequence)
+    if translated_original_seq != translated_optimized_seq:
+        raise RuntimeError(f"Optimized sequence is translated to {translated_optimized_seq} which is different than "
+                           f"the translated seq {translated_original_seq} of the original sequence")
