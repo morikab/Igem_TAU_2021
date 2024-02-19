@@ -173,7 +173,7 @@ class ModuleInput:
             "orf_optimization_method": self.orf_optimization_method.value,
             "orf_optimization_cub_index": self.orf_optimization_cub_index.value,
             "initiation_optimization_method": self.initiation_optimization_method.value,
-            "evaluation_score": self.evaluation_score,
+            "evaluation_score": self.evaluation_score.value,
             "organisms": [organism.summary for organism in self.organisms],
         }
 
