@@ -60,7 +60,7 @@ def synonymous_codon_permutation(seq: str, skipped_codons_num: int = 0) -> str:
     for i in range(0, len(seq), 3):
         codon = seq[i:i + 3]
         new_codon = codon
-        if i >= skipped_codons_num:
+        if i >= skipped_codons_num * 3:
             new_codon = random_synonymous_codon(codon)
         permutation += new_codon
     return permutation

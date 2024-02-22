@@ -41,7 +41,7 @@ class ORFModule(object):
                 run_summary=run_summary,
             )
             validate_module_output(original_sequence=module_input.sequence, new_sequence=result)
-            return result
+            return [result]
 
         if optimization_method.is_zscore_optimization:
             return ORFModule.optimize_sequence_by_zscore(
@@ -64,7 +64,7 @@ class ORFModule(object):
     ):
         original_sequence = module_input.sequence
         target_genes = [original_sequence] + [
-            synonymous_codon_permutation(original_sequence) for _ in
+            synonymous_codon_permutation(seq=original_sequence, skipped_codons_num=skipped_codons_num) for _ in
             range(config["ORF"]["ZSCORE_INITIAL_PERMUTATIONS_NUM"])
         ]
         zscore_optimization = ORFModule.get_zscore_optimization_method(optimization_method)

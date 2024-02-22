@@ -39,7 +39,7 @@ def optimize_sequence(
         skipped_codons_size_in_nt = skipped_codons_num * 3
         optimized_sequence = target_gene[:skipped_codons_size_in_nt]
         optimized_sequence += "".join([aa_to_optimal_codon_mapping[aa] for aa in
-                                       target_protein[skipped_codons_size_in_nt:]])
+                                       target_protein[skipped_codons_num:]])
 
     orf_summary = {
         "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
