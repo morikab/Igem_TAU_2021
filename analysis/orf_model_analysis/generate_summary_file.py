@@ -192,12 +192,12 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
     add_cell_with_value(worksheet=worksheet,
                         row=1,
                         column=worksheet.max_column,
-                        value="optimization_method")
+                        value="orf_optimization_method")
 
     add_cell_with_value(worksheet=worksheet,
                         row=1,
                         column=worksheet.max_column,
-                        value="optimization_cub_index")
+                        value="orf_optimization_cub_index")
 
     organisms = summary["module_input"]["organisms"]
     # Display unwanted organisms first
@@ -265,8 +265,8 @@ def update_from_summary(
     if worksheet.max_row == 1:
         ordered_organisms = initialize_column_headers(summary=summary, worksheet=worksheet)
 
-    optimization_method = summary["module_input"]["optimization_method"]
-    optimization_cub_index = summary["module_input"]["optimization_cub_index"]
+    optimization_method = summary["module_input"]["orf_optimization_method"]
+    optimization_cub_index = summary["module_input"]["orf_optimization_cub_index"]
     formatted_optimization_cub_index = optimization_cub_index.lower()
     summary_row = [optimization_method, optimization_cub_index]
 
