@@ -75,7 +75,7 @@ class EvaluationModule(object):
             deoptimized_organisms_scores=deoptimized_organisms_non_normalized_scores,
             optimized_organisms_weights=optimized_organisms_weights,
             deoptimized_organisms_weights=deoptimized_organisms_weights,
-            tuning_parameter=user_input.tuning_parameter,
+            tuning_parameter=module_input.tuning_parameter,
         )
 
         weakest_link_score = EvaluationModule._calculate_weakest_link_score(
