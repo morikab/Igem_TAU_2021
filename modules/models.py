@@ -25,12 +25,14 @@ class Organism(object):
                  optimization_priority: float,
                  cai_profile: typing.Optional[typing.Dict] = None,
                  tai_profile: typing.Optional[typing.Dict] = None,
+                 codon_frequencies: typing.Optional[typing.Dict] = None,
                  cai_scores: typing.Optional[typing.Dict] = None,
                  tai_scores: typing.Optional[typing.Dict] = None,
                  reference_genes: typing.Optional[typing.Sequence] = None):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
+        self.codon_frequencies = codon_frequencies
         self.cai_scores = cai_scores
         self.tai_scores = tai_scores
         self.reference_genes = reference_genes
@@ -71,6 +73,7 @@ class Organism(object):
             "is_wanted": self.is_optimized,
             "optimization_priority": self.optimization_priority,
             "cai_weights": self.cai_profile,
+            "codon_frequencies": self.codon_frequencies,
             "cai_avg": self.cai_avg,
             "cai_std": self.cai_std,
             "tai_weights": self.tai_profile,
@@ -128,6 +131,7 @@ class ORFOptimizationMethod(Enum):
 
 class InitiationOptimizationMethod(Enum):
     original = "original"
+    external_module = "external"
     weak_folding = "weak_folding"
 
 

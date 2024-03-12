@@ -1,9 +1,13 @@
 import json
+from collections import defaultdict
 
 from modules.run_summary import RunSummary
 from modules.user_IO.input_functions import *
 from modules.shared_functions_and_vars import DEFAULT_ORGANISM_PRIORITY
+from modules.shared_functions_and_vars import nt_to_aa
+from modules.shared_functions_and_vars import synonymous_codons
 from modules.shared_functions_and_vars import write_fasta
+
 
 logger = LoggerFactory.get_logger()
 
@@ -172,10 +176,13 @@ class UserInputModule(object):
                 tai_weights = tai.weights.to_dict()
                 tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
 
+        codon_frequencies = _calculate_codon_frequencies(cds_dict)
+
         optimization_priority = organism_input.get("optimization_priority") or DEFAULT_ORGANISM_PRIORITY
         organism_object = models.Organism(name=organism_name,
                                           cai_profile=cai_weights,
                                           tai_profile=tai_weights,
+                                          codon_frequencies=codon_frequencies,
                                           cai_scores=cai_scores_dict,
                                           tai_scores=tai_scores_dict,
                                           reference_genes=list(reference_genes.keys()) if reference_genes else None,
@@ -199,3 +206,30 @@ class UserInputModule(object):
         if optimization_cub_index.is_trna_adaptation_index:
             logger.info(F"tai_std={organism_object.tai_std}, tai_avg={organism_object.tai_avg}")
         return organism_object
+
+
+def _calculate_codon_frequencies(reference_cds):
+    codons_counter = defaultdict(int)
+
+    for cds in reference_cds.values():
+        if len(cds) % 3 != 0:
+            continue
+        for i in range(0, len(cds), 3):
+            codon = cds[i:i + 3]
+            codons_counter[codon] += 1
+
+    max_aa_freq = {}
+    # Calculate relative frequncies
+    for amino_acid, codons in synonymous_codons.items():
+        total_amino_acid_codons = 0
+        for amino_acid_codon in codons:
+            total_amino_acid_codons += codons_counter[amino_acid_codon]
+
+        # In case a certain amino acid is missing from the reference cds collection, no need to normalize
+        if total_amino_acid_codons == 0:
+            continue
+
+        for amino_acid_codon in codons:
+            codons_counter[amino_acid_codon] /= total_amino_acid_codons
+
+    return codons_counter

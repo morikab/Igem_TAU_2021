@@ -237,10 +237,29 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
             optimization_cub_index=optimization_cub_index,
         )
         logger.info(F"Loss dict is: {loss}")
-        optimal_codons[aa] = min(loss, key=loss.get)
         codons_loss_score[aa] = loss
         codons_loss_score_optimized[aa] = optimized_loss
         codons_loss_score_deoptimized[aa] = deoptimized_loss
+
+        most_optimal_codon = min(loss, key=loss.get)
+        optimal_codon = most_optimal_codon
+        while len(loss) > 0:
+            frequencies = [o.codon_frequencies[optimal_codon] for o in organisms if o.is_optimized]
+            logger.info(f"Candidate optimal codon frequencies in wanted organisms: {frequencies}")
+            average_frequency = sum(frequencies)/len(frequencies)
+            if average_frequency >= config["ORF"]["FREQUENCY_OPTIMIZATION_THRESHOLD"]:
+                break
+            logger.info(f"Skipping codon {optimal_codon} due to very low average frequency {average_frequency} in "
+                        f"wanted hosts.")
+            loss.pop(optimal_codon)
+            optimal_codon = min(loss, key=loss.get)
+
+        if not loss:
+            logger.info(f"Could not find codon that satisfies minimal average frequency in wanted "
+                        f"hosts. Using the original optimal codon: {most_optimal_codon}")
+            optimal_codon = most_optimal_codon
+
+        optimal_codons[aa] = optimal_codon
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
 
     orf_debug = {
@@ -250,7 +269,6 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
     }
     run_summary.add_to_run_summary("orf_debug", orf_debug)
     return optimal_codons
-
 
 # --------------------------------------------------------------
 def _optimize_initiation(seq: str) -> str:

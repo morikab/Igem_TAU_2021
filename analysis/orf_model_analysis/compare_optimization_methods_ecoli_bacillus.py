@@ -237,10 +237,12 @@ if __name__ == "__main__":
 
     results = run_single_method_for_orf_sequence(
         optimization_method="zscore_bulk_aa_ratio",
+        # optimization_method="single_codon_ratio",
         optimization_cub_index="CAI",
         is_ecoli_optimized=True,
         output_path="endogenous-remote-debug",
-        orf_sequence=gene_sequence,
+        orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+        # rf_sequence=gene_sequence,
     )
 
     # results = run_single_method_for_orf_sequence(
