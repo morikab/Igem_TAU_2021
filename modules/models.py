@@ -25,12 +25,14 @@ class Organism(object):
                  optimization_priority: float,
                  cai_profile: typing.Optional[typing.Dict] = None,
                  tai_profile: typing.Optional[typing.Dict] = None,
+                 codon_frequencies: typing.Optional[typing.Dict] = None,
                  cai_scores: typing.Optional[typing.Dict] = None,
                  tai_scores: typing.Optional[typing.Dict] = None,
                  reference_genes: typing.Optional[typing.Sequence] = None):
         self.name = name
         self.cai_profile = cai_profile
         self.tai_profile = tai_profile
+        self.codon_frequencies = codon_frequencies
         self.cai_scores = cai_scores
         self.tai_scores = tai_scores
         self.reference_genes = reference_genes
@@ -71,6 +73,7 @@ class Organism(object):
             "is_wanted": self.is_optimized,
             "optimization_priority": self.optimization_priority,
             "cai_weights": self.cai_profile,
+            "codon_frequencies": self.codon_frequencies,
             "cai_avg": self.cai_avg,
             "cai_std": self.cai_std,
             "tai_weights": self.tai_profile,
@@ -79,7 +82,7 @@ class Organism(object):
         }
 
 
-class OptimizationMethod(Enum):
+class ORFOptimizationMethod(Enum):
     single_codon_ratio = "single_codon_ratio"
     single_codon_diff = "single_codon_diff"
     single_codon_weakest_link = "single_codon_weakest_link"
@@ -92,21 +95,21 @@ class OptimizationMethod(Enum):
 
     @property
     def is_single_codon_optimization(self) -> bool:
-        return self in (OptimizationMethod.single_codon_ratio,
-                        OptimizationMethod.single_codon_diff,
-                        OptimizationMethod.single_codon_weakest_link)
+        return self in (ORFOptimizationMethod.single_codon_ratio,
+                        ORFOptimizationMethod.single_codon_diff,
+                        ORFOptimizationMethod.single_codon_weakest_link)
 
     @property
     def is_zscore_single_aa_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_ratio,
-                        OptimizationMethod.zscore_single_aa_diff,
-                        OptimizationMethod.zscore_single_aa_weakest_link)
+        return self in (ORFOptimizationMethod.zscore_single_aa_ratio,
+                        ORFOptimizationMethod.zscore_single_aa_diff,
+                        ORFOptimizationMethod.zscore_single_aa_weakest_link)
 
     @property
     def is_zscore_bulk_aa_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_bulk_aa_ratio,
-                        OptimizationMethod.zscore_bulk_aa_diff,
-                        OptimizationMethod.zscore_bulk_aa_weakest_link)
+        return self in (ORFOptimizationMethod.zscore_bulk_aa_ratio,
+                        ORFOptimizationMethod.zscore_bulk_aa_diff,
+                        ORFOptimizationMethod.zscore_bulk_aa_weakest_link)
 
     @property
     def is_zscore_optimization(self) -> bool:
@@ -114,32 +117,38 @@ class OptimizationMethod(Enum):
 
     @property
     def is_zscore_ratio_score_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_ratio, OptimizationMethod.zscore_bulk_aa_ratio)
+        return self in (ORFOptimizationMethod.zscore_single_aa_ratio, ORFOptimizationMethod.zscore_bulk_aa_ratio)
 
     @property
     def is_zscore_weakest_link_score_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_weakest_link,
-                        OptimizationMethod.zscore_bulk_aa_weakest_link)
+        return self in (ORFOptimizationMethod.zscore_single_aa_weakest_link,
+                        ORFOptimizationMethod.zscore_bulk_aa_weakest_link)
 
     @property
     def is_zscore_diff_score_optimization(self) -> bool:
-        return self in (OptimizationMethod.zscore_single_aa_diff, OptimizationMethod.zscore_bulk_aa_diff)
+        return self in (ORFOptimizationMethod.zscore_single_aa_diff, ORFOptimizationMethod.zscore_bulk_aa_diff)
 
 
-class OptimizationCubIndex(Enum):
+class InitiationOptimizationMethod(Enum):
+    original = "original"
+    external_module = "external"
+    weak_folding = "weak_folding"
+
+
+class ORFOptimizationCubIndex(Enum):
     codon_adaptation_index = "CAI"
     trna_adaptation_index = "tAI"
     max_codon_trna_adaptation_index = "max_CAI_tAI"
 
     @property
     def is_codon_adaptation_index(self) -> bool:
-        return self in (OptimizationCubIndex.codon_adaptation_index,
-                        OptimizationCubIndex.max_codon_trna_adaptation_index)
+        return self in (ORFOptimizationCubIndex.codon_adaptation_index,
+                        ORFOptimizationCubIndex.max_codon_trna_adaptation_index)
 
     @property
     def is_trna_adaptation_index(self) -> bool:
-        return self in (OptimizationCubIndex.trna_adaptation_index,
-                        OptimizationCubIndex.max_codon_trna_adaptation_index)
+        return self in (ORFOptimizationCubIndex.trna_adaptation_index,
+                        ORFOptimizationCubIndex.max_codon_trna_adaptation_index)
 
 
 class EvaluationScore(Enum):
@@ -155,8 +164,9 @@ class ModuleInput:
     output_path: str
     tuning_parameter: float
     clusters_count: int
-    optimization_method: OptimizationMethod = OptimizationMethod.zscore_bulk_aa_ratio
-    optimization_cub_index: OptimizationCubIndex = OptimizationCubIndex.max_codon_trna_adaptation_index
+    orf_optimization_method: ORFOptimizationMethod = ORFOptimizationMethod.zscore_bulk_aa_ratio
+    orf_optimization_cub_index: ORFOptimizationCubIndex = ORFOptimizationCubIndex.max_codon_trna_adaptation_index
+    initiation_optimization_method: InitiationOptimizationMethod = InitiationOptimizationMethod.original
     evaluation_score: EvaluationScore = EvaluationScore.average_distance
 
     @property
@@ -164,9 +174,10 @@ class ModuleInput:
         return {
             "sequence": self.sequence,
             "tuning_parameter": self.tuning_parameter,
-            "optimization_method": self.optimization_method.value,
-            "optimization_cub_index": self.optimization_cub_index.value,
-            "evaluation_score": self.evaluation_score,
+            "orf_optimization_method": self.orf_optimization_method.value,
+            "orf_optimization_cub_index": self.orf_optimization_cub_index.value,
+            "initiation_optimization_method": self.initiation_optimization_method.value,
+            "evaluation_score": self.evaluation_score.value,
             "organisms": [organism.summary for organism in self.organisms],
         }
 

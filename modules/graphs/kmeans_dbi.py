@@ -24,7 +24,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     user_input = user_IO.UserInputModule.run_module(user_inp_raw)
 
     # no clustering
-    final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_method=user_input.optimization_method)
+    final_cds = ORF.ORFModule.run_module(user_input, 'cai', optimization_method=user_input.orf_optimization_method)
     avg_opt_index, mean_deopt_index, avg_opt_index, weakest_score = \
         EvaluationModule.run_module(final_cds, user_input, 'cai')
 
@@ -32,7 +32,7 @@ def run_modules(user_input_dict: typing.Optional[typing.Dict[str, typing.Any]] =
     opt_indexes = []
     clustered_user_inputs = sequence_family.SequenceFamilyModule.run_module(user_input)
     for input_cluster in clustered_user_inputs:
-        final_cds = ORF.ORFModule.run_module(input_cluster, 'cai', optimization_method=user_input.optimization_method)
+        final_cds = ORF.ORFModule.run_module(input_cluster, 'cai', optimization_method=user_input.orf_optimization_method)
         c_mean_opt_index, c_mean_deopt_index, c_optimization_index, c_weakest_score = \
             EvaluationModule.run_module(final_cds, input_cluster, 'cai')
         opt_indexes.append(c_optimization_index)

@@ -15,7 +15,7 @@ class EvaluationModule(object):
     @staticmethod
     def run_module(final_sequence: str,
                    module_input: main_models.ModuleInput,
-                   optimization_cub_index: main_models.OptimizationCubIndex,
+                   optimization_cub_index: main_models.ORFOptimizationCubIndex,
                    run_summary: RunSummary) -> models.EvaluationModuleResult:
         optimization_cub_index_value = optimization_cub_index.value.lower()
         initial_sequence = module_input.sequence

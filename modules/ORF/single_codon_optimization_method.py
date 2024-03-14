@@ -18,10 +18,10 @@ config = Configuration.get_config()
 def optimize_sequence(
         target_gene: str,
         organisms: typing.Sequence[models.Organism],
-        optimization_method: models.OptimizationMethod,
-        optimization_cub_index: models.OptimizationCubIndex,
+        optimization_method: models.ORFOptimizationMethod,
+        optimization_cub_index: models.ORFOptimizationCubIndex,
         tuning_param: float,
-        skipped_codons_num: int,            # TODO - continue from here.....
+        skipped_codons_num: int,
         run_summary: RunSummary,
 ) -> str:
     with Timer() as timer:
@@ -36,20 +36,21 @@ def optimize_sequence(
             # There is no point in optimizing stop codon by tAI, so leaving the original codon
             aa_to_optimal_codon_mapping["_"] = target_gene[-3:]
 
-        optimized_sequence = target_gene[:skipped_codons_num*3]
-        optimized_sequence += "".join([aa_to_optimal_codon_mapping[aa] for aa in target_protein[:skipped_codons_num]])
+        skipped_codons_size_in_nt = skipped_codons_num * 3
+        optimized_sequence = target_gene[:skipped_codons_size_in_nt]
+        optimized_sequence += "".join([aa_to_optimal_codon_mapping[aa] for aa in
+                                       target_protein[skipped_codons_num:]])
 
     orf_summary = {
         "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
         "run_time": timer.elapsed_time,
     }
     run_summary.add_to_run_summary("orf", orf_summary)
-
     return optimized_sequence
 
 
 # --------------------------------------------------------------
-def _get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index: models.OptimizationCubIndex) -> str:
+def _get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index: models.ORFOptimizationCubIndex) -> str:
     if optimization_cub_index.is_codon_adaptation_index:
         return models.Organism.CAI_PROFILE_ATTRIBUTE_NAME
     elif optimization_cub_index.is_trna_adaptation_index:
@@ -79,7 +80,7 @@ def _get_max_organism_attribute_value(
 def _calculate_organism_loss_per_codon(organism: models.Organism,
                                        codon: str,
                                        max_value: float,
-                                       optimization_method: models.OptimizationMethod,
+                                       optimization_method: models.ORFOptimizationMethod,
                                        organism_attribute_name: str) -> float:
     organism_codon_weight = getattr(organism, organism_attribute_name).get(codon, 0)
 
@@ -102,14 +103,14 @@ def _calculate_organism_loss_per_codon(organism: models.Organism,
         return organism_codon_weight ** 2
 
     optimization_method_to_loss_function_for_optimized_organisms = {
-        models.OptimizationMethod.single_codon_diff: _optimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_ratio: _optimized_organism_ratio_based_loss_function,
-        models.OptimizationMethod.single_codon_weakest_link: _optimized_organism_weakest_link_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_diff: _optimized_organism_diff_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_ratio: _optimized_organism_ratio_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_weakest_link: _optimized_organism_weakest_link_based_loss_function,
     }
     optimization_method_to_loss_function_for_deoptimized_organisms = {
-        models.OptimizationMethod.single_codon_diff: _deoptimized_organism_diff_based_loss_function,
-        models.OptimizationMethod.single_codon_ratio: _deoptimized_organism_ratio_based_loss_function,
-        models.OptimizationMethod.single_codon_weakest_link: _deoptimized_organism_weakest_link_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_diff: _deoptimized_organism_diff_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_ratio: _deoptimized_organism_ratio_based_loss_function,
+        models.ORFOptimizationMethod.single_codon_weakest_link: _deoptimized_organism_weakest_link_based_loss_function,
     }
 
     loss_function_mapping = optimization_method_to_loss_function_for_optimized_organisms if organism.is_optimized else \
@@ -125,8 +126,8 @@ def _calculate_organism_loss_per_codon(organism: models.Organism,
 def loss_function(organisms: typing.Sequence[models.Organism],
                   codons: typing.Sequence[str],
                   tuning_param: float,
-                  optimization_method: models.OptimizationMethod,
-                  optimization_cub_index: models.OptimizationCubIndex) -> typing.Sequence[typing.Dict[str, float]]:
+                  optimization_method: models.ORFOptimizationMethod,
+                  optimization_cub_index: models.ORFOptimizationCubIndex) -> typing.Sequence[typing.Dict[str, float]]:
     """
     The function iterates through each organism and sums up loss for each codon.
     It returns a mapping from codon to its score.
@@ -174,7 +175,7 @@ def loss_function(organisms: typing.Sequence[models.Organism],
 
 
 # --------------------------------------------------------------
-def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMethod,
+def _calculate_total_loss_per_codon(optimization_method: models.ORFOptimizationMethod,
                                     optimized_organisms_loss: typing.List[float],
                                     deoptimized_organisms_loss: typing.List[float],
                                     optimized_organisms_weights: typing.List[float],
@@ -203,9 +204,9 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
                 (1 - tuning_parameter) * max(weighted_deoptimized_organisms_scores))
 
     optimization_method_to_total_loss = {
-        models.OptimizationMethod.single_codon_diff: _diff_total_loss,
-        models.OptimizationMethod.single_codon_ratio: _ratio_total_loss,
-        models.OptimizationMethod.single_codon_weakest_link: _weakest_link_total_loss,
+        models.ORFOptimizationMethod.single_codon_diff: _diff_total_loss,
+        models.ORFOptimizationMethod.single_codon_ratio: _ratio_total_loss,
+        models.ORFOptimizationMethod.single_codon_weakest_link: _weakest_link_total_loss,
     }
 
     if optimization_method not in optimization_method_to_total_loss:
@@ -217,8 +218,8 @@ def _calculate_total_loss_per_codon(optimization_method: models.OptimizationMeth
 # --------------------------------------------------------------
 def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
                          tuning_param: float,
-                         optimization_method: models.OptimizationMethod,
-                         optimization_cub_index: models.OptimizationCubIndex,
+                         optimization_method: models.ORFOptimizationMethod,
+                         optimization_cub_index: models.ORFOptimizationCubIndex,
                          run_summary: RunSummary) -> typing.Dict[str, str]:
     """
     :return: Dictionary in the format Amino Acid: Optimal codon.
@@ -236,10 +237,29 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
             optimization_cub_index=optimization_cub_index,
         )
         logger.info(F"Loss dict is: {loss}")
-        optimal_codons[aa] = min(loss, key=loss.get)
         codons_loss_score[aa] = loss
         codons_loss_score_optimized[aa] = optimized_loss
         codons_loss_score_deoptimized[aa] = deoptimized_loss
+
+        most_optimal_codon = min(loss, key=loss.get)
+        optimal_codon = most_optimal_codon
+        while len(loss) > 0:
+            frequencies = [o.codon_frequencies[optimal_codon] for o in organisms if o.is_optimized]
+            logger.info(f"Candidate optimal codon frequencies in wanted organisms: {frequencies}")
+            average_frequency = sum(frequencies)/len(frequencies)
+            if average_frequency >= config["ORF"]["FREQUENCY_OPTIMIZATION_THRESHOLD"]:
+                break
+            logger.info(f"Skipping codon {optimal_codon} due to very low average frequency {average_frequency} in "
+                        f"wanted hosts.")
+            loss.pop(optimal_codon)
+            optimal_codon = min(loss, key=loss.get)
+
+        if not loss:
+            logger.info(f"Could not find codon that satisfies minimal average frequency in wanted "
+                        f"hosts. Using the original optimal codon: {most_optimal_codon}")
+            optimal_codon = most_optimal_codon
+
+        optimal_codons[aa] = optimal_codon
         logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
 
     orf_debug = {
@@ -249,7 +269,6 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
     }
     run_summary.add_to_run_summary("orf_debug", orf_debug)
     return optimal_codons
-
 
 # --------------------------------------------------------------
 def _optimize_initiation(seq: str) -> str:

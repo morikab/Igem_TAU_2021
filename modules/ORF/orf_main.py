@@ -6,6 +6,7 @@ from modules import models
 from modules.configuration import Configuration
 from modules.run_summary import RunSummary
 from modules.shared_functions_and_vars import synonymous_codon_permutation
+from modules.shared_functions_and_vars import validate_module_output
 
 from .single_codon_optimization_method import optimize_sequence as optimize_sequence_by_single_codon
 from .zscore_optimization_method import optimize_sequence_by_zscore_single_aa
@@ -19,24 +20,28 @@ class ORFModule(object):
     @staticmethod
     def run_module(
             module_input: models.ModuleInput,
-            optimization_cub_index: models.OptimizationCubIndex,
-            optimization_method: models.OptimizationMethod,
+            optimization_cub_index: models.ORFOptimizationCubIndex,
+            optimization_method: models.ORFOptimizationMethod,
             skipped_codons_num: int,
             run_summary: RunSummary,
     ) -> typing.Sequence[str]:
-        logger.info("##########################")
+        logger.info("\n##########################")
         logger.info("# ORF #")
-        logger.info("##########################\n")
+        logger.info("##########################")
         logger.info(F"Optimization method used is: {optimization_method}")
 
         if optimization_method.is_single_codon_optimization:
-            return optimize_sequence_by_single_codon(target_gene=module_input.sequence,
-                                                     organisms=module_input.organisms,
-                                                     optimization_cub_index=optimization_cub_index,
-                                                     optimization_method=optimization_method,
-                                                     tuning_param=module_input.tuning_parameter,
-                                                     skipped_codons_num=skipped_codons_num,
-                                                     run_summary=run_summary),
+            result = optimize_sequence_by_single_codon(
+                target_gene=module_input.sequence,
+                organisms=module_input.organisms,
+                optimization_cub_index=optimization_cub_index,
+                optimization_method=optimization_method,
+                tuning_param=module_input.tuning_parameter,
+                skipped_codons_num=skipped_codons_num,
+                run_summary=run_summary,
+            )
+            validate_module_output(original_sequence=module_input.sequence, new_sequence=result)
+            return [result]
 
         if optimization_method.is_zscore_optimization:
             return ORFModule.optimize_sequence_by_zscore(
@@ -52,14 +57,14 @@ class ORFModule(object):
     @staticmethod
     def optimize_sequence_by_zscore(
             module_input: models.ModuleInput,
-            optimization_cub_index: models.OptimizationCubIndex,
-            optimization_method: models.OptimizationMethod,
+            optimization_cub_index: models.ORFOptimizationCubIndex,
+            optimization_method: models.ORFOptimizationMethod,
             skipped_codons_num: int,
             run_summary: RunSummary,
     ):
         original_sequence = module_input.sequence
         target_genes = [original_sequence] + [
-            synonymous_codon_permutation(original_sequence) for _ in
+            synonymous_codon_permutation(seq=original_sequence, skipped_codons_num=skipped_codons_num) for _ in
             range(config["ORF"]["ZSCORE_INITIAL_PERMUTATIONS_NUM"])
         ]
         zscore_optimization = ORFModule.get_zscore_optimization_method(optimization_method)
@@ -75,12 +80,14 @@ class ORFModule(object):
         results = []
         for target_gene in target_genes:
             logger.info(f"Running ORF optimization for initial sequence: {target_gene}")
-            results.append(partial_zscore_optimization_method(sequence=target_gene))
+            result = partial_zscore_optimization_method(sequence=target_gene)
+            validate_module_output(original_sequence=original_sequence, new_sequence=result)
+            results.append(result)
 
         return results
 
     @staticmethod
-    def get_zscore_optimization_method(optimization_method: models.OptimizationMethod) -> typing.Callable:
+    def get_zscore_optimization_method(optimization_method: models.ORFOptimizationMethod) -> typing.Callable:
         if optimization_method.is_zscore_single_aa_optimization:
             return optimize_sequence_by_zscore_single_aa
         return optimize_sequence_by_zscore_bulk_aa

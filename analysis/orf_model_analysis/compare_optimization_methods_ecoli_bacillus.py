@@ -8,7 +8,7 @@ from pathlib import Path
 
 from Bio import SeqIO
 
-from input_testing_data.generate_input_testing_data_for_modules import \
+from analysis.input_testing_data.generate_input_testing_data_for_modules import \
     generate_testing_data_for_ecoli_and_bacillus
 from modules.main import run_modules
 from modules.main import run_input_processing
@@ -145,8 +145,8 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        optimization_cub_index: str = "CAI",
                                        tuning_param: float = 0.5):
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
-        optimization_method=optimization_method,
-        optimization_cub_index=optimization_cub_index,
+        orf_optimization_method=optimization_method,
+        orf_optimization_cub_index=optimization_cub_index,
         clusters_count=1,
         tuning_param=tuning_param,
         is_ecoli_optimized=is_ecoli_optimized,
@@ -237,10 +237,12 @@ if __name__ == "__main__":
 
     results = run_single_method_for_orf_sequence(
         optimization_method="zscore_bulk_aa_ratio",
+        # optimization_method="single_codon_ratio",
         optimization_cub_index="CAI",
         is_ecoli_optimized=True,
         output_path="endogenous-remote-debug",
-        orf_sequence=gene_sequence,
+        orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
+        # rf_sequence=gene_sequence,
     )
 
     # results = run_single_method_for_orf_sequence(

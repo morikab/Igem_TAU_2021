@@ -8,7 +8,7 @@ from os.path import isfile, join
 
 
 current_directory = Path(__file__).parent.resolve()
-base_path = os.path.join(Path(current_directory).parent.parent.resolve(), "example_data")
+base_path = os.path.join(Path(current_directory).parent.resolve(), "example_data")
 
 DEFAULT_MICROBIOME_PATH = os.path.join(base_path, 'arabidopsis_microbiome')
 DEFAULT_ORGANISM_PRIORITY = 50
@@ -52,8 +52,8 @@ def get_organisms_for_testing(
 
 
 def generate_testing_data(
-        optimization_method: str,
-        optimization_cub_index: str,
+        orf_optimization_method: str,
+        orf_optimization_cub_index: str,
         wanted_hosts: typing.Sequence[str],
         unwanted_hosts: typing.Sequence[str],
         genome_path: str = DEFAULT_MICROBIOME_PATH,
@@ -64,12 +64,13 @@ def generate_testing_data(
         sequence_file_path: str = None,
         sequence: str = None,
         output_path: str = None,
+        initiation_optimization_method: str = None,
 ) -> typing.Dict[str, typing.Any]:
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
 
     output_path = os.path.join("results", output_path)
-    output_directory = os.path.join(output_path, F"{optimization_cub_index}_{optimization_method}_"
+    output_directory = os.path.join(output_path, F"{orf_optimization_cub_index}_{orf_optimization_method}_"
                                                  F"{len(wanted_hosts) + len(unwanted_hosts)}_"
                                                  F"{generate_random_string(4)}")
     # Path(output_directory).mkdir(parents=True, exist_ok=True)
@@ -78,8 +79,9 @@ def generate_testing_data(
         "sequence": sequence,
         "tuning_param": tuning_param,
         "clusters_count": clusters_count,
-        "optimization_method": optimization_method,
-        "optimization_cub_index": optimization_cub_index,
+        "orf_optimization_method": orf_optimization_method,
+        "orf_optimization_cub_index": orf_optimization_cub_index,
+        "initiation_optimization_method": initiation_optimization_method,
         "output_path": output_directory,
         "organisms": {},
     }
@@ -107,8 +109,8 @@ def generate_testing_data(
 
 
 def generate_testing_data_for_ecoli_and_bacillus(
-        optimization_method: str,
-        optimization_cub_index: str,
+        orf_optimization_method: str,
+        orf_optimization_cub_index: str,
         clusters_count: int = DEFAULT_CLUSTERS_COUNT,
         tuning_param: float = DEFAULT_TUNING_PARAM,
         is_ecoli_optimized: bool = False,
@@ -118,12 +120,13 @@ def generate_testing_data_for_ecoli_and_bacillus(
         should_use_mrna_levels: bool = False,
         should_use_protein_abundance: bool = True,
         evaluation_score: str = None,
+        initiation_optimization_method: str = None,
 ):
     assert (sequence is not None or sequence_file_path is not None), \
         "Should provide either a sequence or a sequence file path"
 
     output_path = output_path or "results"
-    output_directory = os.path.join(output_path, F"{optimization_cub_index}_{optimization_method}_ecoli_opt_"
+    output_directory = os.path.join(output_path, F"{orf_optimization_cub_index}_{orf_optimization_method}_ecoli_opt_"
                                                  F"{is_ecoli_optimized}_{generate_random_string(4)}")
     # Path(output_directory).mkdir(parents=True, exist_ok=True)
 
@@ -148,8 +151,9 @@ def generate_testing_data_for_ecoli_and_bacillus(
         "tuning_param": tuning_param,
         "organisms": {},
         "clusters_count": clusters_count,
-        "optimization_method": optimization_method,
-        "optimization_cub_index": optimization_cub_index,
+        "orf_optimization_method": orf_optimization_method,
+        "orf_optimization_cub_index": orf_optimization_cub_index,
+        "initiation_optimization_method": initiation_optimization_method or "original",
         "output_path": output_directory,
         "evaluation_score": evaluation_score or "average_distance",
     }
