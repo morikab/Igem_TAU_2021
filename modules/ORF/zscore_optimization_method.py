@@ -114,7 +114,7 @@ def optimize_sequence_by_zscore_single_aa(
                             f"hosts. Using the original optimal codons: {selected_codons}")
 
             codon_to_score = {}
-            for codon_sequence in tested_sequence_to_codon:
+            for codon_sequence in sequence_to_total_score:
                 for codon in tested_sequence_to_codon[codon_sequence]:
                     codon_to_score[codon] = sequence_to_total_score[codon_sequence]
 
