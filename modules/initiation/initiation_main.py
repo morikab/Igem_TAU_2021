@@ -23,6 +23,7 @@ class InitiationModule(object):
         logger.info("##########################")
 
         codons_num = config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"]
+        codons_num_in_nt = codons_num * 3
         logger.info(f"Running initiation optimization {module_input.initiation_optimization_method} on {codons_num} "
                     f"codons at the start of the ORF")
         if module_input.initiation_optimization_method == models.InitiationOptimizationMethod.original:
@@ -31,7 +32,8 @@ class InitiationModule(object):
             logger.info(f"Optimized sequence is: {optimized_sequence}")
         elif module_input.initiation_optimization_method == models.InitiationOptimizationMethod.external_module:
             logger.info(f"Taking optimized sequence from configuration value config.INITIATION.EXTERNAL_INITIATION_ORF")
-            optimized_sequence = config["INITIATION"]["EXTERNAL_INITIATION_ORF"]
+            optimized_sequence = config["INITIATION"]["EXTERNAL_INITIATION_ORF"][:codons_num_in_nt]
+            optimized_sequence += module_input.sequence[codons_num_in_nt:]
             logger.info(f"Optimized sequence is: {optimized_sequence}")
         elif module_input.initiation_optimization_method == models.InitiationOptimizationMethod.weak_folding:
             optimized_sequence = optimize_by_weak_folding(

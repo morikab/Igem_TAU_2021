@@ -16,6 +16,7 @@ class EvaluationModule(object):
     def run_module(final_sequence: str,
                    module_input: main_models.ModuleInput,
                    optimization_cub_index: main_models.ORFOptimizationCubIndex,
+                   skipped_codons_num: int,
                    run_summary: RunSummary) -> models.EvaluationModuleResult:
         optimization_cub_index_value = optimization_cub_index.value.lower()
         initial_sequence = module_input.sequence
@@ -28,15 +29,23 @@ class EvaluationModule(object):
         deoptimized_organisms_weights = []
         zscores_for_normalization = []
 
+        # Consider only relevant part of the initial and final sequences
+        initial_sequence_for_evaluation = initial_sequence[skipped_codons_num * 3:]
+        final_sequence_for_evaluation = final_sequence[skipped_codons_num * 3:]
+
         organisms_evaluation_summary = []
         for organism in module_input.organisms:
             sigma = getattr(organism, std)
             profile = getattr(organism, weights)
             edge_case_sequences = EvaluationModule._get_sequences_for_normalization(
-                sequence=initial_sequence,
+                sequence=initial_sequence_for_evaluation,
                 weights=profile,
             )
-            cub_scores = general_geomean([initial_sequence, final_sequence, *edge_case_sequences], weights=profile)
+
+            cub_scores = general_geomean(
+                [initial_sequence_for_evaluation, final_sequence_for_evaluation, *edge_case_sequences],
+                weights=profile,
+            )
             initial_score = cub_scores[0]
             final_score = cub_scores[1]
             edge_case_scores = cub_scores[2:]

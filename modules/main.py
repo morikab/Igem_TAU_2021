@@ -64,6 +64,7 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
                 module_input=module_input,
                 cds_nt_final_cai=cds_nt_final_cai,
                 cds_nt_final_tai=cds_nt_final_tai,
+                skipped_codons_num=initiation_optimized_codons_num,
                 run_summary=run_summary,
             )
             evaluation_results.append(evaluation_result)
@@ -96,6 +97,7 @@ def run_evaluation(
     module_input: models.ModuleInput,
     cds_nt_final_cai: typing.Sequence[str],
     cds_nt_final_tai: typing.Sequence[str],
+    skipped_codons_num: int,
     run_summary: RunSummary,
 ) -> evaluation_models.EvaluationModuleResult:
     logger.info('\n##########################')
@@ -105,6 +107,7 @@ def run_evaluation(
         final_sequence=cds_nt_tai,
         module_input=module_input,
         optimization_cub_index=models.ORFOptimizationCubIndex.trna_adaptation_index,
+        skipped_codons_num=skipped_codons_num,
         run_summary=run_summary,
     ) for cds_nt_tai in cds_nt_final_tai]
 
@@ -112,6 +115,7 @@ def run_evaluation(
         final_sequence=cds_nt_cai,
         module_input=module_input,
         optimization_cub_index=models.ORFOptimizationCubIndex.codon_adaptation_index,
+        skipped_codons_num=skipped_codons_num,
         run_summary=run_summary,
     ) for cds_nt_cai in cds_nt_final_cai]
 

@@ -25,29 +25,66 @@ def optimize_sequence(
         run_summary: RunSummary,
 ) -> str:
     with Timer() as timer:
-        aa_to_optimal_codon_mapping = _find_optimal_codons(organisms=organisms,
-                                                           tuning_param=tuning_param,
-                                                           optimization_method=optimization_method,
-                                                           optimization_cub_index=optimization_cub_index,
-                                                           run_summary=run_summary)
+        aa_to_loss_mapping = _calculate_codons_loss(organisms=organisms,
+                                                    tuning_param=tuning_param,
+                                                    optimization_method=optimization_method,
+                                                    optimization_cub_index=optimization_cub_index,
+                                                    run_summary=run_summary)
 
         target_protein = shared_functions_and_vars.translate(target_gene)
-        if target_protein.endswith("_") and optimization_cub_index.is_trna_adaptation_index:
-            # There is no point in optimizing stop codon by tAI, so leaving the original codon
-            aa_to_optimal_codon_mapping["_"] = target_gene[-3:]
 
         skipped_codons_size_in_nt = skipped_codons_num * 3
         optimized_sequence = target_gene[:skipped_codons_size_in_nt]
-        optimized_sequence += "".join([aa_to_optimal_codon_mapping[aa] for aa in
-                                       target_protein[skipped_codons_num:]])
+
+        for i in range(skipped_codons_num, len(target_protein)):        # TODO - validate the iteration is correct
+            aa = target_protein[i]
+            prev_aa = target_protein[i-1]
+            candidate_optimal_codons = aa_to_loss_mapping[aa].copy()
+            should_use_second_optimal_codon = aa == prev_aa
+            optimal_codon = _get_optimal_codon(candidate_optimal_codons, organisms)
+            if should_use_second_optimal_codon:
+                candidate_optimal_codons.pop(optimal_codon)
+                if len(candidate_optimal_codons) > 0:
+                    # TODO - if there are three in a row, take the best or the second best, depending  on the index
+                    logger.info("Found two adjacent instances of the same amino acid. Choosing second-best option for "
+                                "the second instance. ")
+                    optimal_codon = _get_optimal_codon(candidate_optimal_codons, organisms)
+                else:
+                    logger.info("There is no second-best option for choosing an optimal codon. Using original codon "
+                                "from the input sequence.")
+                    optimal_codon = target_gene[i*3: i*3+3]
+
+            optimized_sequence += optimal_codon
+
+        if target_protein.endswith("_") and optimization_cub_index.is_trna_adaptation_index:
+            # There is no point in optimizing stop codon by tAI, so leaving the original codon
+            optimized_sequence[-3:] = target_gene[-3:]
+            optimized_sequence[-3:] = target_gene[-3:]
 
     orf_summary = {
-        "aa_to_optimal_codon": aa_to_optimal_codon_mapping,
+        "orf_module_input_sequence": target_gene,
+        "optimized_sequence": optimized_sequence,
+        "aa_to_loss_mapping": aa_to_loss_mapping,
         "run_time": timer.elapsed_time,
     }
     run_summary.add_to_run_summary("orf", orf_summary)
     return optimized_sequence
 
+
+# --------------------------------------------------------------
+def _get_optimal_codon(candidate_optimal_codons, organisms):
+    for codon in candidate_optimal_codons:
+        frequencies = [o.codon_frequencies[codon] for o in organisms if o.is_optimized]
+        logger.info(f"Candidate optimal codon frequencies in wanted organisms: {frequencies}")
+        average_frequency = sum(frequencies) / len(frequencies)
+        if average_frequency >= config["ORF"]["FREQUENCY_OPTIMIZATION_THRESHOLD"]:
+            return codon
+        logger.info(f"Skipping codon {codon} due to very low average frequency {average_frequency} in "
+                    f"wanted hosts.")
+    most_optimal_codon = candidate_optimal_codons.keys()[0]
+    logger.info(f"Could not find codon that satisfies minimal average frequency in wanted "
+                f"hosts. Using the codon with the minimal loss score: {most_optimal_codon}")
+    return most_optimal_codon
 
 # --------------------------------------------------------------
 def _get_organism_attribute_name_by_optimization_cub_index(optimization_cub_index: models.ORFOptimizationCubIndex) -> str:
@@ -216,11 +253,11 @@ def _calculate_total_loss_per_codon(optimization_method: models.ORFOptimizationM
 
 
 # --------------------------------------------------------------
-def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
-                         tuning_param: float,
-                         optimization_method: models.ORFOptimizationMethod,
-                         optimization_cub_index: models.ORFOptimizationCubIndex,
-                         run_summary: RunSummary) -> typing.Dict[str, str]:
+def _calculate_codons_loss(organisms: typing.Sequence[models.Organism],
+                           tuning_param: float,
+                           optimization_method: models.ORFOptimizationMethod,
+                           optimization_cub_index: models.ORFOptimizationCubIndex,
+                           run_summary: RunSummary) -> typing.Dict[str, typing.Dict[str, float]]:
     """
     :return: Dictionary in the format Amino Acid: Optimal codon.
     """
@@ -237,30 +274,11 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
             optimization_cub_index=optimization_cub_index,
         )
         logger.info(F"Loss dict is: {loss}")
-        codons_loss_score[aa] = loss
         codons_loss_score_optimized[aa] = optimized_loss
         codons_loss_score_deoptimized[aa] = deoptimized_loss
-
-        most_optimal_codon = min(loss, key=loss.get)
-        optimal_codon = most_optimal_codon
-        while len(loss) > 0:
-            frequencies = [o.codon_frequencies[optimal_codon] for o in organisms if o.is_optimized]
-            logger.info(f"Candidate optimal codon frequencies in wanted organisms: {frequencies}")
-            average_frequency = sum(frequencies)/len(frequencies)
-            if average_frequency >= config["ORF"]["FREQUENCY_OPTIMIZATION_THRESHOLD"]:
-                break
-            logger.info(f"Skipping codon {optimal_codon} due to very low average frequency {average_frequency} in "
-                        f"wanted hosts.")
-            loss.pop(optimal_codon)
-            optimal_codon = min(loss, key=loss.get)
-
-        if not loss:
-            logger.info(f"Could not find codon that satisfies minimal average frequency in wanted "
-                        f"hosts. Using the original optimal codon: {most_optimal_codon}")
-            optimal_codon = most_optimal_codon
-
-        optimal_codons[aa] = optimal_codon
-        logger.info(F"Optimal codon for {aa} is: {optimal_codons[aa]}")
+        codons_loss_score[aa] = {
+            codon: codon_loss for codon, codon_loss in sorted(loss.items(), key=lambda item: item[1])
+        }
 
     orf_debug = {
         "total_loss": codons_loss_score,
@@ -268,7 +286,7 @@ def _find_optimal_codons(organisms: typing.Sequence[models.Organism],
         "deoptimized_loss": codons_loss_score_deoptimized,
     }
     run_summary.add_to_run_summary("orf_debug", orf_debug)
-    return optimal_codons
+    return codons_loss_score
 
 # --------------------------------------------------------------
 def _optimize_initiation(seq: str) -> str:
