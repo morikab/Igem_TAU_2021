@@ -17,7 +17,7 @@ class InitiationModule(object):
     def run_module(
             module_input: models.ModuleInput,
             run_summary: RunSummary,
-    ) -> typing.Tuple[str, int]:
+    ) -> str:
         logger.info("\n##########################")
         logger.info("# Initiation #")
         logger.info("##########################")
@@ -46,4 +46,4 @@ class InitiationModule(object):
                              f"supported")
 
         validate_module_output(original_sequence=module_input.sequence, new_sequence=optimized_sequence)
-        return optimized_sequence, codons_num
+        return optimized_sequence

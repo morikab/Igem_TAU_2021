@@ -38,12 +38,16 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
     final_output = {}
     try:
         before_parsing_input = time.time()
-        module_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
+        initiation_optimized_codons_num = config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"]
+        module_input = user_IO.UserInputModule.run_module(
+            user_inp_raw=user_input_dict,
+            initiation_optimized_codons_num=initiation_optimized_codons_num,
+            run_summary=run_summary,
+        )
         after_parsing_input = time.time()
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
-        # TODO - consider better structuring input and output per module
         # ####################################### Initiation Optimization #################################
-        initiation_optimized_sequence, initiation_optimized_codons_num = initiation.InitiationModule.run_module(
+        initiation_optimized_sequence = initiation.InitiationModule.run_module(
             module_input=module_input,
             run_summary=run_summary,
         )

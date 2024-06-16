@@ -226,8 +226,8 @@ def initialize_column_headers(summary: typing.Dict, worksheet) -> typing.Sequenc
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_weakest_link_score")
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="final_ratio_score")
 
-    for aa in aa_list:
-        add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value=aa)
+    # for aa in aa_list:
+    #     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value=aa)
 
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="number_of_iterations")
     add_cell_with_value(worksheet=worksheet, row=1, column=worksheet.max_column, value="run_time (seconds)")
@@ -285,9 +285,9 @@ def update_from_summary(
     summary_row.append(evaluation_summary.get("ratio_score"))
 
     orf_summary = get_orf_summary(summary)
-    aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
-    for aa in aa_list:
-        summary_row.append(aa_to_optimal_codon.get(aa) or "")
+    # aa_to_optimal_codon = orf_summary["aa_to_optimal_codon"]
+    # for aa in aa_list:
+    #     summary_row.append(aa_to_optimal_codon.get(aa) or "")
 
     summary_row.append(orf_summary.get("iterations_count") or 1)
     summary_row.append(orf_summary["run_time"])

@@ -35,19 +35,20 @@ def optimize_sequence(
 
         skipped_codons_size_in_nt = skipped_codons_num * 3
         optimized_sequence = target_gene[:skipped_codons_size_in_nt]
-
-        for i in range(skipped_codons_num, len(target_protein)):        # TODO - validate the iteration is correct
+        for i in range(skipped_codons_num, len(target_protein)):
             aa = target_protein[i]
-            prev_aa = target_protein[i-1]
+            should_use_second_optimal_codon = False
+            for j in range(i-1, skipped_codons_num, -1):
+                if target_protein[j] != aa:
+                    break
+                should_use_second_optimal_codon = i-j % 2 != 0
+
             candidate_optimal_codons = aa_to_loss_mapping[aa].copy()
-            should_use_second_optimal_codon = aa == prev_aa
             optimal_codon = _get_optimal_codon(candidate_optimal_codons, organisms)
             if should_use_second_optimal_codon:
                 candidate_optimal_codons.pop(optimal_codon)
                 if len(candidate_optimal_codons) > 0:
-                    # TODO - if there are three in a row, take the best or the second best, depending  on the index
-                    logger.info("Found two adjacent instances of the same amino acid. Choosing second-best option for "
-                                "the second instance. ")
+                    logger.info("Choosing second-best option for amino-acid that is part of repeating sub-sequence.")
                     optimal_codon = _get_optimal_codon(candidate_optimal_codons, organisms)
                 else:
                     logger.info("There is no second-best option for choosing an optimal codon. Using original codon "
@@ -58,8 +59,8 @@ def optimize_sequence(
 
         if target_protein.endswith("_") and optimization_cub_index.is_trna_adaptation_index:
             # There is no point in optimizing stop codon by tAI, so leaving the original codon
-            optimized_sequence[-3:] = target_gene[-3:]
-            optimized_sequence[-3:] = target_gene[-3:]
+            optimized_sequence = optimized_sequence[:-3]
+            optimized_sequence += target_gene[-3:]
 
     orf_summary = {
         "orf_module_input_sequence": target_gene,
