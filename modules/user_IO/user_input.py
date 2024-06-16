@@ -18,14 +18,28 @@ class UserInputModule(object):
         return "User Input"
 
     @classmethod
-    def run_module(cls, user_inp_raw: typing.Dict, run_summary: RunSummary) -> models.ModuleInput:
+    def run_module(
+            cls,
+            user_inp_raw: typing.Dict,
+            initiation_optimized_codons_num: int,
+            run_summary: RunSummary,
+    ) -> models.ModuleInput:
         logger.info('\n##########################')
         logger.info('# User Input #')
         logger.info('##########################')
-        return cls._parse_input(module_input=user_inp_raw, run_summary=run_summary)
+        return cls._parse_input(
+            module_input=user_inp_raw,
+            skipped_codons_num=initiation_optimized_codons_num,
+            run_summary=run_summary,
+        )
 
     @classmethod
-    def _parse_input(cls, module_input: typing.Dict[str, typing.Any], run_summary: RunSummary) -> models.ModuleInput:
+    def _parse_input(
+            cls,
+            module_input: typing.Dict[str, typing.Any],
+            skipped_codons_num: int,
+            run_summary: RunSummary,
+    ) -> models.ModuleInput:
         orf_optimization_cub_index = models.ORFOptimizationCubIndex(module_input["orf_optimization_cub_index"]) if \
             module_input.get("orf_optimization_cub_index") else None
         orf_optimization_method = models.ORFOptimizationMethod(module_input["orf_optimization_method"]) if \
@@ -43,7 +57,8 @@ class UserInputModule(object):
         logger.info(F"Open reading frame sequence for optimization is:\n{orf_sequence}")
 
         organisms_list = cls._parse_organisms_list(organisms_input_list=module_input["organisms"],
-                                                   optimization_cub_index=orf_optimization_cub_index)
+                                                   optimization_cub_index=orf_optimization_cub_index,
+                                                   skipped_codons_num=skipped_codons_num)
 
         module_input = models.ModuleInput(organisms=organisms_list,
                                           sequence=orf_sequence,
@@ -78,14 +93,17 @@ class UserInputModule(object):
     @classmethod
     def _parse_organisms_list(cls,
                               organisms_input_list: typing.Dict[str, typing.Any],
-                              optimization_cub_index: models.ORFOptimizationCubIndex) -> typing.List[models.Organism]:
+                              optimization_cub_index: models.ORFOptimizationCubIndex,
+                              skipped_codons_num: int) -> typing.List[models.Organism]:
         organisms_list = []
         organisms_names = set()
         for organism_key, organism_input in organisms_input_list.items():
             try:
                 organism = cls._parse_single_organism_input(
                     organism_input=organism_input,
-                    optimization_cub_index=optimization_cub_index)
+                    optimization_cub_index=optimization_cub_index,
+                    skipped_codons_num=skipped_codons_num,
+                )
             except Exception as e:
                 raise ValueError(f"Error in organism input: {organism_key}, re-check your input")
             if organism.name in organisms_names:
@@ -112,7 +130,8 @@ class UserInputModule(object):
 
     @staticmethod
     def _parse_single_organism_input(organism_input: typing.Dict[str, typing.Any],
-                                     optimization_cub_index: models.ORFOptimizationCubIndex) -> models.Organism:
+                                     optimization_cub_index: models.ORFOptimizationCubIndex,
+                                     skipped_codons_num: int) -> models.Organism:
 
         is_optimized = organism_input["optimized"]
         gb_path = organism_input["genome_path"]
@@ -171,7 +190,8 @@ class UserInputModule(object):
 
         if optimization_cub_index.is_codon_adaptation_index:
             reference_genes = get_reference_genes_for_cai(cds_dict, estimated_expression)
-            cai = cb.scores.CodonAdaptationIndex(ref_seq=reference_genes.values(), ignore_stop=False)
+            reference_genes_for_cub_calculation = [seq[skipped_codons_num*3:] for seq in reference_genes.values()]
+            cai = cb.scores.CodonAdaptationIndex(ref_seq=reference_genes_for_cub_calculation, ignore_stop=False)
             cai_weights = cai.weights.to_dict()
             cai_scores_dict = {gene_name: cai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
 
@@ -179,7 +199,7 @@ class UserInputModule(object):
             tai = calculate_tai_weights(organism_name)
             if tai is not None:
                 tai_weights = tai.weights.to_dict()
-                tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name]) for gene_name in gene_names}
+                tai_scores_dict = {gene_name: tai.get_score(cds_dict[gene_name][skipped_codons_num*3:]) for gene_name in gene_names if len(cds_dict[gene_name]) > (skipped_codons_num+1)*3}
 
         codon_frequencies = _calculate_codon_frequencies(cds_dict)
 

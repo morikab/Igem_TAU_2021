@@ -38,12 +38,16 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
     final_output = {}
     try:
         before_parsing_input = time.time()
-        module_input = user_IO.UserInputModule.run_module(user_inp_raw=user_input_dict, run_summary=run_summary)
+        initiation_optimized_codons_num = config["INITIATION"]["NUMBER_OF_CODONS_TO_OPTIMIZE"]
+        module_input = user_IO.UserInputModule.run_module(
+            user_inp_raw=user_input_dict,
+            initiation_optimized_codons_num=initiation_optimized_codons_num,
+            run_summary=run_summary,
+        )
         after_parsing_input = time.time()
         logger.info(F"Total input processing time: {after_parsing_input-before_parsing_input}")
-        # TODO - consider better structuring input and output per module
         # ####################################### Initiation Optimization #################################
-        initiation_optimized_sequence, initiation_optimized_codons_num = initiation.InitiationModule.run_module(
+        initiation_optimized_sequence = initiation.InitiationModule.run_module(
             module_input=module_input,
             run_summary=run_summary,
         )
@@ -64,6 +68,7 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
                 module_input=module_input,
                 cds_nt_final_cai=cds_nt_final_cai,
                 cds_nt_final_tai=cds_nt_final_tai,
+                skipped_codons_num=initiation_optimized_codons_num,
                 run_summary=run_summary,
             )
             evaluation_results.append(evaluation_result)
@@ -103,6 +108,7 @@ def run_evaluation(
     module_input: models.ModuleInput,
     cds_nt_final_cai: typing.Sequence[str],
     cds_nt_final_tai: typing.Sequence[str],
+    skipped_codons_num: int,
     run_summary: RunSummary,
 ) -> evaluation_models.EvaluationModuleResult:
     logger.info('\n##########################')
@@ -112,6 +118,7 @@ def run_evaluation(
         final_sequence=cds_nt_tai,
         module_input=module_input,
         optimization_cub_index=models.ORFOptimizationCubIndex.trna_adaptation_index,
+        skipped_codons_num=skipped_codons_num,
         run_summary=run_summary,
     ) for cds_nt_tai in cds_nt_final_tai]
 
@@ -119,6 +126,7 @@ def run_evaluation(
         final_sequence=cds_nt_cai,
         module_input=module_input,
         optimization_cub_index=models.ORFOptimizationCubIndex.codon_adaptation_index,
+        skipped_codons_num=skipped_codons_num,
         run_summary=run_summary,
     ) for cds_nt_cai in cds_nt_final_cai]
 

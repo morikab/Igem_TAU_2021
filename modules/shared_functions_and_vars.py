@@ -91,17 +91,34 @@ def translate(seq, table=nt_to_aa):  # DONE
         return ValueError('len(seq)%3 !=0')
 
 
-def change_all_codons_of_aa(seq: str, selected_codon: str, skipped_codons_num: int = 0) -> typing.Tuple[str, int]:
+def change_all_codons_of_aa(
+        seq: str,
+        selected_codon: str,
+        skipped_codons_num: int = 0,
+        default_codon: typing.Optional[str] = None,
+        should_dedup_codons: bool = False,
+) -> str:
     split_seq = [seq[i:i+3].upper() for i in range(0, len(seq), 3)]
     new_split_seq = []
-    changed_codons_count = 0
+    selected_codon_aa = nt_to_aa[selected_codon]
     for i, codon in enumerate(split_seq):
-        if i < skipped_codons_num or nt_to_aa[codon] != nt_to_aa[selected_codon]:
+        if i < skipped_codons_num or nt_to_aa[codon] != selected_codon_aa:
             new_split_seq.append(codon)
-        else:
+        elif should_dedup_codons is False:
             new_split_seq.append(selected_codon)
-            changed_codons_count += 1
-    return ''.join(new_split_seq), changed_codons_count
+        else:
+            should_use_selected_codon = True
+            for j in range(i - 1, skipped_codons_num, -1):
+                if nt_to_aa[split_seq[j]] != selected_codon_aa:
+                    break
+                should_use_selected_codon = i - j % 2 == 0
+            if should_use_selected_codon:
+                new_split_seq.append(selected_codon)
+            elif default_codon is not None:
+                new_split_seq.append(default_codon)
+            else:
+                new_split_seq.append(codon)
+    return ''.join(new_split_seq)
 
 
 def unique(list1):

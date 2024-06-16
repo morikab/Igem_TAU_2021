@@ -143,7 +143,8 @@ def run_single_method_for_orf_sequence(optimization_method: str,
                                        orf_sequence_file: typing.Optional[str] = None,
                                        output_path: typing.Optional[str] = None,
                                        optimization_cub_index: str = "CAI",
-                                       tuning_param: float = 0.5):
+                                       tuning_param: float = 0.5,
+                                       initiation_optimization_method: str = "original"):
     default_user_inp_raw = generate_testing_data_for_ecoli_and_bacillus(
         orf_optimization_method=optimization_method,
         orf_optimization_cub_index=optimization_cub_index,
@@ -153,6 +154,7 @@ def run_single_method_for_orf_sequence(optimization_method: str,
         sequence=orf_sequence,
         sequence_file_path=orf_sequence_file,
         output_path=os.path.join("results", output_path),
+        initiation_optimization_method=initiation_optimization_method,  # original, external
     )
     return run_modules(default_user_inp_raw)
     # return run_orf_module(default_user_inp_raw)
@@ -224,25 +226,27 @@ if __name__ == "__main__":
     #                                    orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
     #                                    output_path="mcherry_debug")
 
-    fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Escherichia-coli.fasta"
-    with open(fasta_file_path, "r") as fasta_handle:
-        genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
+    # fasta_file_path = r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Escherichia-coli.fasta"
+    # with open(fasta_file_path, "r") as fasta_handle:
+    #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
 
     # with open(r"C:\projects\Igem_TAU_2021_moran\analysis\example_data\Bacillus-subtilis.fasta", "r") as fasta_handle:
     #     genome_dict = SeqIO.to_dict(SeqIO.parse(fasta_handle, "fasta"), lambda r: r.description)
-    gene_name = "thrA|fused aspartate kinase/homoserine dehydrogenase 1"
-
-    gene_sequence = genome_dict[gene_name]
-    gene_sequence = str(gene_sequence.seq)
-
+    # gene_name = "thrA|fused aspartate kinase/homoserine dehydrogenase 1"
+    #
+    # gene_sequence = genome_dict[gene_name]
+    # gene_sequence = str(gene_sequence.seq)
+    initiation_type = "external"
     results = run_single_method_for_orf_sequence(
-        optimization_method="zscore_bulk_aa_ratio",
-        # optimization_method="single_codon_ratio",
+        optimization_method="zscore_single_aa_diff",
+        # optimization_method="zscore_bulk_aa_diff",
+        # optimization_method="single_codon_diff",
         optimization_cub_index="CAI",
         is_ecoli_optimized=True,
-        output_path="endogenous-remote-debug",
+        output_path=f"mcherry-debug-{initiation_type}-0.1",
         orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
-        # rf_sequence=gene_sequence,
+        initiation_optimization_method=initiation_type,
+        # orf_sequence="ATGAAGAAGGTAACTGCAGAGGCTATTTCCTGGAATGAATCAACGAGTGAAACGAATAACTCTATGGTGACTGAATTCATTTTTCTGGGTCTCTCTGATTCTCAGGAACTCCAGACCTTCCTATTTATGTTGTTTTTTGTATTCTATGGAGGAATCGTGTTTGGAAACCTTCTTATTGTCATAACAGTGGTATCTGACTCCCACCTTCACTCTCCCATGTACTTCCTGCTAGCCAACCTCTCACTCATTGATCTGTCTCTGTCTTCAGTCACAGCCCCCAAGATGATTACTGACTTTTTCAGCCAGCGCAAAGTCATCTCTTTCAAGGGCTGCCTTGTTCAGATATTTCTCCTTCACTTCTTTGGTGGGAGTGAGATGGTGATCCTCATAGCCATGGGCTTTGACAGATATATAGCAATATGCAAGCCCCTACACTACACTACAATTATGTGTGGCAACGCATGTGTCGGCATTATGGCTGTCACATGGGGAATTGGCTTTCTCCATTCGGTGAGCCAGTTGGCGTTTGCCGTGCACTTACTCTTCTGTGGTCCCAATGAGGTCGATAGTTTTTATTGTGACCTTCCTAGGGTAATCAAACTTGCCTGTACAGATACCTACAGGCTAGATATTATGGTCATTGCTAACAGTGGTGTGCTCACTGTGTGTTCTTTTGTTCTTCTAATCATCTCATACACTATCATCCTAATGACCATCCAGCATCGCCCTTTAGATAAGTCGTCCAAAGCTCTGTCCACTTTGACTGCTCACATTACAGTAGTTCTTTTGTTCTTTGGACCATGTGTCTTTATTTATGCCTGGCCATTCCCCATCAAGTCATTAGATAAATTCCTTGCTGTATTTTATTCTGTGATCACCCCTCTCTTGAACCCAATTATATACACACTGAGGAACAAAGACATGAAGACGGCAATAAGACAGCTGAGAAAATGGGATGCACATTCTAGTGTAAAGTTTTAG",
     )
 
     # results = run_single_method_for_orf_sequence(

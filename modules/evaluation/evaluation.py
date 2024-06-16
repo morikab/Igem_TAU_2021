@@ -3,6 +3,7 @@ import typing
 from numpy import average
 from scipy.stats.mstats import gmean
 
+from logger_factory.logger_factory import LoggerFactory
 from modules import models as main_models
 from modules import shared_functions_and_vars
 from modules.run_summary import RunSummary
@@ -10,12 +11,15 @@ from modules.ORF.calculating_cai import general_geomean
 
 from . import models
 
+logger = LoggerFactory.get_logger()
+
 
 class EvaluationModule(object):
     @staticmethod
     def run_module(final_sequence: str,
                    module_input: main_models.ModuleInput,
                    optimization_cub_index: main_models.ORFOptimizationCubIndex,
+                   skipped_codons_num: int,
                    run_summary: RunSummary) -> models.EvaluationModuleResult:
         optimization_cub_index_value = optimization_cub_index.value.lower()
         initial_sequence = module_input.sequence
@@ -30,15 +34,25 @@ class EvaluationModule(object):
         deoptimized_organisms_weights = []
         zscores_for_normalization = []
 
+        # Consider only relevant part of the initial and final sequences
+        initial_sequence_for_evaluation = initial_sequence[skipped_codons_num * 3:]
+        final_sequence_for_evaluation = final_sequence[skipped_codons_num * 3:]
+        logger.info(f"Calculating evaluation score based on initial sequence: {initial_sequence_for_evaluation} and"
+                    f"final sequence: {final_sequence_for_evaluation}")
+
         organisms_evaluation_summary = []
         for organism in module_input.organisms:
             sigma = getattr(organism, std)
             profile = getattr(organism, weights)
             edge_case_sequences = EvaluationModule._get_sequences_for_normalization(
-                sequence=initial_sequence,
+                sequence=initial_sequence_for_evaluation,
                 weights=profile,
             )
-            cub_scores = general_geomean([initial_sequence, final_sequence, *edge_case_sequences], weights=profile)
+
+            cub_scores = general_geomean(
+                [initial_sequence_for_evaluation, final_sequence_for_evaluation, *edge_case_sequences],
+                weights=profile,
+            )
             initial_score = cub_scores[0]
             final_score = cub_scores[1]
             edge_case_scores = cub_scores[2:]
@@ -106,6 +120,8 @@ class EvaluationModule(object):
         evaluation_summary = {
             "organisms": organisms_evaluation_summary,
             **evaluation_result.summary,
+            "init_evaluation_sequence": initial_sequence_for_evaluation,
+            "final_evaluation_sequence": final_sequence_for_evaluation,
         }
         run_summary.append_to_run_summary("evaluation", evaluation_summary)
 
@@ -126,7 +142,7 @@ class EvaluationModule(object):
                 final_sequence = shared_functions_and_vars.change_all_codons_of_aa(
                     seq=final_sequence,
                     selected_codon=aa_to_codon[aa],
-                )[0]
+                )
             return final_sequence
 
         return [_get_sequence_per_aggregation_method(method) for method in (min, max)]
