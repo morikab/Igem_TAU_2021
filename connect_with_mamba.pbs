@@ -1,11 +1,16 @@
 #!/bin/bash
 #PBS -q tamirQ
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=12:00:00
+#PBS -l walltime=24:00:00
 #PBS -N connect
 #PBS -V
 
-cd $PBS_O_WORKDIR # Go to the job submission directory
+cd /tamir2/moranb/microbiome/Igem_TAU_2021 # Go to the job submission directory
+
+# source myconda
+# mamba activate myabs
+module load Python3.9Plus
+source venv/bin/activate
 
 ## Get tunneling info
 #XDG_RUNTIME_DIR=""
@@ -27,13 +32,9 @@ local host to the address below.
 localhost:$local_port
 EOF
 
-module load Python3.9Plus
-cd /tamir2/moranb/microbiome/Igem_TAU_2021
-source venv/bin/activate
-
 ## Launch jupyter server (jupyter lab can be replaced with jupyter-notebook if preferred)
 jupyter lab  --no-browser --ip=$remote_host_ip --port=$remote_port
 #jupyter-notebook  --no-browser --ip=$remote_host_ip --port=$remote_port
 
-deactivate
+mamba deactivate
 rm jupyter.info

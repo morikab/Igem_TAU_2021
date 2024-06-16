@@ -132,6 +132,7 @@ class UserInputModule(object):
                     cai_scores=organism_data["cai_scores"],
                     tai_scores=organism_data["tai_scores"],
                     reference_genes=organism_data["reference_genes"],
+                    codon_frequencies=organism_data["codon_frequencies"],
                     is_optimized=organism_data["is_wanted"],
                     optimization_priority=organism_data["optimization_priority"],
                 )
