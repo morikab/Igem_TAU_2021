@@ -239,4 +239,9 @@ def calculate_tai_weights(organism_name: str) -> typing.Optional[cb.scores.TrnaA
         return None
     # TODO - consider using https://github.com/AliYoussef96/gtAI for better results
     logger.info(f"tGCN values were found for {organism_name}. Calculating tAI profile.")
+
+    # Patch for fixing a certificate expiration issue when accessing gtrnadb
+    import ssl
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     return cb.scores.TrnaAdaptationIndex(url=organism_name_to_url_mapping[organism_name], prokaryote=True)
