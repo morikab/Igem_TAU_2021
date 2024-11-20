@@ -14,6 +14,7 @@ artifacts_directory = Path(os.path.join(str(Path(__file__).parent.resolve()), "a
 # if artifacts_directory.exists() and artifacts_directory.is_dir():
 #     shutil.rmtree(artifacts_directory)
 artifacts_directory.mkdir(parents=True, exist_ok=True)
+artifacts_path = str(artifacts_directory)
 
 from modules import initiation
 from modules import ORF
@@ -84,6 +85,7 @@ def run_modules(user_input_dict: typing.Dict[str, typing.Any],
             final_output["zip_output_file_path"] = user_IO.UserOutputModule.run_module(
                 cds_sequence=evaluation_result.sequence,
                 output_path=output_path,
+                artifacts_path=artifacts_path,
             )
     except:
         logger.error("Encountered unknown error when running modules.")
