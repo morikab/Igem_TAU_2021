@@ -241,7 +241,7 @@ if __name__ == "__main__":
         # optimization_method="zscore_single_aa_diff",
         # optimization_method="zscore_bulk_aa_diff",
         optimization_method="single_codon_diff",
-        optimization_cub_index="CAI",
+        optimization_cub_index="tAI",
         is_ecoli_optimized=True,
         output_path=f"mcherry-debug-{initiation_type}-0.1",
         orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
