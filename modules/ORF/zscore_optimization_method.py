@@ -203,6 +203,7 @@ def optimize_sequence_by_zscore_bulk_aa(
         iterations_count = 0
         iterations_summary = []
         for run in range(max_iterations):
+            logger.info(f"Starting run {run+1}.")
             iterations_count = run + 1
             codons_to_zscore = {}
             for codon in nt_to_aa.keys():
@@ -279,6 +280,7 @@ def optimize_sequence_by_zscore_bulk_aa(
 
             iteration_summary = {
                 "aa_to_selected_codon": aa_to_selected_codon,
+                "aa_to_default_codon": aa_to_default_codon,
                 "sequence_score": score,
             }
             iterations_summary.append(iteration_summary)
@@ -334,10 +336,12 @@ def _get_optimal_codon_per_aa(
             if average_frequency >= config["ORF"]["FREQUENCY_OPTIMIZATION_THRESHOLD"]:
                 if selected_codon is None:
                     selected_codon = candidate_codon
-                    logger.info(f"Found optimal codon. Now looking for second-best option.")
+                    logger.info(f"Found optimal codon {selected_codon} for amino acid {aa}. "
+                                f"Now looking for second-best option.")
                     codons_list.remove(candidate_codon)
                 else:
                     default_codon = candidate_codon
+                    logger.info(f"Found default codon {default_codon} for amino acid {aa}.")
                     break
             else:
                 logger.info(
