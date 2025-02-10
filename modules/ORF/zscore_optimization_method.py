@@ -49,7 +49,6 @@ def optimize_sequence_by_zscore_single_aa(
         aa_to_codon_mapping = defaultdict(str)
         iterations_count = 0
         iterations_summary = []
-        # Single codon replacement
         for run in range(max_iterations):
             iterations_count = run + 1
             # Include also the sequence from the previous iteration
@@ -117,7 +116,7 @@ def optimize_sequence_by_zscore_single_aa(
 
             new_sequence_score = sequence_to_total_score[new_sequence]
 
-            # Dedup repeating codons by using the second-best option of a synonymous codon
+            # Dedup repeating codons by using the second-best option of a synonymous codon for each selected codon
             for selected_codon in selected_codons:
                 synonymous_codons_of_selected_codon = synonymous_codons.get(nt_to_aa.get(selected_codon)).copy()
                 synonymous_codons_of_selected_codon.remove(selected_codon)
@@ -132,16 +131,18 @@ def optimize_sequence_by_zscore_single_aa(
                 candidate_codons_scores = {sequence: score for sequence, score in tested_sequence_to_codon.items() if
                                            sequence in candidate_codons_sequences}
                 candidate_sequence = max(candidate_codons_scores, key=candidate_codons_scores.get)
+                default_codon = None
                 for candidate_codon in tested_sequence_to_codon.get(candidate_sequence):
                     if nt_to_aa[candidate_codon] == nt_to_aa[selected_codon]:
-                        new_sequence = change_all_codons_of_aa(
-                            seq=new_sequence,
-                            selected_codon=selected_codon,
-                            skipped_codons_num=skipped_codons_num,
-                            default_codon=candidate_codon,
-                            should_dedup_codons=True,
-                        )
+                        default_codon = candidate_codon
                         break
+                new_sequence = change_all_codons_of_aa(
+                    seq=new_sequence,
+                    selected_codon=selected_codon,
+                    skipped_codons_num=skipped_codons_num,
+                    default_codon=default_codon,
+                    should_dedup_codons=True,
+                )
 
             # Summary information
             codon_to_score = {}
@@ -160,7 +161,7 @@ def optimize_sequence_by_zscore_single_aa(
                 # If the aa does not appear at all in the cds, this may give a faulty result (that should be consistent)
                 aa_to_codon_mapping[nt_to_aa[selected_codon]] = selected_codon
 
-            if new_sequence == sequence:
+            if new_sequence == sequence or previous_sequence_score >= new_sequence_score:
                 break
             else:
                 sequence = new_sequence
