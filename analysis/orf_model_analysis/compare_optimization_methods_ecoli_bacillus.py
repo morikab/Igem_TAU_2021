@@ -237,12 +237,12 @@ if __name__ == "__main__":
     # gene_sequence = str(gene_sequence.seq)
     initiation_type = "external"
     results = run_single_method_for_orf_sequence(
-        # optimization_method="zscore_single_aa_diff",
-        optimization_method="zscore_bulk_aa_ratio",
+        optimization_method="zscore_single_aa_diff",
+        # optimization_method="zscore_bulk_aa_diff",
         # optimization_method="single_codon_diff",
         optimization_cub_index="CAI",
         is_ecoli_optimized=False,
-        output_path=f"mcherry-debug-{initiation_type}-0.1",
+        output_path=f"mcherry-debug",
         orf_sequence_file=DEFAULT_SEQUENCE_FILE_PATH,
         initiation_optimization_method=initiation_type,
         # orf_sequence="",

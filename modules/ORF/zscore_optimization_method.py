@@ -38,13 +38,16 @@ def optimize_sequence_by_zscore_single_aa(
     """
     with Timer() as timer:
         initial_sequence = sequence
-        previous_sequence_score = _calculate_zscore_for_sequence(
+        previous_sequence_zscore = _calculate_zscore_for_sequence(
             sequence=sequence,
             module_input=module_input,
             optimization_cub_index=optimization_cub_index,
             skipped_codons_num=skipped_codons_num,
         )
         initial_sequence_score = None
+        previous_sequence_score = get_total_score(zscore=previous_sequence_zscore,
+                                                  optimization_method=optimization_method,
+                                                  tuning_parameter=module_input.tuning_parameter)
 
         aa_to_codon_mapping = defaultdict(str)
         iterations_count = 0
@@ -52,7 +55,7 @@ def optimize_sequence_by_zscore_single_aa(
         for run in range(max_iterations):
             iterations_count = run + 1
             # Include also the sequence from the previous iteration
-            sequence_to_zscore = {sequence: previous_sequence_score}
+            sequence_to_zscore = {sequence: previous_sequence_zscore}
             tested_sequence_to_codon = defaultdict(list)
             for codon in nt_to_aa.keys():
                 if nt_to_aa[codon] == "_" and optimization_cub_index.is_trna_adaptation_index:
